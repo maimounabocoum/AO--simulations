@@ -69,6 +69,12 @@ InfoBeam.YDebut  = -1;  InfoBeam.YFin  = 1;    InfoBeam.pasY  = 0.5;
 if (InfoBeam.ZDebut*1e-3<farfield) disp('attention, champ proche!'); end; 
 [points,ampl,InfoBeam] = ZoneImageRemote(InfoBeam);
 
+Hf1 = figure(1);
+set(Hf1,'name','position of detection')
+scatter3(points(:,1)*1e3,points(:,2)*1e3,points(:,3)*1e3)
+xlabel('x(mm)')
+ylabel('y(mm)')
+zlabel('z(mm)')
 
 
 [champs ,ti] = calc_hp(te,points);
