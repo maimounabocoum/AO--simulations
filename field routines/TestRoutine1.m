@@ -19,9 +19,9 @@ N_elements = 128; % Number of elements
 %N_active = 128; % number of active elements for the reception
 focus = [0 0 35]/1000; % Initial electronic focus
 Rfocus = 40/1000; % Elevation focus
-attenuation = 0*0.6;         % en db/cm/Mhz
+attenuation = 0.6;         % en db/cm/Mhz
 no_sub_x = 1;
-no_sub_y = 2;
+no_sub_y = 10;
 
 %% Probe defintion :
 % Set the sampling frequency
@@ -72,21 +72,29 @@ PositionActuators = [1:N]';
 
 %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
 
-Noc = 1;
-excitation = sin(2*pi*f0*[0:1/fs:Noc/f0]);
-excitation = excitation.*hanning(length(excitation))';
-xdc_excitation (Probe, excitation);
+% Noc = 2;
+% excitation = sin(2*pi*f0*[0:1/fs:Noc/f0]);
+% excitation = excitation.*hanning(length(excitation))';
+%xdc_excitation (Probe, excitation);
+
+RI = MakeRI_Remote(f0,fs,50);
+Tpulse = length(RI)/fs;
+xdc_excitation (Probe, RI);
+
+% apodisation :
+apodisation = ones(N_elements,1);
+xdc_apodization(Probe,0,apodisation')
 %xdc_focus (Probe,4e-6,[0 0 3]/1000);
 %ele_waveform(Probe,PositionActuators,Actuators.Excitation);
 
 %% Simulation box initialization : 
-Nx = 10;
-Ny = 1;
-Nz = 40;
+Nx = 18;
+Ny = 4;
+Nz = 20;
 
-Xrange = [-2 2]; % in m
-Yrange = 0;
-Zrange = [0 4]/1000; % in m
+Xrange = [-0.45 0.45]; % in m
+Yrange = [-1 1];
+Zrange = [35 45]/1000; % in m
 
 SimulationBox = AO_FieldBox(Xrange,Yrange,Zrange,Nx,Ny,Nz);
 Hf1 = figure(1);
@@ -103,11 +111,11 @@ time = t + [0:(size(h,1)-1)]/fs;
 % SimulationBox.Points() list
 
 % Screen Raw data Result
-Hf1 = figure(2);
-set(Hf1,'name','raw data returned By calc_hp function')
+Hf2 = figure(2);
+set(Hf2,'name','raw data returned By calc_hp function')
 %imagesc(1:Nx*Ny*Nz,time,log(abs(h)))
-[~,I] = sort(SimulationBox.Z(:));
-imagesc(1:Nx*Ny*Nz,time*1e6,h(:,I).^2)
+[~,I] = sort(SimulationBox.X(:).^2 + SimulationBox.Y(:).^2 +SimulationBox.Z(:).^2);
+imagesc(1:Nx*Ny*Nz,time*1e6,log(h(:,I).^2))
 title('image in log scale')
 xlabel('Point index')
 ylabel('time (\mu s)')
@@ -117,18 +125,27 @@ colorbar
 Field_resized = reshape(h',[Nx,Ny,Nz,length(time)]);
 
 MaxAxis = max(Field_resized(:).^2);
-for loop = 1:10:length(time)
-Hf2 = figure(3);
-set(Hf2,'name','maximum field resized to simulation box')
-imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,abs(squeeze(Field_resized(:,1,:,loop))).^2);
-title(['image in log scale at',num2str(time(loop)),'s'])
+% for loop = 1:10:length(time)
+% Hf2 = figure(3);
+% set(Hf2,'name','field resized to simulation box')
+% imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,abs(squeeze(Field_resized(:,1,:,loop))).^2);
+% title(['image in log scale at',num2str(time(loop)),'s'])
+% xlabel('x (mm)')
+% ylabel('z (\mu m)')
+% caxis([0 MaxAxis])
+% colorbar
+% 
+% end
+
+% screen maximum value for the field :
+Field_max= reshape(max(h,[],1),[Nx,Ny,Nz]);
+Hf3 = figure(3);
+set(Hf3,'name','maximum field values')
+imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,abs(squeeze(Field_max(1,:,:))).^2);
 xlabel('x (mm)')
 ylabel('z (\mu m)')
 caxis([0 MaxAxis])
 colorbar
-
-end
-
 
 
 xdc_free(Probe);

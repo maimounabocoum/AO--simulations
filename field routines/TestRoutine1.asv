@@ -30,7 +30,7 @@ set_field('c',c);
 set_field('Freq_att',attenuation*100/1e6);
 set_field('att',2.6*100);
 set_field ('att_f0',f0); 
-set_field('use_att',1);
+set_field('use_att',0);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate aperture for emission
@@ -73,18 +73,18 @@ PositionActuators = [1:N]';
 %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
 
 Noc = 1;
-excitation = sin(2*pi*f0*[0:1/fs:Noc/f0]);
+excitation = 10*sin(2*pi*f0*[0:1/fs:Noc/f0]);
 excitation = excitation.*hanning(length(excitation))';
 xdc_excitation (Probe, excitation);
 %xdc_focus (Probe,4e-6,[0 0 3]/1000);
 %ele_waveform(Probe,PositionActuators,Actuators.Excitation);
 
 %% Simulation box initialization : 
-Nx = 1;
+Nx = 10;
 Ny = 1;
-Nz = 400;
+Nz = 10;
 
-Xrange = [-2]; % in m
+Xrange = [-2 2]; % in m
 Yrange = 0;
 Zrange = [0 4]/1000; % in m
 
@@ -103,11 +103,11 @@ time = t + [0:(size(h,1)-1)]/fs;
 % SimulationBox.Points() list
 
 % Screen Raw data Result
-Hf1 = figure(2);
-set(Hf1,'name','raw data returned By calc_hp function')
+Hf2 = figure(2);
+set(Hf2,'name','raw data returned By calc_hp function')
 %imagesc(1:Nx*Ny*Nz,time,log(abs(h)))
-[~,I] = sort(SimulationBox.Z(:));
-imagesc(1:Nx*Ny*Nz,time*1e6,h(:,I).^2)
+[~,I] = sort(SimulationBox.X(:).^2 + SimulationBox.Y(:).^2 +SimulationBox.Z(:).^2);
+imagesc(1:Nx*Ny*Nz,time*1e6,log(h(:,I).^2))
 title('image in log scale')
 xlabel('Point index')
 ylabel('time (\mu s)')
@@ -129,6 +129,14 @@ colorbar
 
 end
 
+% screen maximum value for the field :
+Field_max= reshape(max(h,[],1),[Nx,Ny,Nz]);
+Hf3 = figure(3);
+imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,abs(squeeze(Field_max(:,1,:))).^2);
+xlabel('x (mm)')
+ylabel('z (\mu m)')
+caxis([0 MaxAxis])
+colorbar
 
 
 xdc_free(Probe);
