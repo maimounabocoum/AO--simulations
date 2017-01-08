@@ -11,7 +11,8 @@ lambda=c/f0; % Wavelength [m]
 element_height= 6/1000; % Height of element [m]
 width=0.2/1000; % Width of element [m]
 kerf= 0; % Distance between transducer elements [m]
-N_elements = 128;%128; % Number of elements
+N_elements = 10;%128; % Number of elements
+ActiveList = 1:N_elements;
 %N_active = 128; % number of active elements for the reception
 focus = [0 0 0]/1000; % Initial electronic focus
 Rfocus = 40/1000; % Elevation focus
@@ -26,6 +27,6 @@ farfield = width^2/(4*lambda);
 set_sampling(fs);
 set_field('c',c);
 set_field('Freq_att',attenuation*100/1e6);
-set_field('att',2.6*100);
+set_field('att',0*2.6*100);
 set_field ('att_f0',f0); 
 set_field('use_att',1);

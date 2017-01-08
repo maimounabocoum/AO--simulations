@@ -2,11 +2,13 @@ classdef ExcitationField
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
+    properties (Access = private)
+        Probe
+    end
     properties
-        N % number of actuator taken into account
         t % time
         Excitation % Field for each actuator (1 actuator = 1 line)
-        
+        delayLaw      
     end
     
     methods
