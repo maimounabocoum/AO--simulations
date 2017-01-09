@@ -11,6 +11,8 @@ parameters;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList);
 Probe = xdc_rectangles(P.rect,[0 0 0], focus);
+% contant focus curvature :
+
 %Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
 %Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
 %data = xdc_get(Probe,'rect');
@@ -44,7 +46,7 @@ PositionActuators = [1:N]';
 % PositionActuators : Position of active actuator. 
 
 %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
- Noc = 2;
+Noc = 2;
 t_excitation = (0:1/fs:Noc*1.5/f0);
 excitation =  sin(2*pi*f0*t_excitation);
 excitation = excitation.*hanning(length(excitation))';
@@ -54,7 +56,7 @@ delays = DelayLaw(width,N_elements,c,40/1000);
 figure
 plot(delays)
 
-%xdc_focus(Probe,0,[0 0 40]/1000);
+%xdc_focus(Probe,0,[0 0 20]/1000);
 xdc_focus_times(Probe,-1,delays);
 
 % figure;
