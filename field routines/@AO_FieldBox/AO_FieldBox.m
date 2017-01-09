@@ -7,10 +7,6 @@ classdef AO_FieldBox
         y
         z
         
-        X
-        Y
-        Z
-        
         time
         Field
        
@@ -23,44 +19,94 @@ classdef AO_FieldBox
             obj.y = linspace(Yrange(1),Yrange(end),Ny);
             obj.z = linspace(Zrange(1),Zrange(end),Nz);
             
-          [X,Y,Z] = meshgrid(obj.x,obj.y,obj.z);  
-          
-          obj.X = X(:);
-          obj.Y = Y(:);
-          obj.Z = Z(:);
-
-        
         end
         
         function List = Points(obj)
-           
-            List = [obj.X,obj.Y,obj.Z];
+            
+           [X,Y,Z] = meshgrid(obj.x,obj.y,obj.z);  
+
+            List = [X(:),Y(:),Z(:)];
      
+        end
+        
+        function [Nx,Ny,Nz] = SizeBox(obj)
+            Nx = length(obj.x);
+            Ny = length(obj.y);
+            Nz = length(obj.z);
         end
         
         function obj = Get_SimulationResults(obj,t,h,fs)
             
-            Field = h;
-            time = t + [0:(size(h,1)-1)]/fs;
+            obj.Field = h;
+            obj.time = t + [0:(size(h,1)-1)]/fs;
             
         end
         
-        function [] = ShowMaxField(obj)
-        
-        % get maximum field value (with respect to time)    
-        Field_max= reshape(max(obj.Field,[],1),[length(obj.x),length(obj.y),length(obj.z)]);
-        
-        Hf3 = figure(3);
-        set(Hf3,'name','maximum field values')
-        %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
-        imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(:,1,:))');
-        xlabel('x (mm)')
-        ylabel('z (mm)')
-        colorbar
+        function [] = ShowMaxField(obj,plane)
+            [Nx,Ny,Nz] = SizeBox(obj);
+            % get maximum field value (with respect to time)   
+            Field_max= reshape(max(obj.Field,[],1),[Ny,Nx,Nz]);
+            switch plane
+                case 'XZ'
+                    % selection of the interpolation plane:
+                if (Ny == 1)
+                    I_plane = 1;
+                else
+                    prompt = {'Enter Y coordinate (program will look for closest value):'};
+                    dlg_title = 'Y plane select (mm)';
+                    num_lines = 1;
+                    answer = inputdlg(prompt,dlg_title,num_lines,{'0'});
+                    V_plane = str2num(answer{1})*1e-3;                    
+                    I_plane = Closest(V_plane,obj.y); 
+                end
+ 
+
+
+            Hf3 = figure(3);
+            set(Hf3,'name','(XZ) maximum field values')
+            %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
+            size(squeeze(Field_max(:,I_plane,:))')
+            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
+            shading interp
+            xlabel('x (mm)')
+            ylabel('z (mm)')
+            title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
+            colorbar
+            
+               case 'YZ'
+                   if (Nx == 1)
+                   I_plane = 1;
+                else
+                    prompt = {'Enter X coordinate (program will look for closest value):'};
+                    dlg_title = 'X plane select (mm)';
+                    num_lines = 1;
+                    answer = inputdlg(prompt,dlg_title,num_lines,{'0'});
+                    V_plane = str2num(answer{1})*1e-3;                    
+                    I_plane = Closest(V_plane,obj.x); 
+                   end
+                            Hf4 = figure(4);
+            set(Hf4,'name','(YZ) maximum field values')
+            %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
+            size(squeeze(Field_max(:,I_plane,:))')
+            imagesc(obj.y*1e3,obj.z*1e3,squeeze(Field_max(:,I_plane,:))');
+            shading interp
+            xlabel('y (mm)')
+            ylabel('z (mm)')
+            title(['Maximum Field in plane X = ',num2str(obj.x(I_plane)*1e3),'mm'])
+            colorbar
+
+            end
         
         end
         
     end
     
+end
+
+function I_plane = Closest(V_plane,x)
+    Distance = abs(x - V_plane);
+    I_planeList = find(Distance == min(Distance));
+    I_plane = I_planeList(1);
+
 end
 

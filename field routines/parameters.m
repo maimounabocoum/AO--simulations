@@ -12,12 +12,11 @@ element_height= 6/1000; % Height of element [m]
 width=0.2/1000; % Width of element [m]
 kerf= 0; % Distance between transducer elements [m]
 N_elements = 128;%128; % Number of elements
-ActiveList = 1:128;
-%N_active = 128; % number of active elements for the reception
+ActiveList = 1:128; % index of active elements
 focus = [0 0 40]/1000; % Initial electronic focus
-Rfocus = 40/1000; % Elevation focus
+Rfocus = 70/1000; % Elevation focus
 attenuation = 0;         % en db/cm/Mhz
-no_sub_x = 1;
+no_sub_x = 5;
 no_sub_y = 10;
 farfield = width^2/(4*lambda); 
 

@@ -13,16 +13,15 @@ parameters;
     P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList);
     %P.ShowActuatorCenter();
 
-% type of waves for delays line : 1. focused to Z , 2. plane waves with
-% angle theta 3. user defined delay law 
-
-    %P = P.Set_ActuatorDelayLaw('focus',[0 0 40]/1000,c);
-    P = P.Set_ActuatorDelayLaw('plane',10*180/pi,c);
+    P = P.Set_ActuatorDelayLaw('focus',[0 0 50]/1000,c);
+    %P = P.Set_ActuatorDelayLaw('plane',0*180/pi,c);
     %P.ShowDelay();
 
-    %Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
-    Probe = xdc_rectangles(P.rect,[0 0 0], focus);
+    Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
+    %Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
+    %Probe = xdc_rectangles(P.rect,[0 0 0], focus);
     % show_xdc (Probe);
+    xdc_focus(Probe,0,[0 0 35]/1000);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Setting the impulse response field (Green function)
@@ -51,8 +50,8 @@ parameters;
     t_excitation = (0:1/fs:Noc*1.5/f0);
     excitation =  sin(2*pi*f0*t_excitation);
     excitation = excitation.*hanning(length(excitation))';
-    % addind delay law
-    xdc_focus_times(Probe,-1,P.DelayLaw);
+    % adding delay law
+    %xdc_focus_times(Probe,-1,P.DelayLaw);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,13 +60,13 @@ parameters;
 
 %% Simulation box initialization : 
 
-    Nx = 50;
-    Ny = 1;
+    Nx = 1;
+    Ny = 50;
     Nz = 40;
 
-    Xrange = [-5 5]/1000; % in m
-    Yrange = 0;%[-0.1 0.1]/1000;
-    Zrange = [1 45]/1000; % in m
+    Xrange = 0/1000; % in m
+    Yrange = [-5 5]/1000;%[-0.1 0.1]/1000;
+    Zrange = [30 45]/1000; % in m
 
 SimulationBox = AO_FieldBox(Xrange,Yrange,Zrange,Nx,Ny,Nz);
 
@@ -77,9 +76,11 @@ SimulationBox = AO_FieldBox(Xrange,Yrange,Zrange,Nx,Ny,Nz);
 
 [h,t] = calc_hp(Probe,SimulationBox.Points());
 h = h/max(h(:));
-SimulationBox = Get_SimulationResults(t,h,fs);
-SimulationBox.ShowMaxField();
-
+SimulationBox = SimulationBox.Get_SimulationResults(t,h,fs);
+%SimulationBox.SizeBox()
+%SimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
+SimulationBox.ShowMaxField('YZ'); % XZ : plan (x,z)
+%SimulationBox.ShowFieldPropagation();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -39,12 +39,6 @@ xdc_impulse (Probe, impulse);
 % Definition of excitation function for actuator
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-N = N_elements;
-PositionActuators = [1:N]';
-% user defined excitation :
-% N number of actuator 
-% PositionActuators : Position of active actuator. 
-
 %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
 Noc = 2;
 t_excitation = (0:1/fs:Noc*1.5/f0);

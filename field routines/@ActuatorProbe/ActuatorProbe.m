@@ -55,14 +55,14 @@ classdef ActuatorProbe
                case 'focus'
                    % input parameter = angle of focalisation
                for i = 1:length(obj.ActiveList)
-                  Delay(i) = -(1/c)*norm(obj.center(i,:) + Param);  
+                  Delay(i) = -(1/c)*norm(obj.center(obj.ActiveList(i),:) + Param);  
                end 
                   Delay = Delay + norm(Param)/c;
      
                case 'plane'
                    % input parameters = drift angle
                    for i = 1:length(obj.ActiveList)
-                   Delay(i) = -(1/c)*(obj.center(i,1)*tan(Param));
+                   Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param));
                    end
                    
                case 'user'
@@ -76,7 +76,7 @@ classdef ActuatorProbe
         %% screening functions %%
         function [] = ShowDelay(obj)
             figure;
-            plot(obj.center(:,1)*1e3,obj.DelayLaw*1e6,'o')
+            plot(obj.center(obj.ActiveList,1)*1e3,obj.DelayLaw*1e6,'o')
             xlabel('Actuator position z(mm)')
             ylabel('Delay ( \mu s )')
             
