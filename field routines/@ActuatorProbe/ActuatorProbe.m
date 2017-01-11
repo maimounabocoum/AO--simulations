@@ -8,7 +8,7 @@ classdef ActuatorProbe
         DelayLaw;
     end
     
-   properties (Access = private)
+    properties (Access = private)
    Nactuators
    ActiveList
    end
@@ -16,7 +16,7 @@ classdef ActuatorProbe
         
     methods
         
-        function obj = ActuatorProbe(Nactuators,Height,Width,no_sub_x,no_sub_y,kerf,ActiveList)
+        function obj = ActuatorProbe(Nactuators,Height,Width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus)
             obj.Nactuators = Nactuators;
             obj.ActiveList = ActiveList;
      
@@ -37,14 +37,34 @@ classdef ActuatorProbe
                   Element = SingleElement(Height,Width,no_sub_x,no_sub_y,i);
                   Element = Element_TranslationX(Element,(ActiveList(i)-1)*(kerf+Width));
                   Element = Element_TranslationY(Element,-Height/2);
+
                   rect([1:no_sub_x*no_sub_y] + no_sub_x*no_sub_y*(i-1),:) = Element;
                 end
                   
                %% recentering all elements to (0,0,0):
                        
                rect = Element_TranslationX(rect,-Xc);
-               
-                obj.rect = rect;           
+               rect = Element_ElevationZ(rect,Rfocus);
+
+                obj.rect = rect;      
+                
+                
+        end
+        
+        function [] = ShowProbe(obj)
+            
+            h = figure;
+            X = [obj.rect(:,2);obj.rect(:,5);obj.rect(:,8);obj.rect(:,11)];
+            Y = [obj.rect(:,3);obj.rect(:,6);obj.rect(:,9);obj.rect(:,12)];
+            Z = [obj.rect(:,4);obj.rect(:,7);obj.rect(:,10);obj.rect(:,13)];
+            %Element(i,5:7) = [line*Width,(col - 1)*Height,0];
+            % Element(i,8:10) = [line*Width,col*Height,0];
+            % Element(i,11:13) = [(line - 1)*Width,col*Height,0];
+            scatter3(X*1e3,Y*1e3,Z*1e3)
+            xlabel('x(mm)')
+            ylabel('y(mm)')
+            zlabel('z(mm)')
+            
         end
           
         function obj = Set_ActuatorDelayLaw(obj,LawSelection,Param,c)
@@ -116,7 +136,9 @@ end
             
             for i = 1:no_sub_x*no_sub_y
                 
-                [line col] = ind2sub([no_sub_y,no_sub_x],i);
+                [col line] = ind2sub([no_sub_y,no_sub_x],i);
+                %line: index along x
+                %col: index along y
                 
             % rectangles coordinates:    
             Element(i,2:4) = [(line - 1)*Width,(col - 1)*Height,0];
@@ -162,6 +184,24 @@ end
         Vout = ListVector + repmat(V0,[size(ListVector,1),1]);
         
         
+        end
+        
+        function Element = Element_ElevationZ(Element,Rfocus)
+        
+        % Eq circle in cartesian coordinate : Y^2 + (Z - Rfocus)^2 = R
+        % Therfore, if M belongs to circle with coord Y , we have :
+        % Z = R + sqrt(R-Y^2)
+             
+        Element(:,[4,7,10,13,19]) = Rfocus - sqrt(Rfocus^2 - Element(:,[3,6,9,12,18]).^2);
+
+        if (2*Rfocus < GetElementHeigth(Element))
+            warndlg('Rfocus is smaller than actuator height','!! Warning !!')
+        end
+        
+        end
+        
+        function H = GetElementHeigth(Element)
+        H = max(max(Element(:,[3,6,9,12,18]))) - min(min( Element(:,[3,6,9,12,18]) ));
         end
     
 
