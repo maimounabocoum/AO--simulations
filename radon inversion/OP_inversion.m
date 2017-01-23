@@ -57,15 +57,30 @@ title('Fourier Transform of Radon')
 
 FILTER = abs(FourierParam.w)'*ones(1,length(MyImage.theta));
 
+I = FourierParam.ifourier(F_R);
 
-I = FourierParam.ifourier(F_R.*FILTER);
 
+%I = FourierParam.ifourier(F_R.*FILTER);
 
-subplot(224)
-imagesc(MyImage.theta,FourierParam.t,I)
-xlabel('\theta (°)')
-ylabel('\omega (m^{-1})')
-title('identity op')
+xsonde=linspace(0,192*200e-6,193);
+[x,y]=meshgrid(xsonde,MyImage.t);
+
+  for i=1:length(MyImage.theta)
+      t = x.*sin(MyImage.theta(i)*pi/180) + y.*cos(MyImage.theta(i)*pi/180);
+      projContrib = interp1(MyImage.t',MyImage.R(:,i),t(:),'linear');
+      projContrib(isnan(projContrib))=0;
+      imgfilt(:,:,i) = reshape(projContrib,length(MyImage.t),length(xsonde));       
+      clf;figure(15)
+      imagesc(MyImage.t,xsonde,imgfilt(:,:,i))
+      title(['angle',num2str(MyImage.theta(i))])
+      drawnow 
+  end
+% 
+% subplot(224)
+% surf(X,T,I)
+% xlabel('\theta (°)')
+% ylabel('\omega (m^{-1})')
+% title('identity op')
 
 
 
