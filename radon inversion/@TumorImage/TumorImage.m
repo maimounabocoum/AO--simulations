@@ -12,10 +12,10 @@ classdef TumorImage
     
     methods
         function obj = TumorImage(WindowSize,Position,SizeTumors,Type)
-           obj.x = 1:WindowSize(end);
-           obj.x = obj.x - mean(obj.x);
-           obj.y = 1:WindowSize(1);
-           obj.y = obj.y - mean(obj.y);
+           obj.x = 0:WindowSize(end);
+           %obj.x = obj.x - mean(obj.x);
+           obj.y = 0:WindowSize(1);
+           %obj.y = obj.y - mean(obj.y);
            obj.Type = Type;
            
            [X,Y] = meshgrid(obj.x,obj.y);
@@ -35,6 +35,23 @@ classdef TumorImage
 
            end
            
+        end
+        
+        function obj = ScanTumor(obj,Angles)
+  
+            [X,Y] = meshgrid(obj.x,obj.y);
+            figure;
+            for i=1:length(Angles)
+                T = cos(Angles(i)*pi/180)*X + sin(Angles(i)*pi/180)*Y ;
+                S = sin(Angles(i)*pi/180)*X - cos(Angles(i)*pi/180)*Y ;
+                
+                
+                imagesc(obj.x,obj.y,T)
+                xlabel('x')
+                ylabel('y')
+                title(['angle',num2str(Angles(i))])
+                drawnow
+            end
         end
         
         function [] = ShowTumor(obj)

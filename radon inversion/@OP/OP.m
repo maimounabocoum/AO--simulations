@@ -6,12 +6,14 @@ classdef OP < TF_t
         theta
         R  % Input radon transform of the object        
         F_R  % TF (R) with respect to t direction
-
+        
+        L
     end
     
     properties (Access = private)
-        L
+        
         Fc
+        Linphase_fit
     end
     
     methods
@@ -24,7 +26,7 @@ classdef OP < TF_t
             % checkin that dimension match the input image
             t = (0:(length(t)-1))*DXsample;
             obj.L = max(t);
-            obj.R= interp1(t,InputImage,obj.t,'linear',0);
+            obj.R = interp1(t,InputImage,obj.t,'linear',0);
             obj.theta = theta;            
     
             else
@@ -33,6 +35,25 @@ classdef OP < TF_t
             error(msg);
             
             end
+            
+        end
+        
+        function obj = PhaseCorrection(obj,Fc)
+            % linear fit of the phase for each angle :
+           Iy = length(obj.f)/2+1;
+           %Ix = find(abs(obj.theta) == min(abs(obj.theta)));
+           %PHASE = UnwrapPHASE(angle(obj.F_R) ,Ix,Iy);
+           phase  = unwrap( angle( obj.F_R( Iy , : ) ) );
+        for i=1:length(obj.theta)
+           %phase  = unwrap( angle( obj.F_R( abs(obj.f)<Fc , i ) ) );
+           %P = polyfit(obj.f(abs(obj.f) < Fc),phase',1);
+           %obj.Linphase_fit(:,i) = P(1)*obj.f(abs(obj.f)<Fc)+P(2); 
+           %Linphase_fit = smooth(PHASE(Iy,i))*(obj.f)*0.1;
+           %Linphase_fit = phase(i) + phase(i)*(obj.f)*2*pi;
+           Linphase_fit = (-2+0.00005*obj.theta(i).^2)*abs(obj.f);
+        % phase correction 
+         obj.F_R(:,i) = obj.F_R(:,i).*exp(-1i*Linphase_fit');
+           end 
             
         end
         
@@ -55,15 +76,24 @@ classdef OP < TF_t
 
            % find central point for the unwrapping correspondind to theta =
            % 0 , and f = 0 :
-           Iy = length(obj.w)/2;
+           Iy = length(obj.f)/2+1;
            Ix = find(abs(obj.theta) == min(abs(obj.theta)));
            PHASE = UnwrapPHASE(angle(obj.F_R) ,Ix,Iy);
-           imagesc( obj.theta,2*pi*obj.w(2*pi*abs(obj.w) < Fc),PHASE(2*pi*abs(obj.w)<Fc,:));   
+           imagesc( obj.theta,obj.f(abs(obj.f) < Fc), PHASE( abs(obj.f)<Fc,:) ) ;   
            colorbar
            xlabel('theta (°)')
            ylabel('frequency (m-1)')
            title('Measured R-Fourier Transform')
-            
+           figure;
+           subplot(121)
+           PHASE(Iy,1)
+           plot(obj.theta,PHASE(Iy,:),'linewidth',2);
+           title(['unwrapped phase for f = ',num2str(obj.f(Iy))]);
+           subplot(122)
+           for i=1:length(obj.theta)
+           plot(obj.f(abs(obj.f) < Fc),unwrap( angle(obj.F_R(abs(obj.f)<Fc,i) ) ));
+           hold on
+           end
         end
         
         
