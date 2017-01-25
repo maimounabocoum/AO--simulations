@@ -3,48 +3,38 @@
 %%%%%%%%%%%%%%% load experiemental data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clearvars;
+addpath('functions')
 load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
 c = 1540 ; % sound velocity in m/s
 % update of the OP structure
 % X : theta 
 % Y : monotonic t variable
-
-MyImage = OP(data(:,:,1),X,Y,Param,c); 
-MyImage.Show_R();
-MyImage.Fmax() % maximum frequency sampling = 1/dt
-MyImage.Get_Lsample()
-
+N = 2^11;
+MyImage = OP(N,data(:,:,1),X,Y,Param,c); 
+MyImage.Show_R();    % show Radon transform (ie raw data)
+MyImage.Fmax()       % maximum frequency sampling = 1/dt
+Lobject = 1e-3;
+Fc = 10/Lobject; % Lobject is the size of the object to detect. Using simple model (sinc function)
+                   % we set it to kc = 100/Lobject
+                   
 %% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
 
 %%% Fourier Tranform of Radon input image with respect to t
-N = 2^11;
+
 % creating a fourier parameter set using the measure sample size in m
-FourierParam = TF_t(N,MyImage.Fmax());
-
-
 % fourier transform of image
-R = interp1(MyImage.t,MyImage.R,FourierParam.t,'linear',0);
-F_R = FourierParam.fourier(R);
+
+MyImage.F_R = MyImage.fourier(MyImage.R);
+MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 
 %% image show
-figure;
-subplot(221)
-imagesc(MyImage.theta,FourierParam.t,R)
-xlabel('\theta (°)')
-ylabel('\omega (m^{-1})')
-title('interpolation of Radon transform')
-subplot(222)
-imagesc(MyImage.theta,FourierParam.w(N/2:end),log(abs(F_R(N/2:end,:))))
-xlabel('\theta (°)')
-ylabel('\omega (m^{-1})')
-title('Fourier Transform of Radon')
 
 % representation in polar coordinates:
 
-subplot(223)
-[THETA, W] = meshgrid(MyImage.theta*pi/180,FourierParam.w(N/2:end));
+figure;
+[THETA, W] = meshgrid(MyImage.theta*pi/180,MyImage.w(N/2:end));
 [X,Y] = pol2cart(THETA, W);
-surfc(X,Y,log(abs(F_R(N/2:end,:))))
+surfc(X,Y,log(abs(MyImage.F_R(N/2:end,:))))
 view(0,90)
 shading interp
 xlabel('\omega\it_{x} (\itm^{-1})')
@@ -54,35 +44,32 @@ title('Fourier Transform of Radon')
 
 % filtered inverse fourier transform :
 % defninition of the filter :
-
-FILTER = abs(FourierParam.w)'*ones(1,length(MyImage.theta));
-
-I = FourierParam.ifourier(F_R);
-
-
-%I = FourierParam.ifourier(F_R.*FILTER);
-
+% 
+FILTER = abs(MyImage.w)'*ones(1,length(MyImage.theta));
+ 
+ I = MyImage.ifourier(MyImage.F_R);
+% 
+% 
+% I = MyImage.ifourier(F_R.*FILTER);
+% 
 xsonde=linspace(0,192*200e-6,193);
-[x,y]=meshgrid(xsonde,MyImage.t);
+[x,y]=meshgrid(MyImage.t,xsonde);
+img = zeros(size(x,1),size(x,2),'like',x);
 
   for i=1:length(MyImage.theta)
       t = x.*sin(MyImage.theta(i)*pi/180) + y.*cos(MyImage.theta(i)*pi/180);
-      projContrib = interp1(MyImage.t',MyImage.R(:,i),t(:),'linear');
-      projContrib(isnan(projContrib))=0;
-      imgfilt(:,:,i) = reshape(projContrib,length(MyImage.t),length(xsonde));       
+      projContrib = interp1(MyImage.t',I(:,i),t(:),'linear',0);
+      img = img + reshape(projContrib,length(xsonde),length(MyImage.t)); 
+      
       clf;figure(15)
-      imagesc(MyImage.t,xsonde,imgfilt(:,:,i))
+      imagesc(xsonde*1e3,MyImage.t*1e3,img)
       title(['angle',num2str(MyImage.theta(i))])
+      %caxis([-400 400])
+      colorbar
       drawnow 
+
   end
-% 
-% subplot(224)
-% surf(X,T,I)
-% xlabel('\theta (°)')
-% ylabel('\omega (m^{-1})')
-% title('identity op')
 
 
-
-
+rmpath('functions')
 
