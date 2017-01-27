@@ -1,11 +1,11 @@
 %%%%% initialize programm FIELD II %%%%%%%%%%%%
 
 %%%%%%%%% set parameters %%%%%%%%%%%%%%%%%%%%
-field_debug(0);
+
 % set_field('show_time',1);
 
 f0=6e6; % Transducer center frequency [Hz]
-fs=200e6; % Sampling frequency [Hz]
+fs=12e6; % Sampling frequency [Hz]
 c=1540; % Speed of sound [m/s]
 lambda=c/f0; % Wavelength [m]
 element_height= 6/1000; % Height of element [m]
@@ -20,13 +20,18 @@ no_sub_x = 1;
 no_sub_y = 10; % for designed probes, you should put a value > 2 for proper calculation (10 is good!)
 farfield = width^2/(4*lambda); 
 
+% temporal field 
 
+ActivatedField = 0 ; % 0 to generate field by yourself
 
 %% Probe defintion :
 % Set the sampling frequency
+if ActivatedField == 1 
+field_debug(0);
 set_sampling(fs);
 set_field('c',c);
 set_field('Freq_att',attenuation*100/1e6);
 set_field('att',0*2.6*100);
 set_field ('att_f0',f0); 
 set_field('use_att',1);
+end

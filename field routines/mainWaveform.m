@@ -12,15 +12,15 @@ tic
               %definition of the actuator array %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,1:N_elements,Rfocus); % for waveform
-    P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus); % for excitation
-    %P.ShowActuatorCenter();
+     P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus); % for excitation
+   % P.ShowActuatorCenter();
 
     P = P.Set_ActuatorDelayLaw('focus',[0 0 40]/1000,c);
-    %P = P.Set_ActuatorDelayLaw('plane',0*180/pi,c);
-    %P.ShowDelay();
+   % P = P.Set_ActuatorDelayLaw('plane',0*180/pi,c);
+   % P.ShowDelay();
 
    % Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
-  %  Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
+   % Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
     Probe = xdc_rectangles(P.rect,[0 0 0], focus);
    % show_xdc (Probe);
    % xdc_focus(Probe,0,[0 0 35]/1000);
@@ -48,11 +48,12 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
-    Noc = 10;
+
+    % adding delay law
+    Noc = 10; % number of optical cycles
     t_excitation = (0:1/fs:Noc*1.5/f0);
     excitation =  sin(2*pi*f0*t_excitation);
     excitation = excitation.*hanning(length(excitation))';
-    % adding delay law
 
     xdc_focus_times(Probe,-1,P.DelayLaw);
     
@@ -72,9 +73,13 @@ tic
     Ny = 1;
     Nz = 90;
 
-    Xrange = [-4 4]/1000; % in m
+    Xrange = [-30 30]/1000; % in m
     Yrange = 0/1000;%[-0.1 0.1]/1000;
-    Zrange = [5 85]/1000; % in m
+    Zrange = [0 70]/1000; % in m
+    
+    % field 
+    % gaussian : w0 , f0 (transducer freq) , fs (sampling frequency)
+    % plane : angle of propagation : theta
 
 SimulationBox = AO_FieldBox(Xrange,Yrange,Zrange,Nx,Ny,Nz);
 
