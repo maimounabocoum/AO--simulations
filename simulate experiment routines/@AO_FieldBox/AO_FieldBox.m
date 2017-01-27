@@ -48,17 +48,14 @@ classdef AO_FieldBox
             obj.Field = (w0./W).*exp( - 2*X.^2./W.^2) ;
             
             for i = 1:10:length(obj.time)
-
             clf;figure(10);
             excitation =  sin(2*pi*f0*(obj.time(i) - Z/c)).*exp(-(obj.time(i) - Z/c).^2/(8/f0)^2);
-
             imagesc(1e3*obj.x,1e3*obj.z,abs(obj.Field.*excitation).^2)
             title(['time = ',num2str(1e6*obj.time(i)),'\mu s'])
             xlabel('x (mm)')
             ylabel('z (mm)')
             colorbar
-            drawnow
-            
+            drawnow           
             end
 
             
