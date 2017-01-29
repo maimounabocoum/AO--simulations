@@ -78,15 +78,32 @@ classdef AO_FieldBox
         function obj = Get_SimulationResults(obj,t,h,fs)
             
             obj.Field = h;
-            obj.time = t + [0:(size(h,1)-1)]/fs;
+            obj.time = t + (0:(size(h,1)-1))/fs;
             
         end
         
         function [] = ShowMaxField(obj,plane)
             [Nx,Ny,Nz] = SizeBox(obj);
-            % get maximum field value (with respect to time)   
+            % get maximum field value for each line (with respect to time)  
             Field_max= reshape(max(obj.Field,[],1),[Ny,Nx,Nz]);
+ 
             switch plane
+                case 'XZt'
+                  c_max = max(Field_max(:).^2);  
+            Hf3 = figure(3);
+            set(Hf3,'name','(XZ) maximum field values')
+            for i = 1:10:size(obj.Field,1)
+            Field_max = reshape(obj.Field(i,:),[Ny,Nx,Nz]);
+            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:))');
+            xlabel('x (mm)')
+            ylabel('z (mm)')
+            title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
+            %caxis([0 c_max/30])
+            colorbar
+            drawnow
+            end
+                    
+               
                 case 'XZ'
                     % selection of the interpolation plane:
                 if (Ny == 1)

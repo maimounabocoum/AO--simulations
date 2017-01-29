@@ -5,8 +5,7 @@ classdef OP < TF_t
     properties
         theta
         R  % Input radon transform of the object        
-        F_R  % TF (R) with respect to t direction
-        
+        F_R  % TF (R) with respect to t direction       
         L
     end
     

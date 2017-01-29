@@ -12,15 +12,19 @@ tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               %definition of the actuator array %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-     
+    
+% Start a new experiment
      CurrentExperiement = Experiment(param);
-   % P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,1:N_elements,Rfocus); % for waveform
-   % P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus); % for excitation
-   % P.ShowActuatorCenter();
+   % CurrentExperiement.MyProbe = ...
+   % ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,1:N_elements,Rfocus); % for waveform
+   % CurrentExperiement.MyProbe = ...
+   % ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus); % for excitation
+   % CurrentExperiement.MyProbe.ShowActuatorCenter();
 
+ % Set a delay law for the probe
     CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',[0 0 40]/1000,param.c);
-   % P = P.Set_ActuatorDelayLaw('plane',0*180/pi,c);
-   % P.ShowDelay();
+   % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*180/pi,c);
+   % CurrentExperiement.MyProbe.ShowDelay();
 
    % Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
    % Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
@@ -53,7 +57,7 @@ tic
     %excitation= Actuators.Excitation(1,:);%sin(2*pi*f0*(0:1/fs:2/f0));
 
     % adding delay law
-    Noc = 10; % number of optical cycles
+    Noc = 8; % number of optical cycles
     t_excitation = (0:1/param.fs:Noc*1.5/param.f0);
     excitation =  sin(2*pi*param.f0*t_excitation);
     excitation = excitation.*hanning(length(excitation))';
@@ -77,7 +81,7 @@ tic
 h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
+CurrentExperiement.MySimulationBox.ShowMaxField('XZt'); % XZ : plan (x,z)
 %SimulationBox.ShowMaxField('YZ');  
 %SimulationBox.ShowFieldPropagation();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

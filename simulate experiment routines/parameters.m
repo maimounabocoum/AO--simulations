@@ -31,11 +31,11 @@ param.ActivatedField = 0 ; % 0 to generate field by yourself
 %% Simulation box initialization : 
 
 
-    param.Nx = 50;
+    param.Nx = 20;
     param.Ny = 1;
     param.Nz = 90;
 
-    param.Xrange = [-30 30]/1000; % in m
+    param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [0 70]/1000; % in m
     
