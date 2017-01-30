@@ -8,9 +8,13 @@ field_init(0);
 
 parameters;
 
+field_info
+
+
+
 tic
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-              %definition of the actuator array %%%%%%%%%%%%%%%%%
+            %%% definition of the HOME MADE actuator array %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
 % Start a new experiment
@@ -22,15 +26,31 @@ tic
    % CurrentExperiement.MyProbe.ShowActuatorCenter();
 
  % Set a delay law for the probe
-    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',[0 0 40]/1000,param.c);
-   % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*180/pi,c);
+ 
+    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',param.focus,param.c);
+   % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*180/pi,param.c);
    % CurrentExperiement.MyProbe.ShowDelay();
 
-   % Probe = xdc_linear_array (N_elements, width, element_height, kerf,no_sub_x,no_sub_y, focus);
-   % Probe = xdc_focused_array(N_elements,width,element_height,kerf,Rfocus,no_sub_x,no_sub_y,focus);
-    Probe = xdc_rectangles(CurrentExperiement.MyProbe.rect,[0 0 0], param.focus);
-   % show_xdc (Probe);
-   % xdc_focus(Probe,0,[0 0 35]/1000);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % Setting the probe inside FIELD II program
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   % Linear array with electronic focusing defined by focus :
+   
+   % Probe = xdc_linear_array (param.N_elements, param.width, param.element_height,...
+   %                           param.kerf,param.no_sub_x,param.no_sub_y, param.focus);
+   
+   % Linear array with electronic focusing defined by focus and elevation (static) by Rfocus
+   
+   % Probe = xdc_focused_array(param.N_elements,param.width,param.element_height,param.kerf,...
+                              %param.Rfocus,param.no_sub_x,param.no_sub_y,param.focus);
+                              
+      % probe using the previously defined array :
+      Probe = xdc_rectangles(CurrentExperiement.MyProbe.rect,[0 0 0], param.focus);
+      
+      
+   %   show_xdc (Probe);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Setting the impulse response field (Green function)
@@ -64,7 +84,12 @@ tic
 
     xdc_focus_times(Probe,-1,CurrentExperiement.MyProbe.DelayLaw);
     
-   xdc_excitation (Probe, excitation);
+%      apodisation = hanning(length(excitation))*ones(1,param.N_elements);
+%      xdc_apodization(Probe,0*hanning(length(excitation)),apodisation);
+ 
+    xdc_excitation (Probe, excitation);
+   
+   
    list = zeros(param.N_elements,1);
    list(param.ActiveList) = 1;
   % ele_waveform (Probe,[1:N_elements]', list*excitation);
@@ -81,9 +106,10 @@ tic
 h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZt'); % XZ : plan (x,z)
+CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
 %SimulationBox.ShowMaxField('YZ');  
 %SimulationBox.ShowFieldPropagation();
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

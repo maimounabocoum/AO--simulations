@@ -68,14 +68,17 @@ classdef ActuatorProbe
         end
           
         function obj = Set_ActuatorDelayLaw(obj,LawSelection,Param,c)
-            size(obj.center)
-                      
+         
+              % obj.center : size = Nactuators x 3 (x,y,z coordinates)
+              
            switch LawSelection
-               
+               % bj.center : corrdinates of actuator center position
+               % Param : z focus
+
                case 'focus'
                    % input parameter = angle of focalisation
                for i = 1:length(obj.ActiveList)
-                  Delay(i) = -(1/c)*norm(obj.center(obj.ActiveList(i),:) + Param);  
+                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:));  
                end 
                   Delay = Delay + norm(Param)/c;
      

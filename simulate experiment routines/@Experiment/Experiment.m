@@ -35,7 +35,7 @@ classdef Experiment
             % calculate laser on simulation box
             %obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
 
-            obj.MySimulationBox.time = (0:(obj.param.Nz-1))*(1/obj.param.fs);
+            obj.MySimulationBox.time = 0:(1/obj.param.fs):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
             
                 % adding delay law
 %             Noc = 8; % number of optical cycles
@@ -44,24 +44,21 @@ classdef Experiment
 %             excitation = excitation.*hanning(length(excitation))';
             % 
             [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-            %clf;
-            for i = 20:1:length(obj.MySimulationBox.time)
+
+            length(obj.MySimulationBox.time)
             Field = obj.MyLaser.GaussianPulse(X,Y,Z);
-            Field = Field.*exp(1i*2*pi*obj.param.f0*(obj.MySimulationBox.time(i)- Z/(obj.param.c))).*...
-                   exp(-(obj.MySimulationBox.time(i) - Z/(obj.param.c)).^2/(8/(obj.param.f0))^2);
-            %   imagesc(1e3*obj.MySimulationBox.x,1e3*obj.MySimulationBox.z,real(squeeze(Field))')
-            %obj.My
+            
+            % F : field to match dimension issued by Field II
+            F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
+            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
+            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
 
-            obj.MySimulationBox.Field(i,:) = real(Field(:))';
-            %colorbar
-            %title(['t = ',num2str(1e6*obj.MySimulationBox.time(i))]);
-           
-            %drawnow
-            
-            end
-            
 
-            
+             F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
+                    exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
+
+            obj.MySimulationBox.Field = real(F) ;
+
             %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
             
             
