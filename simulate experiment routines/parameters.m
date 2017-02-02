@@ -5,7 +5,7 @@
 % set_field('show_time',1);
 
 param.f0=6e6; % Transducer center frequency [Hz]
-param.fs=100e6; % Sampling frequency [Hz]
+param.fs=10e6; % Sampling frequency [Hz]
 param.c=1540; % Speed of sound [m/s]
 param.lambda=param.c/param.f0; % Wavelength [m]
 param.element_height= 6/1000; % Height of element [m]
@@ -20,9 +20,16 @@ param.no_sub_x = 1;
 param.no_sub_y = 10; % for designed probes, you should put a value > 2 for proper calculation (10 is good!)
 param.farfield = param.width^2/(4*param.lambda); 
 
+%% type of focalization to apply for the virtual experiment :
+% OF : 'Focused Waves'
+% OP : 'Plane Waves'
+% OS : 'Structured Waves ' 
+param.FOC_type = 'OF'; 
+
+
 % temporal field 
 
-param.ActivatedField = 1 ; % 0 to generate field by yourself
+param.Activated_FieldII =  0 ; % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -41,7 +48,7 @@ param.ActivatedField = 1 ; % 0 to generate field by yourself
 
 %% Probe defintion :
 % Set the sampling frequency
-if param.ActivatedField == 1 
+if param.Activated_FieldII == 1 
 field_debug(0);
 set_sampling(param.fs);
 set_field('c',param.c);

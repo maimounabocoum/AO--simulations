@@ -22,7 +22,9 @@ classdef Experiment
                           param.no_sub_x,param.no_sub_y,param.kerf,param.ActiveList,param.Rfocus);
                       
             obj.MyPhantom = Phantom();
+            % IR laser :
             obj.MyLaser = LaserBeam(param,'gaussian');
+            
             obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
             obj.param = param;
         end
