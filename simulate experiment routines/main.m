@@ -8,8 +8,8 @@ field_init(0);
 
 parameters;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-              %definition of the actuator array %%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+              %definition of the actuator array %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     P = ActuatorProbe(N_elements,element_height,width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus);
     %P.ShowActuatorCenter();
 
@@ -79,7 +79,7 @@ h = h/max(h(:));
 SimulationBox = SimulationBox.Get_SimulationResults(t,h,fs);
 %SimulationBox.SizeBox()
 %SimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
-SimulationBox.ShowMaxField('YZ');  
+SimulationBox.ShowMaxField('Xt');  
 %SimulationBox.ShowFieldPropagation();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory

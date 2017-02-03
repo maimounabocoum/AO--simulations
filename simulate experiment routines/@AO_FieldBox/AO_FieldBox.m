@@ -82,26 +82,36 @@ classdef AO_FieldBox
             
         end
         
+        
         function [] = ShowMaxField(obj,plane)
             [Nx,Ny,Nz] = SizeBox(obj);
-            % get maximum field value for each line (with respect to time)  
-            Field_max= reshape(max(obj.Field,[],1),[Ny,Nx,Nz]);
- 
+
+            [Field_max,Tmax] = max(obj.Field,[],1);
+            % max(obj.Field,[],1) : returns for each colulm
+            % the maximum field pressure.
+            Field_max = reshape(Field_max,[Ny,Nx,Nz]);
+            Tmax = reshape(Tmax,[Ny,Nx,Nz]);
+            
             switch plane
                 case 'XZt'
                   c_max = max(Field_max(:).^2);  
             Hf3 = figure(3);
             set(Hf3,'name','(XZ) maximum field values')
-            for i = 1:10:size(obj.Field,1)
-            Field_max = reshape(obj.Field(i,:),[Ny,Nx,Nz]);
-            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:))');
-            xlabel('x (mm)')
-            ylabel('z (mm)')
-            title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
-            %caxis([0 c_max/30])
-            colorbar
-            drawnow
+            for i = 1:10:size(obj.Field,1) % loop over time
+                Field_max = reshape(obj.Field(i,:),[Ny,Nx,Nz]);
+                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:))');
+                xlabel('x (mm)')
+                ylabel('z (mm)')
+                t(i) = obj.time(i);
+                p(i) = sum(squeeze(Field_max(:)));
+                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
+                %caxis([0 c_max/30])
+                colorbar
+                drawnow
             end
+            figure(4)
+            plot(t*1540*1e3,p,'o') ;
+
                     
                
                 case 'XZ'
@@ -122,13 +132,40 @@ classdef AO_FieldBox
             Hf3 = figure(3);
             set(Hf3,'name','(XZ) maximum field values')
             %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
-            size(squeeze(Field_max(:,I_plane,:))')
+
             imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
             shading interp
             xlabel('x (mm)')
             ylabel('z (mm)')
             title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
             colorbar
+            
+                 case 'Xt'
+                    % selection of the interpolation plane:
+                if (Ny == 1)
+                    I_plane = 1;
+                else
+                    prompt = {'Enter Y coordinate (program will look for closest value):'};
+                    dlg_title = 'Y plane select (mm)';
+                    num_lines = 1;
+                    answer = inputdlg(prompt,dlg_title,num_lines,{'0'});
+                    V_plane = str2num(answer{1})*1e-3;                    
+                    I_plane = Closest(V_plane,obj.y); 
+                end
+ 
+
+
+            Hf3 = figure(3);
+            set(Hf3,'name','(XZ) maximum field values')
+            %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
+
+            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Tmax(I_plane,:,:))');
+            shading interp
+            xlabel('x (mm)')
+            ylabel('z (mm)')
+            title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
+            colorbar
+           
             
                case 'YZ'
                    if (Nx == 1)

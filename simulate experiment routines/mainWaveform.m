@@ -8,7 +8,7 @@ field_init(0);
 
 parameters;
 
-field_info
+%field_info
 
 
 
@@ -106,9 +106,13 @@ tic
 h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
+CurrentExperiement.MySimulationBox.ShowMaxField('XZt'); % XZ : plan (x,z)
 %SimulationBox.ShowMaxField('YZ');  
 %SimulationBox.ShowFieldPropagation();
+
+
+%CurrentExperiement.ShowAcquisitionLine(); 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
