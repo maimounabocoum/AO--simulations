@@ -28,11 +28,13 @@ param.FOC_type = 'OF';
 
 % waist of diffuse IR laser beam
 param.w0 = 10/1000 ; % in m 
-
+% param.center = [10 10 10]/1000 ; specify the center of the gaussian beam.
+% if this value is commented, the beam is by defaukt center on the
+% simulation bow
 
 % temporal field 
 
-param.Activated_FieldII =  0 ; % 0 to generate field by yourself
+param.Activated_FieldII =  1 ; % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX

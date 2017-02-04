@@ -69,6 +69,10 @@ classdef AO_FieldBox
      
         end
         
+        function center = GetCenter(obj)
+           center = [mean(obj.x), mean(obj.y),mean(obj.z)];           
+        end
+        
         function [Nx,Ny,Nz] = SizeBox(obj)
             Nx = length(obj.x);
             Ny = length(obj.y);
@@ -84,8 +88,8 @@ classdef AO_FieldBox
         
         
         function [] = ShowMaxField(obj,plane)
+            
             [Nx,Ny,Nz] = SizeBox(obj);
-
             [Field_max,Tmax] = max(obj.Field,[],1);
             % max(obj.Field,[],1) : returns for each colulm
             % the maximum field pressure.
@@ -97,22 +101,18 @@ classdef AO_FieldBox
                   c_max = max(Field_max(:).^2);  
             Hf3 = figure(3);
             set(Hf3,'name','(XZ) maximum field values')
-            for i = 1:10:size(obj.Field,1) % loop over time
-                Field_max = reshape(obj.Field(i,:),[Ny,Nx,Nz]);
-                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:))');
+            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);          
+            for i = 1:5:size(obj.Field,1) % loop over time
+                
+                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
-                t(i) = obj.time(i);
-                p(i) = sum(squeeze(Field_max(:)));
                 title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
-                %caxis([0 c_max/30])
+                caxis([0 c_max/30])
                 colorbar
                 drawnow
             end
-            figure(4)
-            plot(t*1540*1e3,p,'o') ;
-
-                    
+                  
                
                 case 'XZ'
                     % selection of the interpolation plane:

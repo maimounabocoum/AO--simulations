@@ -4,18 +4,20 @@ classdef LaserBeam
     
     properties
        w0
+       center 
     end
     
     methods
         
-        function obj = LaserBeam(w0)
+        function obj = LaserBeam(w0,center)
             obj.w0 = w0;
+            obj.center = center ;
         end
         
         function Intensity = Eval(obj,x,y,z)
             
-           [X,Y,Z] = meshgrid(x,y,z) ;
-           Intensity = exp(-2*(X.^2+Z.^2)/(obj.w0)^2) ;
+           [X,~,Z] = meshgrid(x,y,z) ;
+           Intensity = exp(-2*((X-obj.center(1)).^2+(Z-obj.center(3)).^2)/(obj.w0)^2) ;
            
            Intensity = Intensity(:)' ;
            

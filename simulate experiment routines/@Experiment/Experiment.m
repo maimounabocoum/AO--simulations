@@ -24,10 +24,18 @@ classdef Experiment
                           param.no_sub_x,param.no_sub_y,param.kerf,param.ActiveList,param.Rfocus);
                       
             obj.MyPhantom = Phantom();
-            % IR laser :
-            obj.MyLaser = LaserBeam(param.w0);
             
             obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
+            
+            
+            % IR laser :
+            % if no center is specified, the beam center is the 
+            if isfield(param,'center')
+            obj.MyLaser = LaserBeam(param.w0,param.center);
+            else
+            obj.MyLaser = LaserBeam(param.w0,obj.MySimulationBox.GetCenter);
+            end
+            
             obj.param = param;
         end
         
@@ -116,26 +124,23 @@ classdef Experiment
         end
         
         function [] = ShowAcquisitionLine(obj)
-            [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
-            Field = reshape(obj.MySimulationBox.Field,[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
             
+            [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
+                       
             % avaluate Gaussian diffuse beam on current simulation box :
             % returns a 1x[Nx,Ny,Nz] vector
-           % DiffuseLightIntensity = obj.MyLaser.Eval(X,Y,Z) ;
+            DiffuseLightIntensity = obj.MyLaser.Eval(obj.MySimulationBox.x,...
+                                    obj.MySimulationBox.y,obj.MySimulationBox.z) ;
+                                
+            DiffuseLightIntensity = repmat(DiffuseLightIntensity,length(obj.MySimulationBox.time),1)  ;
             
-            size(Field)
-            Line = sum(sum(sum(Field.^2,1),2),3) ;
-            
-            for i = 1:size(obj.MySimulationBox.Field,1) % loop over time
-                Field_max = reshape(obj.MySimulationBox.Field(i,:),[Ny,Nx,Nz]);
-                p(i) = sum(squeeze(Field_max(:)).^2);
-            end
-            
-            
+            MarkedPhotons = (obj.MySimulationBox.Field).^2.*DiffuseLightIntensity ;
+            MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
+ 
+             Line = sum(sum(sum(MarkedPhotons,1),2),3) ;
+    
             figure;
-            plot(obj.MySimulationBox.time*1e6,p,'color','red')
-            hold on
-            plot(1e6*obj.MySimulationBox.time,squeeze(Line))
+            plot(obj.MySimulationBox.time*1e6,squeeze(Line),'color','blue')
             xlabel('time (\mu s)')
             title('\int_{x,y,z} P(x,y,z,t)')
             
