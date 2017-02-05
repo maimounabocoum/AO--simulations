@@ -21,13 +21,6 @@ CurrentExperiement = Experiment(param);
 
 CurrentExperiement = CurrentExperiement.CalculateUSfield(excitation);
 
-
-
-%CurrentExperiement = CurrentExperiement.StartExperiement();
-
-% size(CurrentExperiement.MySimulationBox.Field)
-% param.Nx*param.Ny*param.Nz
-%
 % option for screening : XY, Xt , XZt
 CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
 CurrentExperiement.ShowAcquisitionLine(); 

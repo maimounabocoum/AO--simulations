@@ -196,7 +196,10 @@ end
         % Z = R + sqrt(R-Y^2)
              
         Element(:,[4,7,10,13,19]) = Rfocus - sqrt(Rfocus^2 - Element(:,[3,6,9,12,18]).^2);
-
+        % somehow this is how FIELD II defines the probe, if commented, the
+        % results are different ?? 
+        Element(:,[4,7,10,13,19]) = Element(:,[4,7,10,13,19]) - max(max(Element(:,[4,7,10,13,19]))) ;
+        
         if (2*Rfocus < GetElementHeigth(Element))
             warndlg('Rfocus is smaller than actuator height','!! Warning !!')
         end

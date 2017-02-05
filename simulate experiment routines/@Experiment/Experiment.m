@@ -18,10 +18,18 @@ classdef Experiment
     end
     
     methods
-        function obj = Experiment(param)
+        function obj = Experiment(param,v)
             % param = structure containing all the simulation parameters
+                       % for excitation : sparse probe, use with rectangle
+            switch v
+                case 0
             obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
                           param.no_sub_x,param.no_sub_y,param.kerf,param.ActiveList,param.Rfocus);
+                      % for waveform :
+                case 1
+           obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
+                           param.no_sub_x,param.no_sub_y,param.kerf,1:param.N_elements,param.Rfocus); 
+            end
                       
             obj.MyPhantom = Phantom();
             
@@ -44,8 +52,12 @@ classdef Experiment
             if obj.param.Activated_FieldII == 1
             % define delay law for the probe :
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',obj.param.focus,obj.param.c);
-            % set impulse response :
-            Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], obj.param.focus);
+            
+            % Initialize home-made probe  :
+            %Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], obj.param.focus);
+            Probe = xdc_focused_array(obj.param.N_elements,obj.param.width,obj.param.element_height,obj.param.kerf,...
+                                obj.param.Rfocus,obj.param.no_sub_x,obj.param.no_sub_y,obj.param.focus);
+                          
             % calculate impulse response in FIELD II
                 t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
                 impulse = sin(2*pi*obj.param.f0*t_impulseResponse);
@@ -54,7 +66,7 @@ classdef Experiment
             % set excitation in FIELD II:  
             xdc_excitation (Probe, excitation);
             % set delay law in FIELD II: 
-            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
+%            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
             % calculate field on MySimulationBox.Points() with FIELD II: 
             [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
             h = h/max(h(:));
