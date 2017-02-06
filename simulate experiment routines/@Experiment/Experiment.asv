@@ -27,7 +27,7 @@ classdef Experiment
                       % for waveform :
   
            %obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
-           %                param.no_sub_x,param.no_sub_y,param.kerf,1:param.N_elements,param.Rfocus); 
+                           param.no_sub_x,param.no_sub_y,param.kerf,1:param.N_elements,param.Rfocus); 
  
                       
             obj.MyPhantom = Phantom();

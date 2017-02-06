@@ -157,9 +157,8 @@ classdef AO_FieldBox
 
             Hf3 = figure(3);
             set(Hf3,'name','(XZ) maximum field values')
-            %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
-
-            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Tmax(I_plane,:,:))');
+           
+            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
             shading interp
             xlabel('x (mm)')
             ylabel('z (mm)')
