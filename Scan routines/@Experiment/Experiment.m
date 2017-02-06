@@ -12,6 +12,7 @@ classdef Experiment
        ScanParam
        Nscan
        BoolActiveList 
+       AOSignal
         
     end
     
@@ -41,7 +42,7 @@ classdef Experiment
                        
                        
                         % Dimension in index of active probes lenght
-                        ActiveWidth = obj.param.focus/10 ; % as in the experiement, in m
+                        ActiveWidth = obj.param.focus; % as in the experiement, in m
                         ActiveWidth = ceil(ActiveWidth/obj.param.width) ; % convert to index 
                         
                         n_actives = (1:ActiveWidth)  - floor(mean(1:ActiveWidth)) ;
@@ -131,7 +132,7 @@ classdef Experiment
             xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
             % calculate field on MySimulationBox.Points() with FIELD II: 
             [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-            h = h/max(h(:));
+            %h = h/max(h(:));
             % write field results to the current box
             obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
             
@@ -139,8 +140,6 @@ classdef Experiment
 
             obj.MySimulationBox.time = 0:(1/obj.param.fs):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
             [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-
-            length(obj.MySimulationBox.time)
             Field = obj.GaussianPulse(X,Y,Z);
             
             % F : field to match dimension issued by Field II
@@ -197,8 +196,7 @@ classdef Experiment
             
         end
         
-        function [] = ShowAcquisitionLine(obj)
-            
+        function obj = GetAcquisitionLine(obj,n)
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
                        
             % avaluate Gaussian diffuse beam on current simulation box :
@@ -211,13 +209,19 @@ classdef Experiment
             MarkedPhotons = (obj.MySimulationBox.Field).^2.*DiffuseLightIntensity ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
  
-             Line = sum(sum(sum(MarkedPhotons,1),2),3) ;
-    
+            line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
+            % interpolation on simulation box 
+            obj.AOSignal(:,n) = interp1(obj.MySimulationBox.time*obj.param.c,line,obj.MySimulationBox.z,'linear',0);
+            
+            
+        end
+        
+        function [] = ShowAcquisitionLine(obj)
             figure;
-            plot(obj.MySimulationBox.time*1e6,squeeze(Line),'color','blue')
+            imagesc(obj.AOSignal)
             xlabel('time (\mu s)')
             title('\int_{x,y,z} P(x,y,z,t)')
-            
+            colorbar
             
         end
        

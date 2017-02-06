@@ -44,13 +44,13 @@ param.Activated_FieldII =  1; % 0 to generate field by yourself
 
     param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [30 50]/1000; % in m
+    param.Zrange = [35 50]/1000; % in m
 
-    param.Nx = 90;
+    param.Nx = 50;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
-    % unshure Nz >=1
-    param.Nz = max( 1 , ceil ( param.fs * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) );
+    % unshures Nz >=1
+    param.Nz = max( 1 , ceil ( param.fs * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 
 
 %% Probe defintion :

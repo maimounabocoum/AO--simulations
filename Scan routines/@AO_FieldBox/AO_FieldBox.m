@@ -87,7 +87,8 @@ classdef AO_FieldBox
         end
         
         
-        function [] = ShowMaxField(obj,plane)
+        function [] = ShowMaxField(obj,plane,FigHandle)
+            set(FigHandle,'NextPlot', 'replace');
             
             [Nx,Ny,Nz] = SizeBox(obj);
             [Field_max,Tmax] = max(obj.Field,[],1);
@@ -99,8 +100,7 @@ classdef AO_FieldBox
             switch plane
                 case 'XZt'
                   c_max = max(Field_max(:).^2);  
-            Hf3 = figure(3);
-            set(Hf3,'name','(XZ) maximum field values')
+            set(FigHandle,'name','(XZ) maximum field values')
             Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);          
             for i = 1:5:size(obj.Field,1) % loop over time
                 
@@ -127,10 +127,7 @@ classdef AO_FieldBox
                     I_plane = Closest(V_plane,obj.y); 
                 end
  
-
-
-            Hf3 = figure(3);
-            set(Hf3,'name','(XZ) maximum field values')
+            set(FigHandle,'name','(XZ) maximum field values')
             %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
 
             imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
@@ -139,6 +136,8 @@ classdef AO_FieldBox
             ylabel('z (mm)')
             title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
             colorbar
+            drawnow
+            get(FigHandle)
             
                  case 'Xt'
                     % selection of the interpolation plane:
@@ -152,11 +151,8 @@ classdef AO_FieldBox
                     V_plane = str2num(answer{1})*1e-3;                    
                     I_plane = Closest(V_plane,obj.y); 
                 end
- 
 
-
-            Hf3 = figure(3);
-            set(Hf3,'name','(XZ) maximum field values')
+            set(FigHandle,'name','(XZ) maximum field values')
             %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
 
             imagesc(obj.x*1e3,obj.z*1e3,squeeze(Tmax(I_plane,:,:))');
@@ -178,8 +174,8 @@ classdef AO_FieldBox
                     V_plane = str2num(answer{1})*1e-3;                    
                     I_plane = Closest(V_plane,obj.x); 
                    end
-                            Hf4 = figure(4);
-            set(Hf4,'name','(YZ) maximum field values')
+
+            set(FigHandle,'name','(YZ) maximum field values')
             %imagesc(SimulationBox.x*1e3,SimulationBox.z*1e6,squeeze(Field_max(1,:,:)));
             size(squeeze(Field_max(:,I_plane,:))')
             imagesc(obj.y*1e3,obj.z*1e3,squeeze(Field_max(:,I_plane,:))');

@@ -19,31 +19,18 @@ CurrentExperiement = Experiment(param);
     excitation =  sin(2*pi*param.f0*t_excitation);
     excitation = excitation.*hanning(length(excitation))';
     
-clf;Hf = figure(1);
-set(Hf,'NextPlot', 'replace');
-
- for n_scan = 1:CurrentExperiement.Nscan
-
+Hf = figure(1);
+ 
+%h = waitbar(0,'Please wait...');
+for n_scan = 1:CurrentExperiement.Nscan
+% waitbar(n_scan/CurrentExperiement.Nscan)
      CurrentExperiement = CurrentExperiement.CalculateUSfield(excitation,n_scan);
-     
-    [Nx,Ny,Nz] = SizeBox(CurrentExperiement.MySimulationBox);
-    [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
-    Field_max = reshape(Field_max,[Ny,Nx,Nz]);
-       
-    CurrentExperiement.MyProbe.ShowProbe();
+   %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
 
-           close all
-           imagesc(CurrentExperiement.MySimulationBox.x*1e3,CurrentExperiement.MySimulationBox.z*1e3,...
-                    squeeze(Field_max(1,:,:))');
-   
-            shading interp
-            xlabel('x (mm)')
-            ylabel('z (mm)')
-            title(['Maximum Field in plane Y = ',num2str(CurrentExperiement.MySimulationBox.y(1)*1e3),'mm'])
-            colorbar
-            drawnow
+    CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+
  end
  
 % % option for screening : XY, Xt , XZt
-% 
-% CurrentExperiement.ShowAcquisitionLine(); 
+ 
+ %CurrentExperiement.ShowAcquisitionLine(); 
