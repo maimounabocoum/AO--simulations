@@ -68,7 +68,7 @@ classdef Experiment
 %            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
             % calculate field on MySimulationBox.Points() with FIELD II: 
             [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-            h = h/max(h(:));
+            %h = h/max(h(:));
             % write field results to the current box
             obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
             
