@@ -76,11 +76,11 @@ tic
 
 %    xdc_focus_times(Probe,-1,CurrentExperiement.MyProbe.DelayLaw);
     
-%apodisation = ones(1,param.N_elements);
+apodisation = ones(1,param.N_elements);
 %xdc_apodization(te,times,apodisation')
 
 %      apodisation = hanning(length(excitation))*ones(1,param.N_elements);
-%xdc_apodization(Probe,1,apodisation);
+xdc_apodization(Probe,-1,apodisation);
  
     
  %  xdc_excitation (Probe, excitation);
