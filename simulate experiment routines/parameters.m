@@ -11,8 +11,8 @@ param.lambda=param.c/param.f0; % Wavelength [m]
 param.element_height= 6/1000; % Height of element [m]
 param.width= 0.2/1000; % Width of element [m]
 param.kerf= 0; % Distance between transducer elements [m]
-param.N_elements = 2;%128; % Number of elements
-param.ActiveList = 1; % index of active elements
+param.N_elements = 128;%128; % Number of elements
+param.ActiveList = 64; % index of active elements
 param.focus = [0 0 40]/1000; % Initial electronic focus [m,m,m]
 param.Rfocus = 40/1000; % Elevation focus
 %param.attenuation = 0;         % en db/cm/Mhz
@@ -46,7 +46,7 @@ param.Activated_FieldII =  1 ; % 0 to generate field by yourself
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [1 60]/1000; % in m
 
-    param.Nx = 90;
+    param.Nx = 300;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshure Nz >=1

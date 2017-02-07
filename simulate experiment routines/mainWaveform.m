@@ -25,7 +25,7 @@ tic
 % Set a delay law for the probe
  
    % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',param.focus,param.c);
-  %  CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*180/pi,param.c);
+    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*180/pi,param.c);
    % CurrentExperiement.MyProbe.ShowDelay();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,16 +75,14 @@ tic
     excitation = excitation.*hanning(length(excitation))';
 
 %    xdc_focus_times(Probe,-1,CurrentExperiement.MyProbe.DelayLaw);
-    
-apodisation = ones(1,param.N_elements);
-%xdc_apodization(te,times,apodisation')
+     ele_delay(Probe,param.ActiveList,CurrentExperiement.MyProbe.DelayLaw);   
 
-%      apodisation = hanning(length(excitation))*ones(1,param.N_elements);
-xdc_apodization(Probe,10,apodisation);
+%      apodisation = ones(1,param.N_elements);
+%       xdc_apodization(Probe,10,apodisation);
  
     
- %  xdc_excitation (Probe, excitation);
-
+%  xdc_excitation (Probe, excitation);
+ 
    list = zeros(param.N_elements,1);
    list(param.ActiveList) = 1;
    ele_waveform (Probe,[1:param.N_elements]', list*excitation);
@@ -101,7 +99,7 @@ xdc_apodization(Probe,10,apodisation);
 h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
+CurrentExperiement.MySimulationBox.ShowMaxField('XZt',50); % XZ : plan (x,z)
 min(CurrentExperiement.MySimulationBox.time)*1e6
 max(CurrentExperiement.MySimulationBox.time)*1e6
 %SimulationBox.ShowMaxField('YZ');  

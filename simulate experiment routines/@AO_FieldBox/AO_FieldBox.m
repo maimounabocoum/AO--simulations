@@ -87,7 +87,13 @@ classdef AO_FieldBox
         end
         
         
-        function [] = ShowMaxField(obj,plane)
+        function [] = ShowMaxField(obj,varargin)
+            
+            plane = varargin{1};
+            if nargin > 1
+                value = varargin{2};
+            end
+            
             
             [Nx,Ny,Nz] = SizeBox(obj);
             [Field_max,Tmax] = max(obj.Field,[],1);
@@ -101,16 +107,29 @@ classdef AO_FieldBox
                   c_max = max(Field_max(:).^2);  
             Hf3 = figure(3);
             set(Hf3,'name','(XZ) maximum field values')
-            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);          
-            for i = 1:5:size(obj.Field,1) % loop over time
+            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
+            if exist('value')
+
+                    imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,value))');
+                    xlabel('x (mm)')
+                    ylabel('z (mm)')
+                    title(['P(t)^ on 2XZ, t= ',num2str(obj.time(value)*1e6),'\mu s'])
+                    caxis([0 c_max/30])
+                    colorbar
+                    drawnow
                 
-                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
-                xlabel('x (mm)')
-                ylabel('z (mm)')
-                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
-                caxis([0 c_max/30])
-                colorbar
-                drawnow
+                
+            else
+                for i = 1:5:size(obj.Field,1) % loop over time
+
+                    imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
+                    xlabel('x (mm)')
+                    ylabel('z (mm)')
+                    title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
+                    caxis([0 c_max/30])
+                    colorbar
+                    drawnow
+                end
             end
                   
                

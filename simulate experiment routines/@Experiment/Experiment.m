@@ -7,7 +7,6 @@ classdef Experiment
         MyPhantom ;
         MyProbe ;
         MyLaser ;
-        MyUSbeam ;
         MySimulationBox;
         
     end
@@ -50,8 +49,12 @@ classdef Experiment
             
             if obj.param.Activated_FieldII == 1
             % define delay law for the probe :
+            switch obj.param.FOC_type
+                case 'OF'
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',obj.param.focus,obj.param.c);
-            
+                case 'OP'
+            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',0,obj.param.c);
+            end
             % Initialize home-made probe  :
             %Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], obj.param.focus);
             Probe = xdc_focused_array(obj.param.N_elements,obj.param.width,obj.param.element_height,obj.param.kerf,...
