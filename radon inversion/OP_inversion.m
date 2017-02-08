@@ -61,7 +61,7 @@ xsonde=linspace(0,192*200e-6,193);
 img = zeros(size(x,1),size(x,2),'like',x);
 
   for i=1:length(MyImage.theta)
-      t = x.*cos( MyImage.theta(i)*pi/180 ) + y.*sin( MyImage.theta(i)*pi/180 );
+      t = x.*cos( MyImage.theta(i)*pi/180 ) + y.*sin( MyImage.theta(i)*pi/180 ) ;
       projContrib = interp1(MyImage.t',I(:,i),t(:),'linear',0);
       img = img + reshape(projContrib,length(xsonde),length(MyImage.t)); 
       
