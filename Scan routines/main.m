@@ -22,7 +22,7 @@ CurrentExperiement = Experiment(param);
 Hf = figure(1);
  
 %h = waitbar(0,'Please wait...');
-for n_scan = 1:CurrentExperiement.Nscan
+for n_scan = 25%CurrentExperiement.Nscan
 % waitbar(n_scan/CurrentExperiement.Nscan)
      CurrentExperiement = CurrentExperiement.CalculateUSfield(excitation,n_scan);
    %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
@@ -34,3 +34,8 @@ for n_scan = 1:CurrentExperiement.Nscan
 % % option for screening : XY, Xt , XZt
  
  %CurrentExperiement.ShowAcquisitionLine(); 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% End Program - Free memory
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+field_end;

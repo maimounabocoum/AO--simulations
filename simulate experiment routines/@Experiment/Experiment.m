@@ -45,60 +45,60 @@ classdef Experiment
             obj.param = param;
         end
         
-        function obj = CalculateUSfield(obj,excitation)
-            
-            if obj.param.Activated_FieldII == 1
-            % define delay law for the probe :
-            switch obj.param.FOC_type
-                case 'OF'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',obj.param.focus,obj.param.c);
-                case 'OP'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',0,obj.param.c);
-            end
-            % Initialize home-made probe  :
-            %Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], obj.param.focus);
-            Probe = xdc_focused_array(obj.param.N_elements,obj.param.width,obj.param.element_height,obj.param.kerf,...
-                                obj.param.Rfocus,obj.param.no_sub_x,obj.param.no_sub_y,obj.param.focus);
-                          
-            % calculate impulse response in FIELD II
-                t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
-                impulse = sin(2*pi*obj.param.f0*t_impulseResponse);
-                impulse=impulse.*hanning(length(impulse))'; 
-                xdc_impulse (Probe, impulse);
-            % set excitation in FIELD II:  
-            xdc_excitation (Probe, excitation);
-            % set delay law in FIELD II: 
-%            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
-            % calculate field on MySimulationBox.Points() with FIELD II: 
-            [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-            %h = h/max(h(:));
-            % write field results to the current box
-            obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
-            
-            else
-
-            obj.MySimulationBox.time = 0:(1/obj.param.fs):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
-            [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-
-            length(obj.MySimulationBox.time)
-            Field = obj.GaussianPulse(X,Y,Z);
-            
-            % F : field to match dimension issued by Field II
-            F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
-            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
-            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-
-
-             F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
-                    exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
-
-            obj.MySimulationBox.Field = real(F) ;
-
-            %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
-            
-            end
-            
-        end
+%         function obj = CalculateUSfield(obj,excitation)
+%             
+%             if obj.param.Activated_FieldII == 1
+%             % define delay law for the probe :
+%             switch obj.param.FOC_type
+%                 case 'OF'
+%             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',obj.param.focus,obj.param.c);
+%                 case 'OP'
+%             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',0,obj.param.c);
+%             end
+%             % Initialize home-made probe  :
+%             Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], obj.param.focus);
+%             %Probe = xdc_focused_array(obj.param.N_elements,obj.param.width,obj.param.element_height,obj.param.kerf,...
+%             %                    obj.param.Rfocus,obj.param.no_sub_x,obj.param.no_sub_y,obj.param.focus);
+%                           
+%             % calculate impulse response in FIELD II
+%                 t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
+%                 impulse = sin(2*pi*obj.param.f0*t_impulseResponse);
+%                 impulse=impulse.*hanning(length(impulse))'; 
+%                 xdc_impulse (Probe, impulse);
+%             % set excitation in FIELD II:  
+%             xdc_excitation (Probe, excitation);
+%             % set delay law in FIELD II: 
+% %            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
+%             % calculate field on MySimulationBox.Points() with FIELD II: 
+%             [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
+%             %h = h/max(h(:));
+%             % write field results to the current box
+%             obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
+%             
+%             else
+% 
+%             obj.MySimulationBox.time = 0:(1/obj.param.fs):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
+%             [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+% 
+%             length(obj.MySimulationBox.time)
+%             Field = obj.GaussianPulse(X,Y,Z);
+%             
+%             % F : field to match dimension issued by Field II
+%             F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
+%             T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
+%             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+% 
+% 
+%              F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
+%                     exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
+% 
+%             obj.MySimulationBox.Field = real(F) ;
+% 
+%             %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
+%             
+%             end
+%             
+%         end
         
         function E = GaussianPulse(obj,X,Y,Z)
             

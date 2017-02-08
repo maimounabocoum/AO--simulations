@@ -90,7 +90,8 @@ classdef AO_FieldBox
         function [] = ShowMaxField(obj,varargin)
             
             plane = varargin{1};
-            if nargin > 1
+            
+            if nargin > 2
                 value = varargin{2};
             end
             
@@ -114,7 +115,6 @@ classdef AO_FieldBox
                     xlabel('x (mm)')
                     ylabel('z (mm)')
                     title(['P(t)^ on 2XZ, t= ',num2str(obj.time(value)*1e6),'\mu s'])
-                    caxis([0 c_max/30])
                     colorbar
                     drawnow
                 
@@ -126,7 +126,6 @@ classdef AO_FieldBox
                     xlabel('x (mm)')
                     ylabel('z (mm)')
                     title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
-                    caxis([0 c_max/30])
                     colorbar
                     drawnow
                 end

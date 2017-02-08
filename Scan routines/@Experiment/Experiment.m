@@ -24,6 +24,32 @@ classdef Experiment
     
     methods
         
+        % constructor :
+        function obj = Experiment(param)
+            % param = structure containing all the simulation parameters
+                       % for excitation : sparse probe, use with rectangle
+            obj.MyPhantom = Phantom();            
+            obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
+
+            % IR laser :
+            % if no center is specified, the beam center is the 
+            if isfield(param,'center')
+            obj.MyLaser = LaserBeam(param.w0,param.center);
+            else
+            obj.MyLaser = LaserBeam(param.w0,obj.MySimulationBox.GetCenter);
+            end
+            
+            obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
+                          param.no_sub_x,param.no_sub_y,param.kerf,1,param.Rfocus);
+                      % for waveform :
+                      
+            obj.param = param;
+            
+            obj = ConfigureProbeSequence(obj) ;
+            
+            
+        end
+        
         function obj = ConfigureProbeSequence(obj)
             
             switch obj.param.FOC_type
@@ -70,46 +96,16 @@ classdef Experiment
                       
             
         end
-        function obj = Experiment(param)
-            % param = structure containing all the simulation parameters
-                       % for excitation : sparse probe, use with rectangle
-
-
-            obj.MyPhantom = Phantom();
             
-          
-            obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
-            
-            
-            % IR laser :
-            % if no center is specified, the beam center is the 
-            if isfield(param,'center')
-            obj.MyLaser = LaserBeam(param.w0,param.center);
-            else
-            obj.MyLaser = LaserBeam(param.w0,obj.MySimulationBox.GetCenter);
-            end
-            
-            obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
-                          param.no_sub_x,param.no_sub_y,param.kerf,1,param.Rfocus);
-                      % for waveform :
-                      
-            obj.param = param;
-            
-            obj = ConfigureProbeSequence(obj) ;
-            
-            
-        end
-        
         function obj = CalculateUSfield(obj,excitation,n_scan)
             
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan));
-            
+           
+           % probe strcuture initialization :
            obj.MyProbe = ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
                           obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
-                      % for waveform :
-            
-          
+
             if obj.param.Activated_FieldII == 1
             % define delay law for the probe :
             switch obj.param.FOC_type
@@ -156,6 +152,8 @@ classdef Experiment
             %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
             
             end
+            
+            xdc_free(Probe);
             
         end
         

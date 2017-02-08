@@ -80,12 +80,13 @@ classdef ActuatorProbe
                for i = 1:length(obj.ActiveList)
                   Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:));  
                end 
-                  Delay = Delay + norm(Param)/c;
+                  Delay =  Delay + norm(Param)/c;
      
                case 'plane'
                    % input parameters = drift angle
                    for i = 1:length(obj.ActiveList)
-                   Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param));
+                       % 0.0833
+                   Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param)) -0.073e-6;
                    end
                    
                case 'user'
