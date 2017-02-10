@@ -21,19 +21,18 @@ CurrentExperiement = Experiment(param);
     
 Hf = figure(1);
  
-%h = waitbar(0,'Please wait...');
-for n_scan = 25%CurrentExperiement.Nscan
-% waitbar(n_scan/CurrentExperiement.Nscan)
+h = waitbar(0,'Please wait...');
+for n_scan = 1:CurrentExperiement.Nscan
+ waitbar(n_scan/CurrentExperiement.Nscan)
      CurrentExperiement = CurrentExperiement.CalculateUSfield(excitation,n_scan);
-   %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
-
-    CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
-
+     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
+   %  CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
  end
  
 % % option for screening : XY, Xt , XZt
  
- %CurrentExperiement.ShowAcquisitionLine(); 
+ CurrentExperiement.ShowAcquisitionLine(); 
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

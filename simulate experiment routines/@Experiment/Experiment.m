@@ -43,6 +43,7 @@ classdef Experiment
             end
             
             obj.param = param;
+            
         end
         
 %         function obj = CalculateUSfield(obj,excitation)

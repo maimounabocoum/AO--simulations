@@ -68,7 +68,7 @@ classdef Experiment
                        
                        
                         % Dimension in index of active probes lenght
-                        ActiveWidth = obj.param.focus; % as in the experiement, in m
+                        ActiveWidth = obj.param.focus/2; % as in the experiement, in m
                         ActiveWidth = ceil(ActiveWidth/obj.param.width) ; % convert to index 
                         
                         n_actives = (1:ActiveWidth)  - floor(mean(1:ActiveWidth)) ;
@@ -134,7 +134,7 @@ classdef Experiment
             
             else
 
-            obj.MySimulationBox.time = 0:(1/obj.param.fs):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
+            obj.MySimulationBox.time = 0:(1/obj.param.fs_aq):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
             [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
             Field = obj.GaussianPulse(X,Y,Z);
             
