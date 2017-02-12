@@ -80,7 +80,7 @@ classdef ActuatorProbe
         function obj = Set_ActuatorDelayLaw(obj,LawSelection,Param,c)
          
               % obj.center : size = Nactuators x 3 (x,y,z coordinates)
-              
+
            switch LawSelection
                % bj.center : corrdinates of actuator center position
                % Param : z focus
@@ -88,14 +88,14 @@ classdef ActuatorProbe
                case 'focus'
                    % input parameter = angle of focalisation
                for i = 1:length(obj.ActiveList)
-                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:));  
+                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:)) ;  
                end 
                   Delay = Delay + norm(Param)/c;
      
                case 'plane'
                    % input parameters = drift angle
                    for i = 1:length(obj.ActiveList)
-                   Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param));
+                   Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param)) ;
                    end
                    
                case 'user'
@@ -116,7 +116,9 @@ classdef ActuatorProbe
         end
         
         function [n, xn] = GetIndex(obj,x)
+
             n = interp1(obj.center(:,1),1:length(obj.center(:,1)),x,'nearest') ;
+            n(isnan(n)) = [];
             xn = obj.center(n,1) ;
             
         end
@@ -138,12 +140,12 @@ end
         
 
 
-        function CenterPosition = Get_ElementCenter(Element)
-        
-        CenterPosition  = mean(Element(:,17:19));
-  
-        end
-        
+%         function CenterPosition = Get_ElementCenter(Element)
+%         
+%         CenterPosition  = mean(Element(:,17:19));
+%   
+%         end
+%         
         function Element = SingleElement(Height,Width,no_sub_x,no_sub_y,elemNum)
             
         Height = Height/no_sub_y;

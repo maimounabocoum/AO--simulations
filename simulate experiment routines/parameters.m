@@ -43,11 +43,11 @@ param.Activated_FieldII =  1 ; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-50 0]/1000;% [-12.7 12.7]/1000; % in m
+    param.Xrange = [-10 10]/1000;% [-12.7 12.7]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [0 40]/1000; % in m
 
-    param.Nx = 128;
+    param.Nx = 60;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshure Nz >=1

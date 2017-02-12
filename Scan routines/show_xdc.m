@@ -17,7 +17,7 @@ surf(x,y,z,c)
 
 end
 hold on
-plot(Z)
+
 %Put som axis legends on
 Hc = colorbar;
 view(3)

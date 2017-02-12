@@ -4,59 +4,50 @@ classdef Phantom
     
     properties
         %% original image
-        x % axis in pixels
-        y % y axis in pixels
-        I % image
+        Positions
+        SizeTumors
+        Types
  
      end
     
     methods
-        function obj = Phantom(varargin)
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %% initialization of input variables %
+        
+        function obj = Phantom(Positions,SizeTumors,Types)
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-          if isempty(find(nargin == 1:4, 1))
-              WindowSize = [70,40]*1e-3;
-              Position = WindowSize/2;
-              SizeTumors = WindowSize/50;
-              Type =       'gaussian' ;
-          end
-           
-           if nargin == 1
-              WindowSize = varargin{1};
-              Position = WindowSize/2;
-              SizeTumors = WindowSize/10;
-              Type =       'gaussian' ;
-           end
-            %WindowSize,Position,SizeTumors,Type
-            
-           if nargin ==4
-              WindowSize = varargin{1}; 
-              Position =   varargin{2}; 
-              SizeTumors = varargin{3}; 
-              Type =       varargin{4}; 
-           end
-           
+                        %% initialization of input variables %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+              obj.Positions =   Positions; 
+              obj.SizeTumors  = SizeTumors; 
+              obj.Types     =    Types; 
+
+   
+        end
+        
+        function I_abs = CalculatePhantom(obj,x,y,z)
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                        %% initialization of input variables %
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         [X,Y,Z] = meshgrid(x,y,z);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %% Phatom construction in m %
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-           obj.x = linspace(0,WindowSize(1),500);
-           obj.y = linspace(0,WindowSize(end),500);    
-           [X,Y] = meshgrid(obj.x,obj.y);
-           obj.I = sparse(length(obj.y),length(obj.x));
+           I_abs = ones(size(X,1),size(X,2),size(X,3));
            
-               for i_tumor = 1:size(Position,1)
-                   sizeTumor = SizeTumors(i_tumor);
-                   x_c = Position(i_tumor,1);
-                   y_c = Position(i_tumor,end);
-
-                       switch Type
+               for i_tumor = 1:size(obj.Positions,1)
+                   x_c = obj.Positions(i_tumor,1) ;
+                   y_c = obj.Positions(i_tumor,2) ;
+                   z_c = obj.Positions(i_tumor,3) ;
+                   sizeTumor = obj.SizeTumors(i_tumor);
+                       switch obj.Types{i_tumor}
                            case 'gaussian'
-                               obj.I = exp(-((X-x_c).^2+(Y-y_c).^2)/sizeTumor^2)+obj.I;
+                               I_abs = -exp(-((X-x_c).^2+(Y-y_c).^2+(Z-z_c).^2)/sizeTumor^2) + I_abs ;
                            case 'square'
-                               obj.I = (abs(X-x_c)<= sizeTumor & (abs(Y-y_c) <= sizeTumor) ) +obj.I;
+                               I_abs = -(abs(X-x_c)<= sizeTumor & (abs(Y-y_c) <= sizeTumor) & (abs(Z-z_c) <= sizeTumor)  ) + I_abs ;
                        end
                end
+               
+               I_abs = I_abs(:)';
            
            
            

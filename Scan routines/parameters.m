@@ -12,8 +12,7 @@ param.lambda = param.c/param.f0; % Wavelength [m]
 param.element_height= 6/1000; % Height of element [m]
 param.width = 0.2/1000; % Width of element [m]
 param.kerf= 0; % Distance between transducer elements [m]
-param.N_elements = 192;%128; % Number of elements
-%param.ActiveList = 50:5:128 ;
+ param.N_elements = 192 ;%128; % Number of elements
 param.Rfocus = 35/1000; % Elevation focus
 param.attenuation = 0;         % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -24,12 +23,13 @@ param.farfield = param.width^2/(4*param.lambda);
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OF'; 
+param.FOC_type = 'OP'; 
 param.focus = 40/1000; % Initial electronic focus [m,m,m]
-
+param.angles = 0 ; %(-20:2:20)*pi/180 ;
+ 
 % waist of diffuse IR laser beam
 param.w0 = 10/1000 ; % in m 
-% param.center = [10 10 10]/1000 ; specify the center of the gaussian beam.
+% param.center = [10 0 10]/1000 ; specify the center of the gaussian beam.
 % if this value is commented, the beam is by defaukt center on the
 % simulation bow
 
@@ -45,7 +45,7 @@ param.Activated_FieldII =  1; % 0 to generate field by yourself
 
     param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [35 50]/1000; % in m
+    param.Zrange = [25 40]/1000; % in m
 
     param.Nx = 50;
     param.Ny = 1;
@@ -53,6 +53,10 @@ param.Activated_FieldII =  1; % 0 to generate field by yourself
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 
+    %% abosbers positions :
+    param.phantom.Positions = [0 0 30 ; 0 0 50]/1000; % [x1 y1 z1; x2 y2 z2 ....] aborbant position list
+    param.phantom.Sizes     = [100 ; 100]/1000;      % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'gaussian','gaussian'} ; % available types : square, gaussian
 
 %% Probe defintion :
 % Set the sampling frequency

@@ -25,7 +25,7 @@ tic
 % Set a delay law for the probe
  
    % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',param.focus,param.c);
-    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',40*pi/180,param.c);
+    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*pi/180,param.c);
    % CurrentExperiement.MyProbe.ShowDelay();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
