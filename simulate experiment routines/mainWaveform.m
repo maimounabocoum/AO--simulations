@@ -100,7 +100,7 @@ tic
 %h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZ'); % XZ : plan (x,z)
+CurrentExperiement.MySimulationBox.ShowMaxField('XZt'); % XZ : plan (x,z)
 min(CurrentExperiement.MySimulationBox.time)*1e6
 max(CurrentExperiement.MySimulationBox.time)*1e6
 %SimulationBox.ShowMaxField('YZ');  
