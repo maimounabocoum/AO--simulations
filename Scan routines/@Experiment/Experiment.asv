@@ -321,14 +321,20 @@ classdef Experiment
             % interpolation on simulation box 
             dz_box = obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1) ;
             dz_field = obj.param.c/obj.param.fs ;
-            Nint = ceil(dz_box/dz_field); % smoothing parameter which model PD averaging effect
-     
-            obj.AOSignal(:,n) = interp1(obj.MySimulationBox.time*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
+            Nint = ceil(dz_box/dz_field);
+            
+            M = ones(length(obj.MySimulationBox.z),length(line));
+            
+            
+%             for i = 1:obj.MySimulationBox.z
+%                 z = obj.MySimulationBox.time*obj.param.c ;
+%             obj.AOSignal(:,n) =  meshgrid(z(obj.MySimulationBox.z(i)),obj.MySimulationBox.z) ;
+%             end
+            
+            obj.AOSignal(:,n) = interp1(obj.MySimulationBox.time*obj.param.c,line,obj.MySimulationBox.z,'square',0);
             
             figure;
             plot(obj.MySimulationBox.time*obj.param.c*1e3,line)
-            hold on 
-            plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g')
             hold on 
             plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'r')
             

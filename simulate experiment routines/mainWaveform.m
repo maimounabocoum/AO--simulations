@@ -24,8 +24,8 @@ tic
 
 % Set a delay law for the probe
  
-   % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',param.focus,param.c);
-    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*pi/180,param.c);
+    CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('focus',param.focus,param.c);
+   % CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',0*pi/180,param.c);
    % CurrentExperiement.MyProbe.ShowDelay();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -100,7 +100,8 @@ tic
 %h = h/max(h(:));
 CurrentExperiement.MySimulationBox = CurrentExperiement.MySimulationBox.Get_SimulationResults(t,h,param.fs);
 %SimulationBox.SizeBox()
-CurrentExperiement.MySimulationBox.ShowMaxField('XZt'); % XZ : plan (x,z)
+%CurrentExperiement.MySimulationBox.ShowMaxField('XZt',100); % XZ : plan (x,z)
+CurrentExperiement.ShowAcquisitionLine(); 
 min(CurrentExperiement.MySimulationBox.time)*1e6
 max(CurrentExperiement.MySimulationBox.time)*1e6
 %SimulationBox.ShowMaxField('YZ');  

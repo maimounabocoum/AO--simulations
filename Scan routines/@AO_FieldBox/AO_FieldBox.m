@@ -98,18 +98,19 @@ classdef AO_FieldBox
             
             switch plane
                 case 'XZt'
-            c_max = max(Field_max(:).^2);  
+
             set(FigHandle,'name','(XZ) maximum field values');
-            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);          
+            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
+            
             for i = 1:5:size(obj.Field,1) % loop over time
                 
                 imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
-                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s'])
-                caxis([0 c_max/30])
+                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s']) 
                 colorbar
                 drawnow
+                
             end
                   
                

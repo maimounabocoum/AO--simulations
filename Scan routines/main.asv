@@ -14,30 +14,31 @@ CurrentExperiement = Experiment(param);
 
 % initial excitation field :
 
-    Noc = 1; % number of optical cycles
+    Noc = 8; % number of optical cycles
     t_excitation = (0:1/param.fs:Noc*1.5/param.f0);
     excitation =  sin(2*pi*param.f0*t_excitation);
     excitation = excitation.*hanning(length(excitation))';
 
     % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
-%CurrentExperiement.ShowPhantom()    
-%  Hf = figure(1);
+CurrentExperiement.ShowPhantom(param.Xrange,param.Yrange,param.Zrange)    
+ % Hf = figure(1);
  tic
 %h = waitbar(0,'Please wait...');
-for n_scan = 5%:CurrentExperiement.Nscan
+for n_scan = 1:CurrentExperiement.Nscan
  %waitbar(n_scan/CurrentExperiement.Nscan)
      CurrentExperiement = CurrentExperiement.CalculateUSfield(excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+     %CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
      
 end
  
 
 
  toc
+ 
 % % option for screening : XY, Xt , XZt
-%CurrentExperiement.ShowAcquisitionLine(); 
+     CurrentExperiement.ShowAcquisitionLine(); 
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
