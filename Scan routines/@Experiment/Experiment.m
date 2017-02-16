@@ -104,7 +104,7 @@ classdef Experiment
             
         end
             
-        function obj = CalculateUSfield(obj,excitation,n_scan)
+        function obj = CalculateUSfield(obj,t_excitation,excitation,n_scan)
             
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan)) ;
@@ -114,6 +114,8 @@ classdef Experiment
                           obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
 
             if obj.param.Activated_FieldII == 1
+            % in field, the excitation fieldII should be real
+                excitation = real(excitation) ;
             % define delay law for the probe :
             switch obj.param.FOC_type
                 case 'OF'
@@ -140,28 +142,40 @@ classdef Experiment
             % write field results to the current box
             obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
             
+            xdc_free(Probe);
             else
-
-            
-            [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-            Field = obj.GaussianPulse(X,Y,Z);
-            
+                
+           obj.MySimulationBox.time = obj.param.Zrange(1)/(obj.param.c):(1/obj.param.fs):...
+                                      max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation) ;
+           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+           size(obj.MySimulationBox.time)
+           T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
+           
+           ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+           
+           switch obj.param.FOC_type
+                case 'OF'
+            Field = obj.GaussianPulse(X,Y,Z);   
             % F : field to match dimension issued by Field II
             F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
-            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
-            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-
-
-             F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
+            F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
                     exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
-
             obj.MySimulationBox.Field = real(F) ;
+               case 'OP'
+            XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
+                       % F : field to match dimension issued by Field II
+            F  =   exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
+                    exp(-(T - ZZ/(obj.param.c)).^2/(1/(obj.param.f0))^2)...
+                   .*exp(-1i*(2*pi/obj.param.lambda)*XX/tan(obj.ScanParam(n_scan)));
+            obj.MySimulationBox.Field = real(F) ;  
+                   
+           end
 
             %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
             
             end
             
-            xdc_free(Probe);
+            
             
         end 
         %same function to use with parfor
@@ -283,7 +297,10 @@ classdef Experiment
         function [] = ShowPhantom(obj)
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             Transmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-
+             % check if dimension agree
+             if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+                 Transmission = Transmission';
+             end
              figure;
              imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,Transmission)
              title('diffused ligth transmission profile')
@@ -297,8 +314,8 @@ classdef Experiment
             % full profile calculated here to optimize loop Scan calulation :                   
             LightTransmission = repmat(obj.DiffuseLightTransmission,length(obj.MySimulationBox.time),1)  ;
             
-            MarkedPhotons = (obj.MySimulationBox.Field).^2 ;%.*LightTransmission ;
-            %MarkedPhotons = (obj.MySimulationBox.Field).^2.*LightTransmission ;
+           % MarkedPhotons = (obj.MySimulationBox.Field).^2;
+            MarkedPhotons = (obj.MySimulationBox.Field).^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
 
 %             figure;
@@ -314,9 +331,6 @@ classdef Experiment
 %             drawnow
 %             end
 
-            sumY = sum(sum(MarkedPhotons,1),2);
-            sumY = (squeeze(sumY));
-            %line = max(sumY,[],1) ;
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
             dz_box = obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1) ;
@@ -325,12 +339,12 @@ classdef Experiment
      
             obj.AOSignal(:,n) = interp1(obj.MySimulationBox.time*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
             
-            figure;
-            plot(obj.MySimulationBox.time*obj.param.c*1e3,line)
-            hold on 
-            plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g')
-            hold on 
-            plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'r')
+%             figure;
+%             plot(obj.MySimulationBox.time*obj.param.c*1e3,line)
+%             hold on 
+%             plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g')
+%             hold on 
+%             plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'r')
             
 
           

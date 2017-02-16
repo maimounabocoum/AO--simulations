@@ -23,12 +23,12 @@ param.farfield = param.width^2/(4*param.lambda);
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OF'; 
+param.FOC_type = 'OP'; 
 param.focus = 35/1000; % Initial electronic focus [m,m,m]
-param.angles = (-20:4:20)*pi/180 ;
+param.angles = (-80:4:80)*pi/180 ;
  
 % waist of diffuse IR laser beam
-param.w0 = 10/1000 ; % in m 
+param.w0 = 5/1000 ; % in m 
 % param.center = [10 0 10]/1000 ; specify the center of the gaussian beam.
 % if this value is commented, the beam is by defaukt center on the
 % simulation bow
@@ -43,20 +43,20 @@ param.Activated_FieldII =  1; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-5 5]/1000; % in m
+    param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [30 40]/1000; % in m
 
-    param.Nx = 10;
+    param.Nx = 40;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 
     %% abosbers positions :
-    param.phantom.Positions = [0 0 30 ; 0 0 35]/1000; % [x1 y1 z1; x2 y2 z2 ....] aborbant position list
-    param.phantom.Sizes     = [1 ; 1]/1000;      % dimension in all direction [dim ; dim ; ...]
-    param.phantom.Types = {'gaussian','gaussian'} ; % available types : square, gaussian
+    param.phantom.Positions = [0 0 35]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [1]/1000;      % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'gaussian'} ; % available types exemple : { 'square', 'gaussian', ...}
 
 %% Probe defintion :
 % Set the sampling frequency

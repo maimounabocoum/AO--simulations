@@ -102,11 +102,12 @@ classdef AO_FieldBox
             set(FigHandle,'name','(XZ) maximum field values');
             Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
             
-            for i = 1:5:size(obj.Field,1) % loop over time
-                
+            for i = 1:5:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+  
                 imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
+                ylim([min(obj.z*1e3) max(obj.z*1e3)])
                 title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s']) 
                 colorbar
                 drawnow

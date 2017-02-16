@@ -108,7 +108,7 @@ max(CurrentExperiement.MySimulationBox.time)*1e6
 %SimulationBox.ShowFieldPropagation();
 %CurrentExperiement.ShowAcquisitionLine(); 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 xdc_free(Probe);
