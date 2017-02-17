@@ -148,7 +148,7 @@ classdef Experiment
            obj.MySimulationBox.time = (obj.param.Zrange(1)/(obj.param.c)):(1/obj.param.fs):...
                                       (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
                                  
-           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+           [X,Y,Z] = meshgrid(obj.MySimulationBox.x-obj.ScanParam(n_scan),obj.MySimulationBox.y,obj.MySimulationBox.z);
 
            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
            
@@ -156,7 +156,7 @@ classdef Experiment
            
            switch obj.param.FOC_type
                 case 'OF'
-            [Field,phi]= obj.GaussianPulse(X-obj.ScanParam(n_scan),Y,Z);   
+            [Field,phi]= obj.GaussianPulse(X,Y,Z);   
             % F : field to match dimension issued by Field II
             PHI = repmat(phi(:)',length(obj.MySimulationBox.time) , 1 );
             FIELD =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
@@ -168,7 +168,7 @@ classdef Experiment
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
                        XI = (XX*sin(obj.ScanParam(n_scan))+ZZ*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
-            F = interp1(t_excitation,excitation,T - XI/(obj.param.c) + max(t_excitation)/2,'linear',0)  ;         
+            F = interp1(t_excitation,excitation,T - XI/(obj.param.c),'linear',0)  ;         
 
             obj.MySimulationBox.Field = real(F) ;  
                    

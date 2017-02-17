@@ -103,13 +103,13 @@ classdef AO_FieldBox
             Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
-            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            for i = 1%1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
                 imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
-                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1e6),'\mu s']) 
+                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1540*1e3),'\mu s']) 
                 colorbar
                 drawnow
                 
