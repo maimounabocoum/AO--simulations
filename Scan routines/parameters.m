@@ -23,19 +23,19 @@ param.farfield = param.width^2/(4*param.lambda);
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OP'; 
+param.FOC_type = 'OF'; 
 param.focus = 35/1000; % Initial electronic focus [m,m,m]
-param.angles = (-80:4:80)*pi/180 ;
+param.angles = (-10:1:10)*pi/180 ;
  
 % waist of diffuse IR laser beam
 param.w0 = 5/1000 ; % in m 
-% param.center = [10 0 10]/1000 ; specify the center of the gaussian beam.
-% if this value is commented, the beam is by defaukt center on the
-% simulation bow
+param.center = [0 0 35]/1000 ;    %  specify the center of the gaussian beam.
+                                    % if this value is commented, 
+                                    %the beam is by defaukt center on the
+                                    %simulation box
 
-% temporal field 
 
-param.Activated_FieldII =  1; % 0 to generate field by yourself
+param.Activated_FieldII =  0; % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -47,7 +47,7 @@ param.Activated_FieldII =  1; % 0 to generate field by yourself
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [30 40]/1000; % in m
 
-    param.Nx = 40;
+    param.Nx = 30;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshures Nz >=1

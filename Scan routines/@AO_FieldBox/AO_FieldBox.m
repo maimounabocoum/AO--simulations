@@ -102,7 +102,8 @@ classdef AO_FieldBox
             set(FigHandle,'name','(XZ) maximum field values');
             Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
             
-            for i = 1:5:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            Nskip = max(1,floor(size(obj.Field,1)/100)) ;
+            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
                 imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')

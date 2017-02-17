@@ -28,14 +28,14 @@ CurrentExperiement = Experiment(param);
     % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 %CurrentExperiement.ShowPhantom()    
-  Hf = figure(1);
+ Hf = figure(1);
  tic
 %h = waitbar(0,'Please wait...');
-for n_scan = 1%:CurrentExperiement.Nscan
+for n_scan = 1:CurrentExperiement.Nscan
 %waitbar(n_scan/CurrentExperiement.Nscan)
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
      
 end
  
@@ -43,7 +43,7 @@ end
 
  toc
 % % option for screening : XY, Xt , XZt
-%CurrentExperiement.ShowAcquisitionLine(); 
+ CurrentExperiement.ShowAcquisitionLine(); 
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% End Program - Free memory

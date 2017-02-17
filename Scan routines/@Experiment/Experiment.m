@@ -115,7 +115,7 @@ classdef Experiment
 
             if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
-                excitation = real(excitation) ;
+
             % define delay law for the probe :
             switch obj.param.FOC_type
                 case 'OF'
@@ -147,26 +147,34 @@ classdef Experiment
                 
            obj.MySimulationBox.time = obj.param.Zrange(1)/(obj.param.c):(1/obj.param.fs):...
                                       max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation) ;
-           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+           [X,Y,Z] = meshgrid(obj.MySimulationBox.x-obj.ScanParam(n_scan),obj.MySimulationBox.y,obj.MySimulationBox.z);
            size(obj.MySimulationBox.time)
            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
            
-           ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+           
            
            switch obj.param.FOC_type
                 case 'OF'
-            Field = obj.GaussianPulse(X,Y,Z);   
+            [Field,phi]= obj.GaussianPulse(X,Y,Z);   
             % F : field to match dimension issued by Field II
-            F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
-            F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
-                    exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
-            obj.MySimulationBox.Field = real(F) ;
+            PHI = repmat(phi(:)',length(obj.MySimulationBox.time) , 1 );
+            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+            FIELD =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
+            F = interp1(t_excitation,excitation,T - PHI/(2*pi*obj.param.f0),'linear',0)  ;  
+            %F = interp1(t_excitation,excitation,T - ZZ/(obj.param.c),'linear',0)  ;  
+            %F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
+            %        exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
+
+            obj.MySimulationBox.Field = real(F.*FIELD) ;
                case 'OP'
+            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
-            F  =   exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
-                    exp(-(T - ZZ/(obj.param.c)).^2/(1/(obj.param.f0))^2)...
-                   .*exp(-1i*(2*pi/obj.param.lambda)*XX/tan(obj.ScanParam(n_scan)));
+                       XI = (XX*sin(obj.ScanParam(n_scan))+ZZ*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
+            F = interp1(t_excitation,excitation,T- XI/(obj.param.c),'linear',0)  ;         
+          %  F  =   exp(1i*2*pi*obj.param.f0*(T- XI/(obj.param.c))).*...
+          %           exp(-(T - XI/(obj.param.c)).^2/(1/(obj.param.f0))^2);%...
+
             obj.MySimulationBox.Field = real(F) ;  
                    
            end
@@ -243,38 +251,40 @@ classdef Experiment
             
         end
         
-        function E = GaussianPulse(obj,X,Y,Z)
+        function [E,PHI] = GaussianPulse(obj,X,Y,Z)
             
             z_x = obj.param.focus;
-           % z_y = obj.param.Rfocus;
+            z_y = obj.param.Rfocus;
            
             Z_x = Z - z_x ;
-            %Z_y = Z - obj.z_y ;
+            Z_y = Z - z_y ;
             
             w_xi = obj.param.N_elements*obj.param.width/2;
-           % w_yi = obj.param.element_height/2;
+            w_yi = obj.param.element_height/2;
             
             lambda = obj.param.c/obj.param.f0;
             
              k = 2*pi/lambda ; 
             
             delta_X = w_xi^4 - 4*(z_x)^2*lambda^2/pi^2;
-            %delta_Y = w_yi^4 - 4*(obj.param.Rfocus)^2*lambda^2/pi^2;
+            delta_Y = w_yi^4 - 4*(obj.param.Rfocus)^2*lambda^2/pi^2;
             
             w0_x = (w_xi^2 + sqrt(delta_X))/(2);
-            %w0_y = (w_yi^2 + sqrt(delta_Y))/(2);
+            w0_y = (w_yi^2 + sqrt(delta_Y))/(2);
             
             Zr_x = pi*(w0_x)^2/lambda;
-            %Zr_y = pi*(w0_y)^2/lambda;
+            Zr_y = pi*(w0_y)^2/lambda;
                
             W_x = w0_x*sqrt(1+Z_x .^2/(Zr_x)^2);
-            %W_y = w0_y*sqrt(1+Z_y.^2/(Zr_y)^2);
+            W_y = w0_y*sqrt(1+Z_y.^2/(Zr_y)^2);
             
             XI_x = atan(Z_x/Zr_x);
             R_x = Z_x  + (Zr_x).^2./Z_x ;
-            %*exp(-1i*obj.k*Z_x)
-            E = (w0_x./W_x).*exp(-X.^2./W_x.^2)...
-                .*exp(-1i*k.*Z_x./(2*R_x)).*exp(1i*XI_x);
+
+            E = (w0_x./W_x).*exp(-X.^2./W_x.^2);
+                
+            % propagation phae + guy phase + sperical wave phase contributions : 
+            PHI = k.*Z - XI_x +k*X.^2./(2*R_x);
             
         
             
@@ -335,17 +345,21 @@ classdef Experiment
             % interpolation on simulation box 
             dz_box = obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1) ;
             dz_field = obj.param.c/obj.param.fs ;
-            Nint = ceil(dz_box/dz_field); % smoothing parameter which model PD averaging effect
+            Nint = ceil(dz_box/dz_field); % smoothing parameter which model PhotoDiode?? averaging effect
      
             obj.AOSignal(:,n) = interp1(obj.MySimulationBox.time*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
-            
+%             
 %             figure;
-%             plot(obj.MySimulationBox.time*obj.param.c*1e3,line)
+%             plot(obj.MySimulationBox.time*obj.param.c*1e3,line,'marker','o')
 %             hold on 
-%             plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g')
+%             plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g','linewidth',3)
 %             hold on 
-%             plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'r')
-            
+%             plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'--r','linewidth',3)
+%             legend({'raw signal','smoothed','interpolated'}) ;
+%             title('tagged photons')
+%             xlabel('z = c x t (mm)')
+%             ylabel('a.u')
+%             
 
           
            
