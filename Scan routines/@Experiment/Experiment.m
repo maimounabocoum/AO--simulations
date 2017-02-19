@@ -99,7 +99,7 @@ classdef Experiment
            
            % data Result Size initialization 
            
-           obj.AOSignal = sparse(obj.param.Nz,obj.Nscan) ;
+           obj.AOSignal = zeros(obj.param.Nz,obj.Nscan) ;
                       
             
         end
@@ -140,13 +140,26 @@ classdef Experiment
             [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
 
             % write field results to the current box
-            obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t - max(t_excitation)/2,h,obj.param.fs);
-            
+            tmin = t - max(t_excitation)/2;
+            obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
             xdc_free(Probe);
             else
                 
-           obj.MySimulationBox.time = (obj.param.Zrange(1)/(obj.param.c)):(1/obj.param.fs):...
-                                      (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+          switch obj.param.FOC_type
+                case 'OF'
+           tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
+           tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+              case 'OP'
+           % with of simulation BOX
+           DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
+
+           % taking into account additional propagatoion du to tilt scan
+           % angle
+           tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) + DZ0)/(obj.param.c) ;
+           tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+          end
+           
+           obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
                                  
            [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
 
@@ -160,6 +173,7 @@ classdef Experiment
             % F : field to match dimension issued by Field II
             PHI = repmat(phi(:)',length(obj.MySimulationBox.time) , 1 );
             FIELD =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
+            
             F = interp1(t_excitation,excitation,T - PHI/(2*pi*obj.param.f0)+ max(t_excitation)/2,'linear',0)  ;  
 
             obj.MySimulationBox.Field = real(F.*FIELD) ;
@@ -167,8 +181,9 @@ classdef Experiment
             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
-                       XI = (XX*sin(obj.ScanParam(n_scan))+ZZ*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
-            F = interp1(t_excitation,excitation,T - XI/(obj.param.c) + max(t_excitation)/2,'linear',0)  ;         
+            XI = (XX*sin(obj.ScanParam(n_scan))+ ZZ*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
+            %+ max(t_excitation)/2
+            F = interp1(t_excitation,excitation,T - XI/(obj.param.c),'linear',0)  ;         
 
             obj.MySimulationBox.Field = real(F) ;  
                    
@@ -300,7 +315,7 @@ classdef Experiment
           
         end
         
-        function [] = ShowPhantom(obj)
+        function [Transmission] = ShowPhantom(obj)
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             Transmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
              % check if dimension agree

@@ -70,12 +70,15 @@ classdef Phantom
             end
         end
         
-        function [] = ShowTumor(obj)
+        function [] = ShowTumor(obj,x,z)
+            
+           I_abs = obj.CalculatePhantom(x,0,z) ;
+           I_abs = squeeze(reshape(I_abs,[1,length(x),length(z)]));
            figure;
-           imagesc(obj.x*1e3,obj.y*1e3,obj.I)
+           imagesc(x*1e3,z*1e3,I_abs)
            xlabel('x (mm)')
-           ylabel('y (mm) : US probe position')
-           title(['Absorbption profile of Phantom'])
+           ylabel('z (mm)')
+           title('Absorbption profile of Phantom')
            colorbar
         end
 

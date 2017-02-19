@@ -97,19 +97,20 @@ classdef AO_FieldBox
             Tmax = reshape(Tmax,[Ny,Nx,Nz]);
             
             switch plane
+                
                 case 'XZt'
 
-            set(FigHandle,'name','(XZ) maximum field values');
+            set(FigHandle,'name','(XZ) maximum field (t) values');
             Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
-            for i = 1%1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
                 imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
-                title(['P(t)^ on 2XZ, t= ',num2str(obj.time(i)*1540*1e3),'\mu s']) 
+                title(['P(t)^ on XZ, z(t)= ',num2str(obj.time(i)*1540*1e3),'mm']) 
                 colorbar
                 drawnow
                 
@@ -139,26 +140,6 @@ classdef AO_FieldBox
             colorbar
             drawnow
             
-                 case 'Xt'
-                    % selection of the interpolation plane:
-                if (Ny == 1)
-                    I_plane = 1;
-                else
-                    prompt = {'Enter Y coordinate (program will look for closest value):'};
-                    dlg_title = 'Y plane select (mm)';
-                    num_lines = 1;
-                    answer = inputdlg(prompt,dlg_title,num_lines,{'0'});
-                    V_plane = str2double(answer{1})*1e-3;                    
-                    I_plane = Closest(V_plane,obj.y); 
-                end
-
-            set(FigHandle,'name','(XZ) maximum field values')
-            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Tmax(I_plane,:,:))');
-            shading interp
-            xlabel('x (mm)')
-            ylabel('z (mm)')
-            title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
-            colorbar
            
                case 'YZ'
                    if (Nx == 1)

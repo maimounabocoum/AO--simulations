@@ -12,7 +12,7 @@ param.lambda = param.c/param.f0; % Wavelength [m]
 param.element_height= 6/1000; % Height of element [m]
 param.width = 0.2/1000; % Width of element [m]
 param.kerf= 0; % Distance between transducer elements [m]
-param.N_elements = 192 ;%128; % Number of elements
+param.N_elements = 128 ;%128; % Number of elements
 param.Rfocus = 35/1000; % Elevation focus
 param.attenuation = 0;         % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -25,7 +25,7 @@ param.farfield = param.width^2/(4*param.lambda);
 % OS : 'Structured Waves ' 
 param.FOC_type = 'OP'; 
 param.focus = 35/1000; % Initial electronic focus [m,m,m]
-param.angles = (-10:1:10)*pi/180 ;
+param.angles = (-90:1:90)*pi/180 ;
  
 % waist of diffuse IR laser beam
 param.w0 = 5/1000 ; % in m 
@@ -35,7 +35,7 @@ param.center = [0 0 35]/1000 ;    %  specify the center of the gaussian beam.
                                     %simulation box
 
 
-param.Activated_FieldII = 1; % 0 to generate field by yourself
+param.Activated_FieldII = 0; % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -43,7 +43,7 @@ param.Activated_FieldII = 1; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-10 10]/1000; % in m
+    param.Xrange = [-13 13]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [30 40]/1000; % in m
 
