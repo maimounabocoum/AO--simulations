@@ -110,7 +110,7 @@ classdef AO_FieldBox
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
-                title(['P(t)^ on XZ, z(t)= ',num2str(obj.time(i)*1540*1e3),'mm']) 
+                title(['P(t)^ on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
                 colorbar
                 drawnow
                 

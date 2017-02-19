@@ -149,13 +149,18 @@ classdef Experiment
                 case 'OF'
            tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
            tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
-              case 'OP'
-           % with of simulation BOX
+               case 'OP'
+           % width of simulation BOX
+           if obj.ScanParam(n_scan) <= 0
            DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
-
+           else
+           DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
+           end
            % taking into account additional propagatoion du to tilt scan
-           % angle
-           tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) + DZ0)/(obj.param.c) ;
+
+           % angle           
+           tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
+           %tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) )/(obj.param.c) ;
            tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
           end
            
@@ -164,9 +169,7 @@ classdef Experiment
            [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
 
            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
-           
-           
-           
+   
            switch obj.param.FOC_type
                 case 'OF'
             [Field,phi]= obj.GaussianPulse(X-obj.ScanParam(n_scan),Y,Z);   
@@ -181,9 +184,16 @@ classdef Experiment
             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
-            XI = (XX*sin(obj.ScanParam(n_scan))+ ZZ*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
+            % setting the rotation inveration to center of the simulation
+            % box
+            XI = (XX*sin(obj.ScanParam(n_scan))+ (ZZ- mean(obj.param.Zrange))*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
+            %figure;
+            %imagesc(squeeze( reshape(XI(1,:),[obj.param.Ny,obj.param.Nx,obj.param.Nz]) ) )
             %+ max(t_excitation)/2
-            F = interp1(t_excitation,excitation,T - XI/(obj.param.c),'linear',0)  ;         
+            
+            %F = imrotate(A,obj.ScanParam(n_scan)) ;
+            
+            F = interp1(t_excitation,excitation,(T-mean(obj.param.Zrange)/(obj.param.c)) - XI/(obj.param.c),'linear',0)  ;         
 
             obj.MySimulationBox.Field = real(F) ;  
                    
@@ -315,18 +325,48 @@ classdef Experiment
           
         end
         
-        function [Transmission] = ShowPhantom(obj)
+        function [Transmission] = ShowPhantom(obj,varargin)
+            
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             Transmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
              % check if dimension agree
              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
                  Transmission = Transmission';
              end
+             
              figure;
+             if nargin == 2 
+                 theta = 180*varargin{1}/pi ;
+                 subplot(121)
+                 imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,Transmission)
+                 xlabel('x(mm)')
+                 ylabel('z(mm)')
+                 title('diffused light transmission profile')
+                 colorbar
+                 % interpolate over refined gris before performing
+                 % R-transform :
+                 dz = (obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1)); % sampling 
+                 x = obj.MySimulationBox.x(1):dz:obj.MySimulationBox.x(end);
+
+                 T = interp1(obj.MySimulationBox.x,Transmission',x,'linear',0);
+                 [R,zp] = radon(T',theta);
+                 subplot(122)
+                 imagesc(theta,zp*dz*1e3 + mean(obj.MySimulationBox.z)*1e3,R)
+                 ylim(1e3*[min(obj.MySimulationBox.z) max(obj.MySimulationBox.z)])
+                 xlabel('\theta(°)')
+                 ylabel('z(mm)')
+                 title('Radon transform')
+                 colorbar
+            else
+
              imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,Transmission)
-             title('diffused ligth transmission profile')
+             xlabel('\theta (°)')
+             ylabel('z (mm)')
+             title('diffused light transmission profile')
              colorbar
-             drawnow
+             
+            end
+                
         end
         
         function obj = GetAcquisitionLine(obj,n)
@@ -358,7 +398,7 @@ classdef Experiment
             dz_field = obj.param.c/obj.param.fs ;
             Nint = ceil(dz_box/dz_field); % smoothing parameter which model PhotoDiode?? averaging effect
      
-            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
+            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time - 0*obj.MySimulationBox.time(1))*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
             
 %             figure;
 %             plot(obj.MySimulationBox.time*obj.param.c*1e3,line,'marker','o')
