@@ -51,14 +51,14 @@ end
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%  if param.FOC_type == 'OP'
-%  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
-%  x_phantom = CurrentExperiement.MySimulationBox.x ;
-%  y_phantom = CurrentExperiement.MySimulationBox.y ;
-%  MyTansmission = CurrentExperiement.ShowPhantom() ;
-%  save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','MyTansmission') 
-%  save('..\radon inversion\saved images\Simulation.mat','MyImage')
-%  end
+ if param.FOC_type == 'OP'
+ MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
+ x_phantom = CurrentExperiement.MySimulationBox.x ;
+ y_phantom = CurrentExperiement.MySimulationBox.y ;
+ MyTansmission = CurrentExperiement.ShowPhantom() ;
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','MyTansmission') 
+ save('..\radon inversion\saved images\Simulation.mat','MyImage')
+ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End Program - Free memory

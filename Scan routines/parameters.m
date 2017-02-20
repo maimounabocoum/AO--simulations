@@ -25,7 +25,7 @@ param.farfield = param.width^2/(4*param.lambda);
 % OS : 'Structured Waves ' 
 param.FOC_type = 'OP'; 
 param.focus = 35/1000; % Initial electronic focus [m,m,m]
-param.angles = (-45:1:45)*pi/180 ;
+param.angles = (-90:1:90)*pi/180 ;
  
 % waist of diffuse IR laser beam
 param.w0 = 5/1000 ; % in m 
@@ -35,7 +35,7 @@ param.center = [0 0 35]/1000 ;    %  specify the center of the gaussian beam.
                                     %simulation box
 
 
-param.Activated_FieldII = 1; % 0 to generate field by yourself
+param.Activated_FieldII = 0; % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -47,14 +47,14 @@ param.Activated_FieldII = 1; % 0 to generate field by yourself
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [30 40]/1000; % in m
 
-    param.Nx = 50;
+    param.Nx = 150;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 
     %% abosbers positions :
-    param.phantom.Positions = [0 0 35]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [0 0 36]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [1]/1000;      % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian'} ; % available types exemple : { 'square', 'gaussian', ...}
 

@@ -86,7 +86,7 @@ classdef Experiment
                         obj.param.angles = (-45:2:45)*pi/180 ; % default scan angles
                     end
                     
-                    % retreive the total number od scans     
+                    % retreive the total number of scans     
                        obj.Nscan = length(obj.param.angles); 
                        obj.ScanParam = obj.param.angles ;
                        obj.BoolActiveList = true(obj.param.N_elements,obj.Nscan);   

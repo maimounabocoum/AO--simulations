@@ -54,26 +54,18 @@ classdef OP < TF_t
         
         function obj = PhaseCorrection(obj,Fc)
             % linear fit of the phase for each angle :
-           Iy = length(obj.f)/2+1;
-           %Ix = find(abs(obj.theta) == min(abs(obj.theta)));
-           %PHASE = UnwrapPHASE(angle(obj.F_R) ,Ix,Iy);
-           phase  = unwrap( angle( obj.F_R( Iy , : ) ) );
-        for i=1:length(obj.theta)
-           %phase  = unwrap( angle( obj.F_R( abs(obj.f)<Fc , i ) ) );
-           %P = polyfit(obj.f(abs(obj.f) < Fc),phase',1);
-           %obj.Linphase_fit(:,i) = P(1)*obj.f(abs(obj.f)<Fc)+P(2); 
-           %Linphase_fit = smooth(PHASE(Iy,i))*(obj.f)*0.1;
-           %Linphase_fit = phase(i) + phase(i)*(obj.f)*2*pi;
-           Linphase_fit = (-2+0.00005*obj.theta(i).^2)*abs(obj.f);
-        % phase correction 
-         obj.F_R(:,i) = obj.F_R(:,i).*exp(-1i*Linphase_fit');
-           end 
+           Iy = obj.N/2+1;
+           %get phase for position theta  = 0
+           N_theta0 = find(obj.theta == 0);
+           phase0  = repmat( unwrap(angle( obj.F_R( : ,N_theta0  ) )), 1 , length(obj.theta) );
+           obj.F_R = abs(obj.F_R).*exp(1i*phase0) ;
+
             
         end
         
         function [] = Show_R(obj)
            Hf = figure;
-           imagesc(obj.theta,obj.t*1e3,obj.R)
+           imagesc(obj.theta*180/pi,obj.t*1e3,obj.R)
            xlabel('theta (°)')
            ylabel('t (mm)')
            ylim(1e3*obj.L)
@@ -85,24 +77,26 @@ classdef OP < TF_t
         function [] = Show_F_R(obj,Fc)
            figure;
            
-          % subplot(121)
-           
+           subplot(121)
            imagesc(obj.theta*180/pi,2*pi*obj.w(2*pi*abs(obj.w) < Fc),abs(obj.F_R(2*pi*abs(obj.w) < Fc,:)));
            xlabel('theta (°)')
            ylabel('frequency (m^{-1})')
            title('Fourier transform')
-           %subplot(122)
-
+           
+           subplot(122)
            % find central point for the unwrapping correspondind to theta =
            % 0 , and f = 0 :
-%            Iy = length(obj.f)/2+1;
-%            Ix = find(abs(obj.theta) == min(abs(obj.theta)));
-%            PHASE = UnwrapPHASE(angle(obj.F_R) ,Ix,Iy);
-%            imagesc( obj.theta,obj.f(abs(obj.f) < Fc), PHASE( abs(obj.f)<Fc,:) ) ;   
-%            colorbar
-%            xlabel('theta (°)')
-%            ylabel('frequency (m-1)')
-%            title('Measured R-Fourier Transform')
+           Iy = length(obj.f)/2+1;
+           Ix = find(abs(obj.theta) == min(abs(obj.theta)));
+           PHASE = UnwrapPHASE(angle(obj.F_R) ,Ix,Iy);
+           %N_theta0 = find(obj.theta == 0);
+           %PHASE = PHASE - repmat(PHASE(:,N_theta0),1,size(PHASE,2));
+           
+           imagesc( obj.theta,obj.f(abs(obj.f) < Fc), PHASE( abs(obj.f)<Fc,:) ) ;   
+           colorbar
+           xlabel('theta (°)')
+           ylabel('frequency (m-1)')
+           title('Measured R-Fourier Transform')
 %            figure;
 %            subplot(121)
 %            PHASE(Iy,1)
