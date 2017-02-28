@@ -25,7 +25,7 @@ param.farfield = param.width^2/(4*param.lambda);
 % OS : 'Structured Waves ' 
 param.FOC_type = 'OP'; 
 param.focus = 35/1000; % Initial electronic focus [m,m,m]
-param.angles = (-90:1:90)*pi/180 ;
+param.angles = (-180:1:180)*pi/180 ;
  
 % waist of diffuse IR laser beam
 param.w0 = 5/1000 ; % in m 

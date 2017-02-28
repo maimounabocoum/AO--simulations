@@ -23,13 +23,16 @@ load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
 MyImage = MyImage.InitializeFourier(N);
-MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
+%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
 Lobject = 5e-3;
 Fc = 100/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
 
 MyImage.F_R = MyImage.fourier(MyImage.R);
-MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
+%MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
+
+% extract image back to initial size :
+ [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
 
 % initial iteration :
  xsonde = linspace(0,128*0.2e-3,128);
@@ -40,10 +43,11 @@ MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 % constraint in fourier domain 
 C = abs ( MyImage.fourier(MyImage.R) );   
 
-for iteration = 1:10
+for iteration = 1:1
     
   % fourier transform  
  FT_img = fft(img) ;
+ 
  MyImage.F_R = abs(MyImage.F_R).*angle() ;
     
 
