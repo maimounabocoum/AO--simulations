@@ -12,6 +12,10 @@ addpath('..\Scan routines')
                             % Y : monotonic t variable in points
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% simulation traces 
+load('saved images\Simulation.mat');
+load('saved images\SimulationTransmission.mat');
+
 %% experiemental input datas :
 % load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
 % c = 1540 ; % sound velocity in m/s
@@ -21,39 +25,52 @@ addpath('..\Scan routines')
 load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
 
-N = 2^12;
+
+N = 2^10;
 MyImage = MyImage.InitializeFourier(N);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
-Lobject = 5e-3;
-Fc = 100/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+Lobject = 0.8e-3;
+Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+
+
+Original = TF2D(N,Fc);
+ [Xf,Yf] = meshgrid(Original.x,Original.y) ;
+ z_out = ReduceDataSize(MyImage.t,'x',MyImage.t,MyImage.L);
+[X Y] = meshgrid(x_phantom,z_out);
+ MyTansmission = interp2(X,Y, MyTansmission,Xf,Yf,'linear',0);
+ MyTansmissionTF = Original.fourier(MyTansmission) ;
+
 
 MyImage.F_R = MyImage.fourier(MyImage.R);
 %MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 
-% extract image back to initial size :
- [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
+%% image show
 
-% initial iteration :
- xsonde = linspace(0,128*0.2e-3,128);
- xsonde = xsonde - mean(xsonde) ;
- [X,Z]= meshgrid(xsonde,z_out);
- img = zeros(size(X,1),size(X,2),'like',X);
- 
-% constraint in fourier domain 
-C = abs ( MyImage.fourier(MyImage.R) );   
+% representation in polar coordinates:
 
-for iteration = 1:1
-    
-  % fourier transform  
- FT_img = fft(img) ;
- 
- MyImage.F_R = abs(MyImage.F_R).*angle() ;
-    
+figure;
+subplot(1,2,1)
+[THETA, W] = meshgrid(MyImage.theta,MyImage.w(N/2:end));
+[X,Y] = pol2cart(THETA, W);
+surfc(X,Y,abs(MyImage.F_R(N/2:end,:)))
+axis([-Fc Fc -Fc Fc])
+view(0,90)
+shading interp
+xlabel('\omega\it_{x} (\itm^{-1})')
+ylabel('\omega\it_{y} (\itm^{-1})')
+title('Fourier Transform of Radon in polar')
 
-    
-    
-end
+subplot(1,2,2)
+imagesc(Original.kx,Original.ky,abs(MyTansmissionTF))
+axis([-Fc Fc -Fc Fc])
+
+view(0,90)
+shading interp
+xlabel('\omega\it_{x} (\itm^{-1})')
+ylabel('\omega\it_{y} (\itm^{-1})')
+title('Fourier Transform of Radon in polar')
+
 
 
 
