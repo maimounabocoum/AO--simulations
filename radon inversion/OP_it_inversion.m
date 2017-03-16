@@ -25,14 +25,21 @@ load('saved images\SimulationTransmission.mat');
 load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
 
+% imported variables :
+% MyTansmission : phatom to analyse
 
 N = 2^10;
 MyImage = MyImage.InitializeFourier(N);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
-Lobject = 0.8e-3;
-Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+Lobject = 1e-3;
+Fc = 2/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
 
+%%%%%%%%%%%%%% radon transform of image %%%%%%%%%%%%%%%
+ [R z1] = radon(MyTansmission,MyImage.theta*180/pi);
+ zR = z1*(MyImage.t(2) - MyImage.t(1));   
+ MyRadon = interp1(zR,R,MyImage.t,'linear',0);
+ MyRadonTF = MyImage.fourier(MyRadon) ;
 
 Original = TF2D(N,Fc);
  [Xf,Yf] = meshgrid(Original.x,Original.y) ;
@@ -42,7 +49,7 @@ Original = TF2D(N,Fc);
  MyTansmissionTF = Original.fourier(MyTansmission) ;
 
 
-MyImage.F_R = MyImage.fourier(MyImage.R);
+ MyImage.F_R = MyImage.fourier(MyImage.R);
 %MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 
 %% image show
@@ -50,26 +57,39 @@ MyImage.F_R = MyImage.fourier(MyImage.R);
 % representation in polar coordinates:
 
 figure;
-subplot(1,2,1)
-[THETA, W] = meshgrid(MyImage.theta,MyImage.w(N/2:end));
-[X,Y] = pol2cart(THETA, W);
-surfc(X,Y,abs(MyImage.F_R(N/2:end,:)))
-axis([-Fc Fc -Fc Fc])
+
+subplot(1,3,1)
+imagesc(Original.fx,Original.fy,abs(MyTansmissionTF))
+axis(0.5*[-Fc Fc -Fc Fc])
 view(0,90)
 shading interp
 xlabel('\omega\it_{x} (\itm^{-1})')
 ylabel('\omega\it_{y} (\itm^{-1})')
-title('Fourier Transform of Radon in polar')
+title('FT original image')
 
-subplot(1,2,2)
-imagesc(Original.kx,Original.ky,abs(MyTansmissionTF))
-axis([-Fc Fc -Fc Fc])
-
+subplot(1,3,2)
+[THETA, F] = meshgrid(MyImage.theta,MyImage.f(N/2:end));
+[FX,FY] = pol2cart(THETA, F);
+surfc(FX,FY,abs(MyRadonTF(N/2:end,:)))
 view(0,90)
+axis(0.5*[-Fc Fc -Fc Fc])
 shading interp
 xlabel('\omega\it_{x} (\itm^{-1})')
 ylabel('\omega\it_{y} (\itm^{-1})')
-title('Fourier Transform of Radon in polar')
+title('Fourier Transform of Th Radon')
+
+subplot(1,3,3)
+[THETA, F] = meshgrid(MyImage.theta,MyImage.f(N/2:end));
+[FX,FY] = pol2cart(THETA, F);
+surfc(FX,FY,abs(MyImage.F_R(N/2:end,:)))
+view(0,90)
+axis(0.5*[-Fc Fc -Fc Fc])
+shading interp
+xlabel('\omega\it_{x} (\itm^{-1})')
+ylabel('\omega\it_{y} (\itm^{-1})')
+title('Fourier Transform of measured Radon')
+
+
 
 
 

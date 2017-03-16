@@ -35,7 +35,7 @@ Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple m
 MyImage.F_R = MyImage.fourier(MyImage.R) ;
 
 % MyImage = MyImage.PhaseCorrection(Fc);
-%MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
+% MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -114,15 +114,17 @@ title('simulation input phantom')
 
 imvisTF = ObjectInitial.fourier(imvis);
 plot(MyImage.f,abs(imvisTF))
-xlabel('x (mm)')
+xlabel('fx (m-1)')
 ylabel('y (mm)')
+XLIM = get(gca,'xlim');
 
 subplot(224)
 ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
 plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
 title('object fourier transform in the vertical direction')
-xlabel('x (mm)')
+xlabel('fx (m-1)')
 ylabel('y (mm)')
+xlim(XLIM)
 
 
 %rmpath('..\Scan routines')

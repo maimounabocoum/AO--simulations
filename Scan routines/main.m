@@ -18,11 +18,11 @@ CurrentExperiement = Experiment(param);
     Noc = 1; % number of optical cycles
     t_excitation = (0:1/param.fs:Noc*1.5/param.f0);
     excitation =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation))';
-    % figure;
-    % plot(t_excitation*1e6,real(excitation),t_excitation*1e6,excitationRe)
-    % xlabel('time in \mu s')
-    % ylabel('a.u')
-    % title('field excitation')
+%     figure;
+%     plot(t_excitation*1e6,real(excitation))
+%     xlabel('time in \mu s')
+%     ylabel('a.u')
+%     title('field excitation')
     
     % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
@@ -38,7 +38,7 @@ for n_scan = 1:CurrentExperiement.Nscan
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
-     %CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
+%     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
      
 end
  
@@ -56,8 +56,8 @@ end
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  MyTansmission = CurrentExperiement.ShowPhantom() ;
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','MyTansmission') 
- save('..\radon inversion\saved images\Simulation.mat','MyImage')
+ %save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','MyTansmission') 
+ %save('..\radon inversion\saved images\Simulation.mat','MyImage')
  end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
