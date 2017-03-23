@@ -23,7 +23,7 @@ N = 2^12;
 MyImage = MyImage.InitializeFourier(N);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
-Lobject = 1e-3;
+Lobject = 0.1e-3;
 Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
                      % we set it to kc = 100/Lobject
                    
@@ -35,40 +35,25 @@ Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple m
 MyImage.F_R = MyImage.fourier(MyImage.R) ;
 
 % MyImage = MyImage.PhaseCorrection(Fc);
-MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
+% MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
 
-%% image show
-
-% representation in polar coordinates:
-% 
-% figure;
-% [THETA, W] = meshgrid(MyImage.theta,MyImage.w(N/2:end));
-% [X,Y] = pol2cart(THETA, W);
-% surfc(X,Y,log(abs(MyImage.F_R(N/2:end,:))))
-% view(0,90)
-% shading interp
-% xlabel('\omega\it_{x} (\itm^{-1})')
-% ylabel('\omega\it_{y} (\itm^{-1})')
-% title('Fourier Transform of Radon')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filtered inverse fourier transform :
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% filter options : 'ram-lak' (default) , 'cosine'
-FilterType = 'ram-lak';%'ram-lak' 
+% filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
+FilterType = 'cosine';%'ram-lak' 
 
 FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 
 %cos(pi*MyImage.f/(2*974.0260)))'
  FILTER = FILTER'.*ones(1,length(MyImage.theta));
- FILTER(abs(MyImage.f) >= Fc, :) = 0;
-
- %MyImage.F_R(abs(MyImage.f) >= 974.0260, :)  = 0;
+% FILTER(abs(MyImage.f) >= Fc, :) = 0;
 
 %p = bsxfun(@times, p, H); % faster than for-loop
-%   I = MyImage.ifourier(MyImage.F_R);
-I = MyImage.ifourier(MyImage.F_R.*FILTER);
-%  I = real(I) ;
+%I = MyImage.ifourier(MyImage.F_R);
+ I = MyImage.ifourier(MyImage.F_R.*FILTER);
+ I = real(I) ;
 % 
 % figure;
 % imagesc(real(I))
@@ -90,8 +75,7 @@ I = MyImage.ifourier(MyImage.F_R.*FILTER);
         T = X.*sin( MyImage.theta(i) ) + (Z-mean(MyImage.L)).*cos( MyImage.theta(i) ) ;
         projContrib = interp1((z_out-mean(MyImage.L))',I(:,i),T(:),'linear',0);
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
-       
-%        
+          
 %        subplot(121)
 %        imagesc(xsonde*1e3,z_out*1e3,img)
 %        title(['angle',num2str(MyImage.theta(i)*180/pi)])
@@ -101,8 +85,16 @@ I = MyImage.ifourier(MyImage.F_R.*FILTER);
 %        drawnow 
        
   end
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %% plotting the final results and its fourier transform
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ObjectInitial = TF_t(N,Fc);
+ObjectInitial_I = interp1(z_out,MyTansmission,ObjectInitial.t,'linear',0) ;
+imvis = interp1(z_out,I(:,181),ObjectInitial.t,'linear',0) ;
  
-subplot(121)
+subplot(221)
 imagesc(xsonde*1e3,z_out*1e3,img)
 title('resconstructed profile')
 xlabel('x (mm)')
@@ -110,11 +102,30 @@ xlim([min(x_phantom*1e3) max(x_phantom*1e3)])
 ylabel('z (mm)')
 colorbar
 drawnow   
-subplot(122)
-imagesc(x_phantom*1e3,z_out*1e3,MyTansmission)
+subplot(222)
+imagesc(x_phantom*1e3,ObjectInitial.t*1e3,ObjectInitial_I)
 title('simulation input phantom')
+ylim([min(z_out*1e3) max(z_out*1e3)])
 xlabel('x (mm)')
 ylabel('y (mm)')
+
+subplot(223)
+title('simulation input phantom')
+
+imvisTF = ObjectInitial.fourier(imvis);
+plot(MyImage.f,abs(imvisTF))
+xlabel('fx (m-1)')
+ylabel('y (mm)')
+XLIM = get(gca,'xlim');
+
+subplot(224)
+ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
+plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
+title('object fourier transform in the vertical direction')
+xlabel('fx (m-1)')
+ylabel('y (mm)')
+xlim(XLIM)
+
 
 %rmpath('..\Scan routines')
 %rmpath('functions')
