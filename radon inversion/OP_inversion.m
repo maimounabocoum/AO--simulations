@@ -76,13 +76,13 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
         projContrib = interp1((z_out-mean(MyImage.L))',I(:,i),T(:),'linear',0);
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
           
-%        subplot(121)
-%        imagesc(xsonde*1e3,z_out*1e3,img)
-%        title(['angle',num2str(MyImage.theta(i)*180/pi)])
-%        xlabel('x (mm)')
-%        ylabel('z (mm)')
-%        colorbar
-%        drawnow 
+       subplot(121)
+       imagesc(xsonde*1e3,z_out*1e3,img)
+       title(['angle',num2str(MyImage.theta(i)*180/pi)])
+       xlabel('x (mm)')
+       ylabel('z (mm)')
+       colorbar
+       drawnow 
        
   end
   
