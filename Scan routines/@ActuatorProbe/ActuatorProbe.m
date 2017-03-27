@@ -116,11 +116,17 @@ classdef ActuatorProbe
         end
         
         function [n, xn] = GetIndex(obj,x)
-
-            n = interp1(obj.center(:,1),1:length(obj.center(:,1)),x,'nearest') ;
-            n(isnan(n)) = [];
-            xn = obj.center(n,1) ;
+           
+            n = 1:length(obj.center(:,1));
+            %n = interp1(obj.center(:,1),1:length(obj.center(:,1)),x,'nearest') ;
             
+            n(obj.center(:,1) < min(x) & obj.center(:,1) > max(x)) = [];
+            % removing out of range values
+            
+            %n(isnan(n)) = []; 
+            
+            xn = obj.center(n,1) ; % position of returned actuator values
+ 
         end
         
         function [] = ShowActuatorCenter(obj)
