@@ -12,9 +12,10 @@ classdef Experiment
         % phantom on simulation bow transmission profile
         DiffuseLightTransmission
       
-       ScanParam
-       Nscan
-       BoolActiveList 
+       ScanParam       % Parameter used for the scan
+       Nscan           % number of scans performed in the experiement
+       BoolActiveList  % active actuator encoded on boolean table, where each column describe 
+                       % one scan, and the line index matches the actuator
        AOSignal
         
     end
@@ -62,10 +63,10 @@ classdef Experiment
                        Scan(isnan(Scan)) = [] ;  
                        % retreive the total number od scans     
                        obj.Nscan = length(Scan);        
-                       % initialization : all actuator actives
-                       obj.BoolActiveList = zeros(obj.param.N_elements,obj.Nscan);                       
+                       % initialization : all actuator non-actives
+                       obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan);                       
                        % Dimension in index of active probes lenght
-                       ActiveWidth = obj.param.focus/2; % as in the experiement, in m
+                       ActiveWidth = 0.5*obj.param.focus; % as in the experiement, in m
                        ActiveWidth = ceil(ActiveWidth/obj.param.width) ; % convert to index 
                        n_actives = (1:ActiveWidth)  - floor(mean(1:ActiveWidth)) ;
                        % definition of the Translation Matrix :
@@ -76,10 +77,9 @@ classdef Experiment
                            I(I < 1) = [] ;
                            I(I > obj.param.N_elements) = [] ;   
                            % define transducers as active:
-                       obj.BoolActiveList( I , n_scan) = 1 ; 
+                       obj.BoolActiveList( I , n_scan) = true ; 
                        end                     
-                       % unsure concersion to boolean type
-                       obj.BoolActiveList = logical(obj.BoolActiveList) ;
+
                        
                case 'OP'
                     if ~isfield(obj.param,'angles')
@@ -90,6 +90,39 @@ classdef Experiment
                        obj.Nscan = length(obj.param.angles); 
                        obj.ScanParam = obj.param.angles ;
                        obj.BoolActiveList = true(obj.param.N_elements,obj.Nscan);   
+                       
+                case 'OS'
+                    if ~isfield(obj.param,'angles')
+                        obj.param.angles = 0 ; % default scan angles
+                    end
+                    
+                    if ~isfield(obj.param,'angles')
+                        obj.param.decimation = 2 ; % default decimate
+                    end
+                    
+                    obj.Nscan = length(obj.param.angles)*length(obj.param.decimation); 
+                    % we operate the full decimation scan for every
+                    % successive angle to scan.
+                    [THETA, DEC] = meshgrid(obj.param.angles,obj.param.decimation);
+                    obj.ScanParam = [THETA(:),DEC(:)];
+                    % initialization : all actuator non-actives
+                    obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan); 
+                    
+                    for i_decimate = 1:length(obj.param.decimation)
+                       
+                        % selection of column index to modify for a given
+                        % decimation
+                       I = 1:length(obj.param.decimation):length(obj.param.angles)*length(obj.param.decimation);
+                       I = I + (i_decimate-1) ;
+                       
+                       % set each of those column using decimation map
+                       obj.BoolActiveList(1:obj.param.decimation(i_decimate):obj.param.N_elements, I ) = true ;
+
+                    
+                    end
+ 
+                    
+                    
                 
      
             end
@@ -122,6 +155,8 @@ classdef Experiment
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
                 case 'OP'
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan),obj.param.c);
+                case 'OS'
+            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
             end
             % Initialize home-made probe  :
             % focus [0 0 0] will be overwritten by the delay law
@@ -129,8 +164,8 @@ classdef Experiment
 
             % calculate impulse response in FIELD II
                 t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
-                impulse = sin(2*pi*obj.param.f0*t_impulseResponse);
-                impulse=impulse.*hanning(length(impulse))'; 
+                impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
+                impulse           = impulse.*hanning(length(impulse))'; 
                 xdc_impulse (Probe, impulse);
             % set excitation in FIELD II:  
             xdc_excitation (Probe, excitation);
@@ -224,6 +259,8 @@ classdef Experiment
                 case 'OF'
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
                 case 'OP'
+            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',angle(n_scan),obj.param.c);
+                case 'OS'
             obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',angle(n_scan),obj.param.c);
             end
             % Initialize home-made probe  :

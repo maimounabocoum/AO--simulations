@@ -88,6 +88,9 @@ classdef AO_FieldBox
         end
                 
         function [] = ShowMaxField(obj,plane,FigHandle)
+            
+            
+            
             set(FigHandle,'NextPlot', 'replace');          
             [Nx,Ny,Nz] = SizeBox(obj);
             [Field_max,Tmax] = max(obj.Field,[],1);

@@ -47,7 +47,7 @@ param.Activated_FieldII =  1 ; % 0 to generate field by yourself
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
     param.Zrange = [25 40]/1000; % in m
 
-    param.Nx = 60;
+    param.Nx = 30;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshure Nz >=1
