@@ -41,14 +41,25 @@ classdef OP < TF_t
             
         end
         
-        function obj = InitializeFourier(obj,N)
-            t = obj.t ;
-            
-            % udate fourier parameters
-            DXsample = obj.c*1/(obj.SamplingRate) ; 
-            obj = obj.Initialize(N,1/DXsample);
-            % interpolated trace on fourier param
-            obj.R = interp1(t,obj.R,obj.t,'linear',0);
+        function obj = InitializeFourier(obj,varargin)
+
+            if nargin == 2
+                N = varargin{1};
+                t = obj.t ;    
+                % udate fourier parameters
+                DXsample = obj.c*1/(obj.SamplingRate) ; 
+                obj = obj.Initialize(N,1/DXsample);
+                % interpolated trace on fourier param
+                obj.R = interp1(t,obj.R,obj.t,'linear',0);
+            elseif nargin == 3
+                N = varargin{1};
+                Fc = varargin{2};
+                t = obj.t ;  
+                obj = obj.Initialize(N,Fc);        
+                % interpolated trace on fourier param
+                obj.R = interp1(t,obj.R,obj.t,'linear',0);
+                
+            end
         
         end
         

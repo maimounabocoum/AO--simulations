@@ -29,14 +29,15 @@ load('saved images\SimulationTransmission.mat');
 % MyTansmission : phatom to analyse
 
 N = 2^10;
-MyImage = MyImage.InitializeFourier(N);
+Lobject = 1e-3;
+Fc = 10/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+
+MyImage = MyImage.InitializeFourier(N,Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
-Lobject = 1e-3;
-Fc = 2/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
 
 %%%%%%%%%%%%%% radon transform of image %%%%%%%%%%%%%%%
- [R z1] = radon(MyTansmission,MyImage.theta*180/pi);
+ [R z1] = radon(MyTansmission,MyImage.theta*180/pi); %
  zR = z1*(MyImage.t(2) - MyImage.t(1));   
  MyRadon = interp1(zR,R,MyImage.t,'linear',0);
  MyRadonTF = MyImage.fourier(MyRadon) ;
@@ -59,7 +60,7 @@ Original = TF2D(N,Fc);
 figure;
 
 subplot(1,3,1)
-imagesc(Original.fx,Original.fy,abs(MyTansmissionTF))
+imagesc(Original.fx,Original.fy,log(abs(MyTansmissionTF)))
 axis(0.5*[-Fc Fc -Fc Fc])
 view(0,90)
 shading interp
@@ -70,7 +71,7 @@ title('FT original image')
 subplot(1,3,2)
 [THETA, F] = meshgrid(MyImage.theta,MyImage.f(N/2:end));
 [FX,FY] = pol2cart(THETA, F);
-surfc(FX,FY,abs(MyRadonTF(N/2:end,:)))
+surfc(FX,FY,log(abs(MyRadonTF(N/2:end,:))))
 view(0,90)
 axis(0.5*[-Fc Fc -Fc Fc])
 shading interp
@@ -81,7 +82,7 @@ title('Fourier Transform of Th Radon')
 subplot(1,3,3)
 [THETA, F] = meshgrid(MyImage.theta,MyImage.f(N/2:end));
 [FX,FY] = pol2cart(THETA, F);
-surfc(FX,FY,abs(MyImage.F_R(N/2:end,:)))
+surfc(FX,FY,log(abs(MyImage.F_R(N/2:end,:))))
 view(0,90)
 axis(0.5*[-Fc Fc -Fc Fc])
 shading interp

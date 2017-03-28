@@ -20,13 +20,13 @@ load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
-MyImage = MyImage.InitializeFourier(N);
-%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
-MyImage.Fmax()       % maximum frequency sampling = 1/dt
 Lobject = 0.1e-3;
 Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
-                     % we set it to kc = 100/Lobject
-                   
+                   % we set it to kc = 100/Lobject 
+MyImage = MyImage.InitializeFourier(N,Fc);
+%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
+MyImage.Fmax()       % maximum frequency sampling = 1/dt
+                 
 %% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
 
 %%% Fourier Tranform of Radon input image with respect to t
@@ -75,14 +75,14 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
         T = X.*sin( MyImage.theta(i) ) + (Z-mean(MyImage.L)).*cos( MyImage.theta(i) ) ;
         projContrib = interp1((z_out-mean(MyImage.L))',I(:,i),T(:),'linear',0);
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
-          
-       subplot(121)
-       imagesc(xsonde*1e3,z_out*1e3,img)
-       title(['angle',num2str(MyImage.theta(i)*180/pi)])
-       xlabel('x (mm)')
-       ylabel('z (mm)')
-       colorbar
-       drawnow 
+%           
+%        subplot(121)
+%        imagesc(xsonde*1e3,z_out*1e3,img)
+%        title(['angle',num2str(MyImage.theta(i)*180/pi)])
+%        xlabel('x (mm)')
+%        ylabel('z (mm)')
+%        colorbar
+%        drawnow 
        
   end
   
