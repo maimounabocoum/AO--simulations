@@ -12,7 +12,7 @@ param.lambda = param.c/param.f0; % Wavelength [m]
 param.element_height= 6/1000; % Height of element [m]
 param.width = 0.2/1000;     % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0;              % Distance between transducer elements [m]
-param.N_elements = 128 ;     %128; % Number of elements
+param.N_elements = 192 ;     %128; % Number of elements
 param.Rfocus = 35/1000;       % Static Elevation focus
 param.attenuation = 0;       % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -26,7 +26,7 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OP'; 
 
 param.focus = 10/1000;           % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles = (-180:180)*pi/180 ;        % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles = (-10:10)*pi/180 ;        % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation = [15] ;        % decimation list of active actuators   - only active in OS mode 
  
 % waist of diffuse IR laser beam
@@ -47,7 +47,7 @@ param.Activated_FieldII = 1; % 0 to generate field by yourself
 
     param.Xrange = [-13 13]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [24 44]/1000; % in m
+    param.Zrange = [27 43]/1000; % in m
 
     param.Nx = 150;
     param.Ny = 1;

@@ -27,7 +27,7 @@ CurrentExperiement = Experiment(param);
     % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 %use param.angles has an input to additionally show Radon transform
-%CurrentExperiement.ShowPhantom(param.angles);
+CurrentExperiement.ShowPhantom(param.angles);
 
  Hf = figure(1);
  tic
