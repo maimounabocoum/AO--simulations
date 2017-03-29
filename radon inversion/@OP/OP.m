@@ -125,20 +125,6 @@ classdef OP < TF_t
             Fm = 1/dt; % in m-1
         end
         
-        function obj = t_Fourier_R(obj,N)
-            % fftshift : swaps the result [0:N/2-1,-N/2:1)] into natural order
-            % performs the zero padding to fit dimmension N
-            obj.F_R = fftshift(fft(obj.R,N));
-            
-            dt = obj.t(2) - obj.t(1) ;
-            t = (-N/2:(N/2-1))*dt; % temporal coordinate
-            
-            % defining the frequency axis
-            f = (-N/2:(N/2-1))*(1/dt);
-            obj.w = 2*pi*f;
-            %linspace(-SamplingRate/(2*1540),SamplingRate/(2*1540),length(obj.t));
-            
-        end
         
 
     

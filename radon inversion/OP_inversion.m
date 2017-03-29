@@ -21,7 +21,7 @@ load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
 Lobject = 1e-3;
-Fc = 50/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+Fc = 2/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
                    % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
@@ -65,17 +65,36 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 % %% reconstruction BOX initialization (retroprojection):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- xsonde = linspace(0,128*0.2e-3,128);
+ xsonde = (1:size(DelayLAWS,1))*0.2e-3; %linspace(0,192*0.2e-3,128);
  xsonde = xsonde - mean(xsonde) ;
+ 
+ % retreive t0 correction :
+ Zref = mean(MyImage.L) ; % Z position supposed to be invariant in rotation
+ % 1 - find x position for t = 0 :
+ % Need to implement on real experiement : finding zero . Here it is not
+ % necessary since t = 0 matches xsonde = 0 for all angles
+ % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
+
+ 
+
+
  [X,Z]= meshgrid(xsonde,z_out);
  img = zeros(size(X,1),size(X,2),'like',X);
  
   for i= 1:length(MyImage.theta)
       
-        T = X.*sin( MyImage.theta(i) ) + (Z-mean(MyImage.L)).*cos( MyImage.theta(i) ) ;
-        projContrib = interp1((z_out-mean(MyImage.L))',I(:,i),T(:),'linear',0);
+      % For Ideal plane Waves reconstruction
+       %T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+       
+      % for FIELD II reconstruction :
+        T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
+        
+      % common interpolation:  
+        projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
+      % retroprojection:  
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
-           
+      
+      %%% real time monitoring %%%   
 %        subplot(121)
 %        imagesc(xsonde*1e3,z_out*1e3,img)
 %        title(['angle',num2str(MyImage.theta(i)*180/pi)])
@@ -83,7 +102,7 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 %        ylabel('z (mm)')
 %        colorbar
 %        drawnow 
-       
+%        
   end
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

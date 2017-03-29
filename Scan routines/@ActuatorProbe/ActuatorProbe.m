@@ -100,10 +100,11 @@ classdef ActuatorProbe
                    
                case 'user'
                    return;
+
            end
            
            obj.DelayLaw = Delay;
-            
+
         end
  
         %% screening functions %%

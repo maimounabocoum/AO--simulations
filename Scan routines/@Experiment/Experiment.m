@@ -138,7 +138,7 @@ classdef Experiment
         end
             
         function obj = CalculateUSfield(obj,t_excitation,excitation,n_scan)
-            
+
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan)) ;
            
@@ -146,57 +146,58 @@ classdef Experiment
            obj.MyProbe = ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
                           obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
 
-            if obj.param.Activated_FieldII == 1
+          if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
 
             % define delay law for the probe :
-            switch obj.param.FOC_type
-                case 'OF'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
-                case 'OP'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan),obj.param.c);
-                case 'OS'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
-            end
-            % Initialize home-made probe  :
-            % focus [0 0 0] will be overwritten by the delay law
-            Probe = xdc_rectangles(obj.MyProbe.rect,[10 10 10], [11 0 0]);   
+              switch obj.param.FOC_type
+                
+                 case 'OF' 
+                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
+                 case 'OP'
+                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan),obj.param.c);
+                 case 'OS'
+                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
+              end
+                    % Initialize home-made probe  :
+                    % focus [0 0 0] will be overwritten by the delay law
+                    Probe = xdc_rectangles(obj.MyProbe.rect,[10 10 10], [11 0 0]);   
 
-            % calculate impulse response in FIELD II
-                t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
-                impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
-                impulse           = impulse.*hanning(length(impulse))'; 
-                xdc_impulse (Probe, impulse);
-            % set excitation in FIELD II:  
-            xdc_excitation (Probe, excitation);
-            % set delay law in FIELD II: 
-            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
-            % calculate field on MySimulationBox.Points() with FIELD II: 
-            [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
+                    % calculate impulse response in FIELD II
+                        t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
+                        impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
+                        impulse           = impulse.*hanning(length(impulse))'; 
+                        xdc_impulse (Probe, impulse);
+                    % set excitation in FIELD II:  
+                    xdc_excitation (Probe, excitation);
+                    % set delay law in FIELD II: 
+                    xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
+                    % calculate field on MySimulationBox.Points() with FIELD II: 
+                    [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
 
-            % write field results to the current box
-            tmin = t - max(t_excitation)/2;
-            obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
-            xdc_free(Probe);
-            else
+                    % write field results to the current box
+                    tmin = t - max(t_excitation)/2;
+                    obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
+                    xdc_free(Probe);
+         else
                 
           switch obj.param.FOC_type
                 case 'OF'
-           tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
-           tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+                   tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
+                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
                case 'OP'
-           % width of simulation BOX
-           if obj.ScanParam(n_scan) <= 0
-           DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
-           else
-           DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
-           end
-           % taking into account additional propagatoion du to tilt scan
+                   % width of simulation BOX
+                   if obj.ScanParam(n_scan) <= 0
+                   DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
+                   else
+                   DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
+                   end
+                   % taking into account additional propagatoion du to tilt scan
 
-           % angle           
-           tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
-           %tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) )/(obj.param.c) ;
-           tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+                   % angle           
+                   tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
+                   %tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) )/(obj.param.c) ;
+                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
           end
            
            obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
@@ -220,7 +221,7 @@ classdef Experiment
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
             % setting the rotation inveration to center of the simulation
-            % box
+            % box , ie x_c = 0 , and z_c = mean(obj.param.Zrange)
             XI = (XX*sin(obj.ScanParam(n_scan))+ (ZZ- mean(obj.param.Zrange))*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
             %figure;
             %imagesc(squeeze( reshape(XI(1,:),[obj.param.Ny,obj.param.Nx,obj.param.Nz]) ) )
@@ -241,74 +242,7 @@ classdef Experiment
             
             
         end 
-        %same function to use with parfor
-        function data = CalculateUSfield_p(obj,excitation,n_scan)
-           
-           FullElementList = 1:obj.param.N_elements ;
-           ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan));
-           
-           % probe strcuture initialization :
-           obj.MyProbe = ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
-                          obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
-
-            if obj.param.Activated_FieldII == 1
-            
-                field_init(0);
-            % define delay law for the probe :
-            switch obj.param.FOC_type
-                case 'OF'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
-                case 'OP'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',angle(n_scan),obj.param.c);
-                case 'OS'
-            obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',angle(n_scan),obj.param.c);
-            end
-            % Initialize home-made probe  :
-            % focus [0 0 0] will be overwritten by the delay law
-            Probe = xdc_rectangles(obj.MyProbe.rect,[0 0 0], [0 0 0]);                          
-            % calculate impulse response in FIELD II
-                t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
-                impulse = sin(2*pi*obj.param.f0*t_impulseResponse);
-                impulse=impulse.*hanning(length(impulse))'; 
-                xdc_impulse (Probe, impulse);
-            % set excitation in FIELD II:  
-            xdc_excitation (Probe, excitation);
-            % set delay law in FIELD II: 
-            xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
-            % calculate field on MySimulationBox.Points() with FIELD II: 
-            [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-
-            % write field results to the current box
-            obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(t,h,obj.param.fs);
-%             obj.MySimulationBox.time(1)*(obj.param.c)*1e3
-%             obj.MySimulationBox.time(end)*(obj.param.c)*1e3
-            else
-                
-
-
-            obj.MySimulationBox.time = 0:(1/obj.param.fs_aq):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
-            [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-            Field = obj.GaussianPulse(X,Y,Z);
-            
-            % F : field to match dimension issued by Field II
-            F =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
-            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
-            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-
-
-             F  =   F.*exp(1i*2*pi*obj.param.f0*(T- ZZ/(obj.param.c))).*...
-                    exp(-(T - ZZ/(obj.param.c)).^2/(8/(obj.param.f0))^2);
-
-            obj.MySimulationBox.Field = real(F) ;
-       
-            end
-            
-            data = obj.GetAcquisitionLine(n_scan);
-            
-            xdc_free(Probe);
-            
-        end
-        
+        %same function to use with parfor   
         function [E,PHI] = GaussianPulse(obj,X,Y,Z)
             
             z_x = obj.param.focus;

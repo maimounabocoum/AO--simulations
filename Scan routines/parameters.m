@@ -26,7 +26,7 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OP'; 
 
 param.focus = 10/1000;           % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles = (-10:10)*pi/180 ;        % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles = (-50:50)*pi/180 ;        % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation = [15] ;        % decimation list of active actuators   - only active in OS mode 
  
 % waist of diffuse IR laser beam
