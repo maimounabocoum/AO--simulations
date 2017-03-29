@@ -32,18 +32,18 @@ CurrentExperiement = CurrentExperiement.EvalPhantom();
  Hf = figure(1);
  tic
 h = waitbar(0,'Please wait...');
-for n_scan = 1%:CurrentExperiement.Nscan
+for n_scan = 1:CurrentExperiement.Nscan
  waitbar(n_scan/CurrentExperiement.Nscan)
 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
      
 end
  
  toc
- %CurrentExperiement.ShowAcquisitionLine();
+ CurrentExperiement.ShowAcquisitionLine();
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
@@ -53,9 +53,10 @@ end
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
+ z_phantom = CurrentExperiement.MySimulationBox.z ;
  MyTansmission = CurrentExperiement.ShowPhantom() ;
- %save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','MyTansmission') 
- %save('..\radon inversion\saved images\Simulation.mat','MyImage')
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission') 
+ save('..\radon inversion\saved images\Simulation.mat','MyImage')
  end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

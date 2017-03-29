@@ -386,7 +386,7 @@ classdef Experiment
                  x = obj.MySimulationBox.x(1):dz:obj.MySimulationBox.x(end);
 
                  T = interp1(obj.MySimulationBox.x,Transmission',x,'linear',0);
-                 [R,zp] = radon(T',theta);
+                 [R,zp] = radon(T',theta - 90);
                  subplot(122)
                  imagesc(theta,zp*dz*1e3 + mean(obj.MySimulationBox.z)*1e3,R)
                  ylim(1e3*[min(obj.MySimulationBox.z) max(obj.MySimulationBox.z)])

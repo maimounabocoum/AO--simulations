@@ -20,8 +20,8 @@ load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
-Lobject = 0.1e-3;
-Fc = 1/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+Lobject = 1e-3;
+Fc = 50/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
                    % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
@@ -47,13 +47,13 @@ FilterType = 'cosine';%'ram-lak'
 FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 
 %cos(pi*MyImage.f/(2*974.0260)))'
- FILTER = FILTER'.*ones(1,length(MyImage.theta));
+ FILTER = FILTER'*ones(1,length(MyImage.theta));
 % FILTER(abs(MyImage.f) >= Fc, :) = 0;
 
 %p = bsxfun(@times, p, H); % faster than for-loop
-%I = MyImage.ifourier(MyImage.F_R);
+%  I = MyImage.ifourier(MyImage.F_R);
  I = MyImage.ifourier(MyImage.F_R.*FILTER);
- I = real(I) ;
+% I = real(I) ;
 % 
 % figure;
 % imagesc(real(I))
@@ -75,7 +75,7 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
         T = X.*sin( MyImage.theta(i) ) + (Z-mean(MyImage.L)).*cos( MyImage.theta(i) ) ;
         projContrib = interp1((z_out-mean(MyImage.L))',I(:,i),T(:),'linear',0);
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
-%           
+           
 %        subplot(121)
 %        imagesc(xsonde*1e3,z_out*1e3,img)
 %        title(['angle',num2str(MyImage.theta(i)*180/pi)])
@@ -90,41 +90,40 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ObjectInitial = TF_t(N,Fc);
-ObjectInitial_I = interp1(z_out,MyTansmission,ObjectInitial.t,'linear',0) ;
-imvis = interp1(z_out,I(:,181),ObjectInitial.t,'linear',0) ;
- 
-subplot(221)
+subplot(121)
 imagesc(xsonde*1e3,z_out*1e3,img)
 title('resconstructed profile')
 xlabel('x (mm)')
 xlim([min(x_phantom*1e3) max(x_phantom*1e3)])
 ylabel('z (mm)')
 colorbar
-drawnow   
-subplot(222)
-imagesc(x_phantom*1e3,ObjectInitial.t*1e3,ObjectInitial_I)
+
+
+subplot(122)
+imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+colorbar
 title('simulation input phantom')
 ylim([min(z_out*1e3) max(z_out*1e3)])
 xlabel('x (mm)')
 ylabel('y (mm)')
+drawnow   
 
-subplot(223)
-title('simulation input phantom')
-
-imvisTF = ObjectInitial.fourier(imvis);
-plot(MyImage.f,abs(imvisTF))
-xlabel('fx (m-1)')
-ylabel('y (mm)')
-XLIM = get(gca,'xlim');
-
-subplot(224)
-ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
-plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
-title('object fourier transform in the vertical direction')
-xlabel('fx (m-1)')
-ylabel('y (mm)')
-xlim(XLIM)
+% subplot(223)
+% title('simulation input phantom')
+% 
+% imvisTF = ObjectInitial.fourier(imvis);
+% plot(MyImage.f,abs(imvisTF))
+% xlabel('fx (m-1)')
+% ylabel('y (mm)')
+% XLIM = get(gca,'xlim');
+% 
+% subplot(224)
+% ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
+% plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
+% title('object fourier transform in the vertical direction')
+% xlabel('fx (m-1)')
+% ylabel('y (mm)')
+% xlim(XLIM)
 
 
 %rmpath('..\Scan routines')
