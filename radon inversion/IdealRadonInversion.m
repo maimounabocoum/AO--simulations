@@ -48,11 +48,11 @@ MyImage.Fmax()       % maximum frequency sampling = 1/dt
 % filtered inverse fourier transform :
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
-FilterType = 'cosine';%'ram-lak' 
+FilterType = 'ram-lak';%'ram-lak' 
 FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 
 %cos(pi*MyImage.f/(2*974.0260)))'
- FILTER = FILTER'*ones(1,length(MyImage.theta));
+ FILTER = FILTER*ones(1,length(MyImage.theta));
 % FILTER(abs(MyImage.f) >= Fc, :) = 0;
 
 %p = bsxfun(@times, p, H); % faster than for-loop
