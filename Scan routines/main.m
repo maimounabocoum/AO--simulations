@@ -30,27 +30,28 @@ CurrentExperiement = CurrentExperiement.EvalPhantom();
 %CurrentExperiement.ShowPhantom(param.angles);
 
 % creating memory to save probe delay law
-if param.FOC_type == 'OP' 
+if param.Activated_FieldII == 1 
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
  %Hf = figure(1);
  tic
-%h = waitbar(0,'Please wait...');
-for n_scan = 1%:CurrentExperiement.Nscan
-% waitbar(n_scan/CurrentExperiement.Nscan)
+h = waitbar(0,'Please wait...');
+for n_scan = 1:CurrentExperiement.Nscan
+ waitbar(n_scan/CurrentExperiement.Nscan)
 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
-<<<<<<< .mine
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
-=======
+
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
+
      %CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
->>>>>>> .theirs
-    
+   
     % retreive delay law for cuurent scan
+    if param.Activated_FieldII == 1
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
+    end
 end
  
  toc
@@ -66,8 +67,15 @@ end
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  MyTansmission = CurrentExperiement.ShowPhantom() ;
-%  save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission') 
-%  save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS')
+ 
+     %--------------------- saving datas -------------
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission')
+     if param.Activated_FieldII == 1
+     save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS')
+     else
+     save('..\radon inversion\saved images\Simulation.mat','MyImage')
+     end
+     %%%%%%%%%%%%%%%%%%%%
  end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
