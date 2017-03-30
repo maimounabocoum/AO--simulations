@@ -21,7 +21,7 @@ load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
 Lobject = 1e-3;
-Fc = 2/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
+Fc = 20/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
                    % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
@@ -65,7 +65,8 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 % %% reconstruction BOX initialization (retroprojection):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- xsonde = (1:size(DelayLAWS,1))*0.2e-3; %linspace(0,192*0.2e-3,128);
+ %xsonde = (1:size(DelayLAWS,1))*0.2e-3; %linspace(0,192*0.2e-3,128);
+ xsonde = linspace(0,192*0.2e-3,128);
  xsonde = xsonde - mean(xsonde) ;
  
  % retreive t0 correction :
@@ -84,10 +85,10 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
   for i= 1:length(MyImage.theta)
       
       % For Ideal plane Waves reconstruction
-       %T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+       T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
        
       % for FIELD II reconstruction :
-        T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
+      %  T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
         
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
