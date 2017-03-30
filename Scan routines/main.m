@@ -37,13 +37,13 @@ end
 % Hf = figure(1);
  tic
 %h = waitbar(0,'Please wait...');
-for n_scan = 1:CurrentExperiement.Nscan
+for n_scan = 1%:CurrentExperiement.Nscan
 % waitbar(n_scan/CurrentExperiement.Nscan)
 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
     
     % retreive delay law for cuurent scan
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
@@ -62,8 +62,8 @@ end
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  MyTansmission = CurrentExperiement.ShowPhantom() ;
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission') 
- save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS')
+%  save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission') 
+%  save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS')
  end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
