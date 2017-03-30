@@ -34,7 +34,7 @@ if param.FOC_type == 'OP'
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
-% Hf = figure(1);
+ %Hf = figure(1);
  tic
 %h = waitbar(0,'Please wait...');
 for n_scan = 1:CurrentExperiement.Nscan
@@ -43,7 +43,7 @@ for n_scan = 1:CurrentExperiement.Nscan
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+     %CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
     
     % retreive delay law for cuurent scan
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
