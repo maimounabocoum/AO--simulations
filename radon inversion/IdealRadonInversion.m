@@ -19,25 +19,23 @@ addpath('..\Scan routines')
 %% simulation traces 
 load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
+% imported variables :
+% MyTansmission : phatom to analyse
 
-N = 2^12;
+N = 2^10;
 Lobject = 1e-3;
 Fc = 2/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
-                   % we set it to kc = 100/Lobject 
+
 MyImage = MyImage.InitializeFourier(N,Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
-                 
-%% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
 
-%%% Fourier Tranform of Radon input image with respect to t
-% creating a fourier parameter set using the measure sample size in m
+%%%%%%%%%%%%%% radon transform of image %%%%%%%%%%%%%%%
+ [R z1] = radon(MyTansmission,MyImage.theta*180/pi-90); %correction of default 0 definition in radon
+ zR = z1*(z_phantom(2) - z_phantom(1));   
+ MyRadon = interp1(zR,R,MyImage.t,'linear',0);
 
-MyImage.F_R = MyImage.fourier(MyImage.R) ;
-
-% MyImage = MyImage.PhaseCorrection(Fc);
-% MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
-
+ MyRadonTF = MyImage.fourier(MyRadon) ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filtered inverse fourier transform :
@@ -53,7 +51,7 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 
 %p = bsxfun(@times, p, H); % faster than for-loop
 %  I = MyImage.ifourier(MyImage.F_R);
- I = MyImage.ifourier(MyImage.F_R.*FILTER);
+ I = MyImage.ifourier(MyRadonTF.*FILTER);
 % I = real(I) ;
 % 
 % figure;
@@ -85,10 +83,10 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
   for i= 1:length(MyImage.theta)
       
       % For Ideal plane Waves reconstruction
-       %T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+       T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
        
       % for FIELD II reconstruction :
-        T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
+      %  T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
         
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
