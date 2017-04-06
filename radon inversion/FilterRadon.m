@@ -16,7 +16,7 @@ filtImpResp = [filtImpResp filtImpResp(end-1:-1:2)];
 filt = 2*real(fft(filtImpResp)); 
 %FILTER = filt(1:N+1);
 
-%FILTER = abs(f).^0.9 ;
+FILTER = abs(f).^0.9 ;
 
 switch filter
     case 'ram-lak'
@@ -38,7 +38,7 @@ end
 %FILTER(isnan(FILTER)) = 0 ;
 
  FILTER(f > Fc ) = 0;                         % Crop the frequency response
- FILTER = [FILTER' ; FILTER(end-1:-1:2)'];    % Symmetry of the filter
+% FILTER = [FILTER' ; FILTER(end-1:-1:2)'];    % Symmetry of the filter
 
 end
 
