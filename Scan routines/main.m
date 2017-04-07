@@ -27,7 +27,7 @@ CurrentExperiement = Experiment(param);
     % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 %use param.angles has an input to additionally show Radon transform
-%CurrentExperiement.ShowPhantom(param.angles);
+
 
 % creating memory to save probe delay law
 if param.Activated_FieldII == 1 
@@ -55,7 +55,7 @@ for n_scan = 1:CurrentExperiement.Nscan
 end
  
  toc
- %CurrentExperiement.ShowAcquisitionLine();
+ CurrentExperiement.ShowAcquisitionLine();
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
@@ -66,10 +66,10 @@ end
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
- MyTansmission = CurrentExperiement.ShowPhantom() ;
+ [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
  
      %--------------------- saving datas -------------
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission')
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
      if param.Activated_FieldII == 1
      save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS')
      else

@@ -296,7 +296,7 @@ classdef Experiment
           
         end
         
-        function [Transmission] = ShowPhantom(obj,varargin)
+        function [Transmission,R,zR] = ShowPhantom(obj,varargin)
             
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             Transmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
@@ -321,8 +321,9 @@ classdef Experiment
 
                  T = interp1(obj.MySimulationBox.x,Transmission',x,'linear',0);
                  [R,zp] = radon(T',theta - 90);
+                 zR = mean(obj.MySimulationBox.z) + zp*dz ; % equivalent z sampling 
                  subplot(122)
-                 imagesc(theta,zp*dz*1e3 + mean(obj.MySimulationBox.z)*1e3,R)
+                 imagesc(theta,zR*1e3,R)
                  ylim(1e3*[min(obj.MySimulationBox.z) max(obj.MySimulationBox.z)])
                  xlabel('\theta(°)')
                  ylabel('z(mm)')
