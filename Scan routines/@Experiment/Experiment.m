@@ -113,11 +113,20 @@ classdef Experiment
                         % selection of column index to modify for a given
                         % decimation
                        I = 1:length(obj.param.decimation):length(obj.param.angles)*length(obj.param.decimation);
-                       I = I + (i_decimate-1) ;
+                       I = I + (i_decimate-1) ; % index od column with same decimate
                        
                        % set each of those column using decimation map
-                       obj.BoolActiveList(1:obj.param.decimation(i_decimate):obj.param.N_elements, I ) = true ;
-
+                       % described by Idecimate 
+                       %Idecimate = 1:obj.param.decimation(i_decimate):obj.param.N_elements ;
+                       %obj.BoolActiveList( Idecimate , I ) = true ;
+                       
+                       %Idecimate = 1:obj.param.N_elements ;
+                       Imod = mod(1:obj.param.N_elements,2*obj.param.decimation(i_decimate)) ;
+                       %Idecimate( Imod < obj.param.decimation(i_decimate) )   = 1 ;
+                       %Idecimate( Imod >= obj.param.decimation(i_decimate) )  = 0 ;
+                       
+                       obj.BoolActiveList( Imod < obj.param.decimation(i_decimate) , I )  = true ;
+                       obj.BoolActiveList( Imod >= obj.param.decimation(i_decimate) , I ) = false ;
                     
                     end
  

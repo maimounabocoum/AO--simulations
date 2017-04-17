@@ -12,18 +12,18 @@ addpath('..\Scan routines')
 
 %% experiemental input datas :
 % load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
-% c = 1540 ; % sound velocity in m/s
+ c = 1540 ; % sound velocity in m/s
 % MyImage = OP(data(:,:,1),X,Y,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
 load('saved images\Simulation.mat');
 load('saved images\SimulationTransmission.mat');
 
-N = 2^12;
-Lobject = 1e-3;
-Fc = 20/Lobject;    % Lobject is the size of the object to detect. Using simple model (sinc function)
-                   % we set it to kc = 100/Lobject 
-MyImage = MyImage.InitializeFourier(N,Fc);
+N       = 2^12;
+Lobject = 1.2e-3;
+Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
+                      % we set it to kc = 100/Lobject 
+MyImage = MyImage.InitializeFourier(N,10*Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
 MyImage.Fmax()       % maximum frequency sampling = 1/dt
                  
@@ -42,21 +42,19 @@ MyImage.F_R = MyImage.fourier(MyImage.R) ;
 % filtered inverse fourier transform :
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
-FilterType = 'cosine';%'ram-lak' 
+FilterType = 'ram-lak';%'ram-lak' 
 
-FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
-
-%cos(pi*MyImage.f/(2*974.0260)))'
- FILTER = FILTER'*ones(1,length(MyImage.theta));
-% FILTER(abs(MyImage.f) >= Fc, :) = 0;
+filt = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
+filt = filt(:);
+FILTER = filt*ones(1,length(MyImage.theta));
+% hold on
+% plot(MyImage.f,filt)
 
 %p = bsxfun(@times, p, H); % faster than for-loop
 %  I = MyImage.ifourier(MyImage.F_R);
  I = MyImage.ifourier(MyImage.F_R.*FILTER);
-% I = real(I) ;
-% 
-% figure;
-% imagesc(real(I))
+ 
+
 
 % extract image back to initial size :
  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
@@ -66,7 +64,7 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  %xsonde = (1:size(DelayLAWS,1))*0.2e-3; %linspace(0,192*0.2e-3,128);
- xsonde = linspace(0,192*0.2e-3,128);
+ xsonde = linspace(0,192*0.2e-3,192);
  xsonde = xsonde - mean(xsonde) ;
  
  % retreive t0 correction :
@@ -85,10 +83,10 @@ FILTER = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
   for i= 1:length(MyImage.theta)
       
       % For Ideal plane Waves reconstruction
-       T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+      % T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
        
       % for FIELD II reconstruction :
-      %  T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
+        T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
         
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);

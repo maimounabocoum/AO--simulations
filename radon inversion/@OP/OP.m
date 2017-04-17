@@ -19,6 +19,7 @@ classdef OP < TF_t
     end
     
     methods
+        
         function obj = OP(InputImage,theta,t,SamplingRate,c)
             %N: number of points for fourier transform
             obj@TF_t(t);
@@ -86,15 +87,24 @@ classdef OP < TF_t
         end
         
         function [] = Show_F_R(obj,Fc)
-           figure;
+           figure('position',[520 378 1000 420]);
            
-           subplot(121)
-           imagesc(obj.theta*180/pi,2*pi*obj.w(2*pi*abs(obj.w) < Fc),abs(obj.F_R(2*pi*abs(obj.w) < Fc,:)));
-           xlabel('theta (°)')
-           ylabel('frequency (m^{-1})')
+           N_Fc = max( find( abs(obj.f) <= Fc));
+           I = (obj.N/2+2):N_Fc ;
+           
+           subplot(2,2,1)
+           imagesc(obj.f( I ),obj.theta*180/pi,abs(obj.F_R( I , :))');
+           ylabel('theta (°)')
+           xlabel('frequency (m^{-1})')
            title('Fourier transform')
-           
-           subplot(122)
+           subplot(2,2,3)
+           surfc(obj.l(I(50:end))*1e3,obj.theta*180/pi,abs(obj.F_R( I(50:end) ,:))');
+           shading interp
+           view(0,90)
+           ylabel('theta (°)')
+           xlabel('\lambda (mm)')
+           title('Fourier transform')
+           subplot(2,2,[2 4])
            % find central point for the unwrapping correspondind to theta =
            % 0 , and f = 0 :
            Iy = length(obj.f)/2+1;

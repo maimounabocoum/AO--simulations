@@ -49,7 +49,8 @@ classdef TF_t
             
         end
         function obj = Initialize(obj,N,Fmax)
-            % Fmax corresponds to the mas sampling of image         
+            % Fmax corresponds to the mas sampling of image    
+            % t is homogenous to a distance, not a time
             obj.N = N;
             obj.dt = 1/Fmax; % in m
             obj.t = (-N/2:1:N/2-1)*obj.dt;
@@ -57,9 +58,9 @@ classdef TF_t
             obj.df = 1/obj.tRange;
             obj.f = (-N/2:1:N/2-1)*obj.df;
             obj.w = 2*pi*obj.f;
-            obj.l(1:N/2)=-1540./obj.f(1:N/2); % wavelength
-            obj.l(N/2+1)=1e15;   % non zero value at origin
-            obj.l(N/2+2:N)= 1540./obj.f(N/2+2:N); 
+            obj.l(1:N/2)=  -1./obj.f(1:N/2); % wavelength
+            obj.l(N/2+1)=   1e15;   % non zero value at origin
+            obj.l(N/2+2:N)= 1./obj.f(N/2+2:N);
             
         end
         function Ew = fourier(obj, Et)
