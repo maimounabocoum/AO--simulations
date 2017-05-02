@@ -49,7 +49,7 @@ for n_scan = 1:CurrentExperiement.Nscan
      %CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
    
     % retreive delay law for cuurent scan
-    if param.Activated_FieldII == 1
+    if param.FOC_type == 'OP' 
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
 end
