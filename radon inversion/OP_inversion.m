@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%% load experiemental data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clearvars;
+%clearvars;
 addpath('functions')
 addpath('..\Scan routines')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,11 +13,11 @@ addpath('..\Scan routines')
 %% experiemental input datas :
 % load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
  c = 1540 ; % sound velocity in m/s
-% MyImage = OP(data(:,:,1),X,Y,Param.SamplingRate*1e6,c); 
+ MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
-load('saved images\Simulation.mat');
-load('saved images\SimulationTransmission.mat');
+% load('saved images\Simulation.mat');
+% load('saved images\SimulationTransmission.mat');
 
 N       = 2^12;
 Lobject = 1.2e-3;
@@ -88,22 +88,25 @@ FILTER = filt*ones(1,length(MyImage.theta));
       % T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
        
       % for FIELD II reconstruction :
-        T = (X).*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+        %T = (X).*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
         %T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
-        
+      % SL10-reconstruction:
+        T = (  X - 6.5e-3*(-1+sign(MyImage.theta(i))) - 6.4e-3*(1+sign(MyImage.theta(i)))).*sin( MyImage.theta(i) ) ...
+            + (Z-Zref).*cos( MyImage.theta(i) ) ;
+        %plot(X,5*cos(X*pi/180) - 9.6*(-1+sign(X)).*sin(X*pi/180) - 9.6*(1+sign(X)).*sin(X*pi/180)+12.3)
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
       % retroprojection:  
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
       
       %%% real time monitoring %%%   
-%        imagesc(xsonde*1e3,z_out*1e3,img)
-%        colorbar
-%        title(['angle',num2str(MyImage.theta(i)*180/pi)])
-%        xlabel('x (mm)')
-%        ylabel('z (mm)')
-%        
-%        drawnow 
+       imagesc(xsonde*1e3,z_out*1e3,img)
+       colorbar
+       title(['angle',num2str(MyImage.theta(i)*180/pi)])
+       xlabel('x (mm)')
+       ylabel('z (mm)')
+       
+       drawnow 
         
   end
   
@@ -111,23 +114,23 @@ FILTER = filt*ones(1,length(MyImage.theta));
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
-subplot(121)
-imagesc(xsonde*1e3,z_out*1e3,img)
-title('resconstructed profile')
-xlabel('x (mm)')
-xlim([min(x_phantom*1e3) max(x_phantom*1e3)])
-ylabel('z (mm)')
-colorbar
-
-
-subplot(122)
-imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-colorbar
-title('simulation input phantom')
-ylim([min(z_out*1e3) max(z_out*1e3)])
-xlabel('x (mm)')
-ylabel('y (mm)')
-drawnow   
+% subplot(121)
+% imagesc(xsonde*1e3,z_out*1e3,img)
+% title('resconstructed profile')
+% xlabel('x (mm)')
+% xlim([min(x_phantom*1e3) max(x_phantom*1e3)])
+% ylabel('z (mm)')
+% colorbar
+% 
+% 
+% subplot(122)
+% imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+% colorbar
+% title('simulation input phantom')
+% ylim([min(z_out*1e3) max(z_out*1e3)])
+% xlabel('x (mm)')
+% ylabel('y (mm)')
+% drawnow   
 
 % subplot(223)
 % title('simulation input phantom')
