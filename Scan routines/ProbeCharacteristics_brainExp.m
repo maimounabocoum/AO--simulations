@@ -16,7 +16,7 @@ parameters;
         Hf = figure(1);
 
 % initializetion of parametetric study
-focus = 8/1000;
+focus = 35/1000;
 
 
 Field2D = [];
@@ -25,7 +25,7 @@ param.focus = focus(loop);
 % initial excitation field :
 
      CurrentExperiement = Experiment(param);
-     CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,64);
+     CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,1);
      %   CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
      

@@ -183,13 +183,14 @@ classdef Experiment
                     xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
                     % calculate field on MySimulationBox.Points() with FIELD II: 
                     [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-
+   
                     % write field results to the current box
                     tmin = t - max(t_excitation)/2;
                     obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
                     xdc_free(Probe);
          else
-                
+         %%================= implementation without use of FILEDII=====================
+         
           switch obj.param.FOC_type
                 case 'OF'
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
@@ -231,7 +232,9 @@ classdef Experiment
                        % F : field to match dimension issued by Field II
             % setting the rotation inveration to center of the simulation
             % box , ie x_c = 0 , and z_c = mean(obj.param.Zrange)
-            XI = (XX*sin(obj.ScanParam(n_scan))+ (ZZ- mean(obj.param.Zrange))*cos(obj.ScanParam(n_scan))) ; % rotated variable by angle theta
+            XI = (XX*sin(obj.ScanParam(n_scan))+ (ZZ- mean(obj.param.Zrange))*cos(obj.ScanParam(n_scan))) ; 
+            % rotated variable by angle theta
+            
             %figure;
             %imagesc(squeeze( reshape(XI(1,:),[obj.param.Ny,obj.param.Nx,obj.param.Nz]) ) )
             %+ max(t_excitation)/2
@@ -329,7 +332,7 @@ classdef Experiment
                  x = obj.MySimulationBox.x(1):dz:obj.MySimulationBox.x(end);
 
                  T = interp1(obj.MySimulationBox.x,Transmission',x,'linear',0);
-                 [R,zp] = radon(T',theta - 90);
+                 [R,zp] = radon(T',theta + 90);
                  zR = mean(obj.MySimulationBox.z) + zp*dz ; % equivalent z sampling 
                  subplot(122)
                  imagesc(theta,zR*1e3,R)
@@ -379,7 +382,7 @@ classdef Experiment
             dz_field = obj.param.c/obj.param.fs ;
             Nint = ceil(dz_box/dz_field); % smoothing parameter which model PhotoDiode?? averaging effect
      
-            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time - 0*obj.MySimulationBox.time(1))*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
+            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
             
 %             figure;
 %             plot(obj.MySimulationBox.time*obj.param.c*1e3,line,'marker','o')

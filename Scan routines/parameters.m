@@ -23,15 +23,15 @@ param.farfield = param.width^2/(4*param.lambda);
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OF'; 
+param.FOC_type = 'OP'; 
 
 param.focus = 35/1000;           % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles = 0*pi/180 ; % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles = (-20:20)*pi/180 ; % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation = [1:2:50] ;        % decimation list of active actuators   - only active in OS mode 
  
 % waist of diffuse IR laser beam
 param.w0 = 1/1000 ; % in m 
-%param.center = [0 0 25]/1000 ;    %  specify the center of the gaussian beam.
+param.center = [3 0 25]/1000 ;    %  specify the center of the gaussian beam.
                                     % if this value is commented, 
                                     %the beam is by defaukt center on the
                                     %simulation box
@@ -45,9 +45,9 @@ param.Activated_FieldII = 1; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-5 5]/1000; % in m
+    param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [30 40]/1000; % in m
+    param.Zrange = [18 32]/1000; % in m
 
     param.Nx = 150;
     param.Ny = 1;

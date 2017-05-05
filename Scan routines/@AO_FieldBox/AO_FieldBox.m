@@ -81,7 +81,7 @@ classdef AO_FieldBox
         end
         
         function obj = Get_SimulationResults(obj,t,h,fs)
-            
+            %t: min time
             obj.Field = h;
             obj.time = t + (0:(size(h,1)-1))/fs;
             

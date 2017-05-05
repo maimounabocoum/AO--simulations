@@ -68,7 +68,9 @@ FILTER = filt*ones(1,length(MyImage.theta));
  xsonde = xsonde - mean(xsonde) ;
  
  % retreive t0 correction :
- Zref = mean(MyImage.L) ; % Z position supposed to be invariant in rotation
+ Zref = 0*mean(MyImage.L) ; % Zref : position supposed to be invariant in rotation
+ 
+ 
  % 1 - find x position for t = 0 :
  % Need to implement on real experiement : finding zero . Here it is not
  % necessary since t = 0 matches xsonde = 0 for all angles
@@ -86,7 +88,8 @@ FILTER = filt*ones(1,length(MyImage.theta));
       % T = X.*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
        
       % for FIELD II reconstruction :
-        T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
+        T = (X).*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
+        %T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
         
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
@@ -94,20 +97,20 @@ FILTER = filt*ones(1,length(MyImage.theta));
         img = img + reshape(projContrib,length(z_out),length(xsonde)); 
       
       %%% real time monitoring %%%   
-%        subplot(121)
 %        imagesc(xsonde*1e3,z_out*1e3,img)
+%        colorbar
 %        title(['angle',num2str(MyImage.theta(i)*180/pi)])
 %        xlabel('x (mm)')
 %        ylabel('z (mm)')
-%        colorbar
-%        drawnow 
 %        
+%        drawnow 
+        
   end
   
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% 
 subplot(121)
 imagesc(xsonde*1e3,z_out*1e3,img)
 title('resconstructed profile')
