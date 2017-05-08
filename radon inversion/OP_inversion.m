@@ -91,9 +91,10 @@ FILTER = filt*ones(1,length(MyImage.theta));
         %T = (X).*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
         %T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
       % SL10-reconstruction:
-        T = (  X - 6.5e-3*(-1+sign(MyImage.theta(i))) - 6.4e-3*(1+sign(MyImage.theta(i)))).*sin( MyImage.theta(i) ) ...
+        T = (  X- 8.2e-3*(-1+sign(MyImage.theta(i))) - 9.6e-3*(1+sign(MyImage.theta(i)))).*sin( MyImage.theta(i) ) ...
             + (Z-Zref).*cos( MyImage.theta(i) ) ;
         %plot(X,5*cos(X*pi/180) - 9.6*(-1+sign(X)).*sin(X*pi/180) - 9.6*(1+sign(X)).*sin(X*pi/180)+12.3)
+
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
       % retroprojection:  
