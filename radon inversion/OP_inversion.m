@@ -57,7 +57,7 @@ FILTER = filt*ones(1,length(MyImage.theta));
 
 
 % extract image back to initial size :
- [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
+ [I,z_out] = ReduceDataSize( I,'y',MyImage.t,[0 50]*1e-3);%MyImage.L
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% reconstruction BOX initialization (retroprojection):
@@ -96,18 +96,19 @@ FILTER = filt*ones(1,length(MyImage.theta));
         %plot(X,5*cos(X*pi/180) - 9.6*(-1+sign(X)).*sin(X*pi/180) - 9.6*(1+sign(X)).*sin(X*pi/180)+12.3)
 
       % common interpolation:  
-        projContrib = interp1((z_out-Zref)'-13.9765e-3,I(:,i),T(:),'linear',0);
+        projContrib = interp1((z_out-Zref)'-13.9765e-3,I(:,i),T(:),'linear',0); %13.9765
       % retroprojection:  
-        img = img + reshape(projContrib,length(z_out),length(xsonde)); 
+        img = 0*img + reshape(projContrib,length(z_out),length(xsonde)); 
         
       %%% real time monitoring %%%   
        imagesc(xsonde*1e3,z_out*1e3,img)
        colorbar
-       title(['angle',num2str(MyImage.theta(i)*180/pi)])
+       title(['angle(°): ',num2str(MyImage.theta(i)*180/pi)])
        xlabel('x (mm)')
        ylabel('z (mm)')
        
        drawnow 
+       saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
         
   end
   
