@@ -9,7 +9,7 @@ clear data
 theta=X;
 Proj=DataOP0(:,:,1);
 
-SamplingRate=Param.SamplingRate*1e6;
+SamplingRate = Param.SamplingRate*1e6;
 
 thetar=pi*theta/180;
 
@@ -46,8 +46,14 @@ for i=1:length(theta)
     imgfilt(:,:,i) = reshape(projContrib,length(yt),length(xsonde));
         figure(1)
         imagesc(xsonde,yt,imgfilt(:,:,i))
+        %imagesc(xsonde,yt,t)
+        colorbar
     drawnow
+
 end
+
+% plot(X,5.*cos(X*pi/180)+18.*sin(X*pi/180)-0.5*(1+sign(X)).*abs(38.4.*tan(X*pi/180)) + abs(38.4.*tan(max(abs(X))*pi/180)))
+    
 % 
 % Proj=DataOP90(:,:,1);
 % FFTt2=fftshift(fft(Proj));

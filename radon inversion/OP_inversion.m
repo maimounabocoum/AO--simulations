@@ -54,7 +54,7 @@ FILTER = filt*ones(1,length(MyImage.theta));
 %  I = MyImage.ifourier(MyImage.F_R);
  I = MyImage.ifourier(MyImage.F_R.*FILTER);
  
-
+I = abs(I);
 
 % extract image back to initial size :
  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
@@ -64,8 +64,8 @@ FILTER = filt*ones(1,length(MyImage.theta));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  %xsonde = (1:size(DelayLAWS,1))*0.2e-3; %linspace(0,192*0.2e-3,128);
- xsonde = linspace(0,192*0.2e-3,192);
- xsonde = xsonde - mean(xsonde) ;
+ xsonde = linspace(0,192*0.2e-3,193);
+% xsonde = xsonde - mean(xsonde) ;
  
  % retreive t0 correction :
  Zref = 0*mean(MyImage.L) ; % Zref : position supposed to be invariant in rotation
@@ -91,9 +91,12 @@ FILTER = filt*ones(1,length(MyImage.theta));
         %T = (X).*sin( MyImage.theta(i) ) + (Z-Zref).*cos( MyImage.theta(i) ) ;
         %T = (X-Zref*sin(MyImage.theta(i))).*sin( MyImage.theta(i) ) + (Z-Zref*cos(MyImage.theta(i))).*cos( MyImage.theta(i) ) ;
       % SL10-reconstruction:
-        T = (  X- 8.2e-3*(-1+sign(MyImage.theta(i))) - 9.6e-3*(1+sign(MyImage.theta(i)))).*sin( MyImage.theta(i) ) ...
-            + (Z-Zref).*cos( MyImage.theta(i) ) ;
-        %plot(X,5*cos(X*pi/180) - 9.6*(-1+sign(X)).*sin(X*pi/180) - 9.6*(1+sign(X)).*sin(X*pi/180)+12.3)
+        T = X.*sin( MyImage.theta(i) ) + Z.*cos( MyImage.theta(i) ) ...
+            - 0.5*(1+sign(MyImage.theta(i)))*abs((38.4e-3)*tan(MyImage.theta(i)))...
+            + (38.4e-3)*tan(max(MyImage.theta));
+        
+        
+        % plot(X,12*cos(X*pi/180) - (-3-abs(192*0.2*tan(X*pi/180))).*sin(X*pi/180))
 
       % common interpolation:  
         projContrib = interp1((z_out-Zref)',I(:,i),T(:),'linear',0);
@@ -102,6 +105,7 @@ FILTER = filt*ones(1,length(MyImage.theta));
       
       %%% real time monitoring %%%   
        imagesc(xsonde*1e3,z_out*1e3,img)
+       %imagesc(xsonde*1e3,z_out*1e3,T*1e3)
        colorbar
        title(['angle',num2str(MyImage.theta(i)*180/pi)])
        xlabel('x (mm)')
