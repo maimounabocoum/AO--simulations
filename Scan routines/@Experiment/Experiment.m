@@ -341,8 +341,8 @@ classdef Experiment
                  ylabel('z(mm)')
                  title('Radon transform')
                  colorbar
-            else
-
+             else
+   
              imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,Transmission)
              xlabel('\theta (°)')
              ylabel('z (mm)')
@@ -381,8 +381,8 @@ classdef Experiment
             dz_box = obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1) ;
             dz_field = obj.param.c/obj.param.fs ;
             Nint = ceil(dz_box/dz_field); % smoothing parameter which model PhotoDiode?? averaging effect
-     
-            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,smooth(line,Nint),obj.MySimulationBox.z,'square',0);
+            % smooth(line,Nint)
+            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
             
 %             figure;
 %             plot(obj.MySimulationBox.time*obj.param.c*1e3,line,'marker','o')

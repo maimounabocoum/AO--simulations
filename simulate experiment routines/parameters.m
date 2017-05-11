@@ -14,12 +14,12 @@ param.width= 0.2/1000; % Width of element [m]
 param.kerf= 0; % Distance between transducer elements [m]
 param.N_elements = 128; % Number of elements
 param.ActiveList = 1:128; % index of active elements
-param.focus = [0 0 40]/1000; % Initial electronic focus [m,m,m]
+param.focus = [0 0 35]/1000; % Initial electronic focus [m,m,m]
 param.Rfocus = 35/1000; % Elevation focus
 %param.attenuation = 0;         % en db/cm/Mhz
 param.no_sub_x = 1;
-param.no_sub_y = 10; % for designed probes, you should put a value > 2 for proper calculation (10 is good!)
-param.farfield = param.width^2/(4*param.lambda); 
+param.no_sub_y = 10; % 10 for designed probes, you should put a value > 2 for proper calculation (10 is good!)
+param.farfield = max(param.width/param.no_sub_x,param.element_height/param.no_sub_y)^2/(4*param.lambda); 
 
 %% type of focalization to apply for the virtual experiment :
 % OF : 'Focused Waves'
@@ -53,7 +53,7 @@ param.Activated_FieldII =  1 ; % 0 to generate field by yourself
     % unshure Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq  * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) );
     %% abosbers positions :
-    param.phantom.Positions = [0 0 30 ; 0 0 35]/1000; % [x1 y1 z1; x2 y2 z2 ....] aborbant position list
+    param.phantom.Positions = [0 0 35 ; 0 0 500]/1000; % [x1 y1 z1; x2 y2 z2 ....] aborbant position list
     param.phantom.Sizes     = [1 ; 1]/1000;      % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ; % available types : square, gaussian
 

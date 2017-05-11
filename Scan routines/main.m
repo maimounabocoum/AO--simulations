@@ -34,30 +34,39 @@ if param.Activated_FieldII == 1
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
- %Hf = figure(1);
+ Hf = figure(1);
  tic
-h = waitbar(0,'Please wait...');
-for n_scan = 1:CurrentExperiement.Nscan
- waitbar(n_scan/CurrentExperiement.Nscan)
+%h = waitbar(0,'Please wait...');
+for n_scan = 96%1:CurrentExperiement.Nscan
+ %waitbar(n_scan/CurrentExperiement.Nscan)
 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
-
-     %CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+    %CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
+     
+     CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
    
     % retreive delay law for cuurent scan
     if param.FOC_type == 'OP' 
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
+    
+       
+      
 end
  
  toc
  CurrentExperiement.ShowAcquisitionLine();
  
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
+% Transmission = squeeze( reshape(CurrentExperiement.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+% plot(CurrentExperiement.MySimulationBox.z*1e3,Transmission(75,:))
+%hold on
+%plot(CurrentExperiement.MySimulationBox.z*1e3,CurrentExperiement.AOSignal(:,64)/max(CurrentExperiement.AOSignal(:,64)))
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
