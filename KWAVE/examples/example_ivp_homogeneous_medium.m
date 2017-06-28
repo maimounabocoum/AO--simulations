@@ -26,7 +26,7 @@
 % along with k-Wave. If not, see <http://www.gnu.org/licenses/>. 
 
 clear all;
-
+addpath('D:\GIT\AO---softwares-and-developpement\KWAVE');
 % =========================================================================
 % SIMULATION
 % =========================================================================
