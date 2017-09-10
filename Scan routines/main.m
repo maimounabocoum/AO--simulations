@@ -36,9 +36,9 @@ end
 
  Hf = figure(1);
  tic
-%h = waitbar(0,'Please wait...');
-for n_scan = 96%1:CurrentExperiement.Nscan
- %waitbar(n_scan/CurrentExperiement.Nscan)
+h = waitbar(0,'Please wait...');
+for n_scan = 1:CurrentExperiement.Nscan
+ waitbar(n_scan/CurrentExperiement.Nscan)
 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
@@ -46,10 +46,10 @@ for n_scan = 96%1:CurrentExperiement.Nscan
 
     %CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
      
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
    
     % retreive delay law for cuurent scan
-    if param.FOC_type == 'OP' 
+    if param.Activated_FieldII == 1
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
     
