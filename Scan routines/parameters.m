@@ -45,9 +45,9 @@ param.Activated_FieldII = 1; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-7 7]/1000; % in m
+    param.Xrange = [-9 9]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [20 30]/1000; % in m
+    param.Zrange = [18 32]/1000; % in m
 
     param.Nx = 150;
     param.Ny = 1;

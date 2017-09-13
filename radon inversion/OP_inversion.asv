@@ -4,7 +4,6 @@
 %clearvars;
 addpath('functions')
 addpath('..\Scan routines')
-addpath('shared functions folder')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % update of the OP structure
                             % X : theta 
@@ -79,25 +78,27 @@ FILTER = filt*ones(1,length(MyImage.theta));
  for i = 1:size(DelayLAWS,2)
       Z_m(i,:) =   - DelayLAWS(:,i)*c;
  end
-[theta M0]    = EvalDelayLaw_shared( X_m , Z_m  ) ;
+[theta M0]    = EvalDelayLaw( X_m , Z_m  ) ;
 
-Retroprojection_shared( I , X_m, z_out , theta, M0);
+Retroprojection( I , X_m, z_out , theta, M0);
 
 % Ireconstruct = OPinversionFunction( Angle_Rad , Z_m , I , SampleRate_Hz, c);
-% aveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
+
+%        saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure
-imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-colorbar
-title('simulation input phantom')
-ylim([min(z_out*1e3) max(z_out*1e3)])
-xlabel('x (mm)')
-ylabel('y (mm)')
-drawnow   
+% 
+% subplot(122)
+% imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+% colorbar
+% title('simulation input phantom')
+% ylim([min(z_out*1e3) max(z_out*1e3)])
+% xlabel('x (mm)')
+% ylabel('y (mm)')
+% drawnow   
 
 % subplot(223)
 % title('simulation input phantom')
