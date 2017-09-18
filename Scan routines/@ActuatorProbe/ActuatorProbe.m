@@ -5,23 +5,24 @@ classdef ActuatorProbe
     properties   
         rect;
         center; 
+        ActiveList
         DelayLaw;
     end
     
-    properties (Access = private)
+   properties (Access = private)
    Nactuators
-   ActiveList
    end
 
         
     methods
         
 
-        function obj = ActuatorProbe(Nactuators,Height,Width,no_sub_x,no_sub_y,kerf,ActiveList,Rfocus)
-            obj.Nactuators = Nactuators;
-            obj.ActiveList = ActiveList;
+        function obj = ActuatorProbe(Nactuators,Height,Width,no_sub_x,no_sub_y,kerf,Rfocus)
+            
+            obj.Nactuators = Nactuators   ;
+            ActiveList     = 1:Nactuators ;
      
-        rect = zeros(length(ActiveList)*no_sub_x*no_sub_y,19);
+        rect = zeros(Nactuators*no_sub_x*no_sub_y,19);
         center= zeros(Nactuators,3);
                %% absolute center of the probe:
                Xc = (Width + (Nactuators-1)*(kerf+Width))/2;
@@ -32,7 +33,7 @@ classdef ActuatorProbe
                obj.center = Vector_Translation(center,[-Xc,0,0]);
         
                %% initialiaze individual active actuators:
-                for i = 1:length(ActiveList)                  
+                for i = 1:Nactuators                 
                   % creation of a single element with lower left corner located 
                   % at position (0,0,0)
                   Element = SingleElement(Height,Width,no_sub_x,no_sub_y,i);
@@ -76,6 +77,13 @@ classdef ActuatorProbe
          
             
         end
+        
+        function obj = Set_ActiveList(obj,ActiveList)
+            % check that value are well into 1 and Nelement :
+            
+            obj.ActiveList = ActiveList;  
+            
+        end
           
         function obj = Set_ActuatorDelayLaw(obj,LawSelection,Param,c)
          
@@ -106,9 +114,11 @@ classdef ActuatorProbe
                    N = floor(T0*Fe);
                    [X,T] = meshgrid(x,t);
                    Mat = (sin(2*pi*F0*(T - alpha*X)) > 0).*sin(2*pi*f0*T) ;
+                   
                    for i = 1:length(obj.ActiveList)
                    Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param)) ;
                    end
+                   
                    Delay = Delay - min(Delay);
                    
                    

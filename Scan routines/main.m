@@ -16,8 +16,7 @@ CurrentExperiement = Experiment(param);
 
 % initial excitation field :
 
-    Noc = 4; % number of optical cycles
-    t_excitation = (0:1/param.fs:Noc*1.5/param.f0);
+    t_excitation = (0:1/param.fs:param.Noc*1.5/param.f0);
     excitation =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
     
 %     excitation_env = hilbert(excitation);
@@ -49,6 +48,7 @@ end
 
  for n_scan = 1:CurrentExperiement.Nscan
  
+     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
@@ -67,7 +67,7 @@ end
 
  %close(h) 
  toc
- CurrentExperiement.ShowAcquisitionLine();
+ %CurrentExperiement.ShowAcquisitionLine();
  
 % [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
 % Transmission = squeeze( reshape(CurrentExperiement.DiffuseLightTransmission',[Ny,Nx,Nz]) );

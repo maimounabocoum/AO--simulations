@@ -7,6 +7,7 @@ classdef Experiment
         MyPhantom ;
         MyProbe ;
         MyLaser ;
+        MyExcitation ;
         MySimulationBox;
         
         % phantom on simulation bow transmission profile
@@ -16,6 +17,7 @@ classdef Experiment
        Nscan           % number of scans performed in the experiement
        BoolActiveList  % active actuator encoded on boolean table, where each column describe 
                        % one scan, and the line index matches the actuator
+                       % index
        AOSignal
         
     end
@@ -44,8 +46,10 @@ classdef Experiment
             end
             
             obj.MyProbe = ActuatorProbe(param.N_elements,param.element_height,param.width,...
-                          param.no_sub_x,param.no_sub_y,param.kerf,1,param.Rfocus);
-                      % for waveform :
+                          param.no_sub_x,param.no_sub_y,param.kerf,param.Rfocus);
+                      
+            % initialization for self-defined field (propagation using FFT)
+            % obj.MyExcitation = ExcitationField(obj.MyProbe,param.f0,param.fs,param.Noc);
                       
             obj.param = param;
             
@@ -57,6 +61,7 @@ classdef Experiment
         function obj = ConfigureProbeSequence(obj)
             
             switch obj.param.FOC_type
+                
                 case 'OF'
                     % get the center position X for each scan line               
                        [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.MySimulationBox.x );
@@ -82,6 +87,7 @@ classdef Experiment
 
                        
                case 'OP'
+                   
                     if ~isfield(obj.param,'angles')
                         obj.param.angles = (-45:2:45)*pi/180 ; % default scan angles
                     end
@@ -102,6 +108,7 @@ classdef Experiment
                        obj.BoolActiveList(MedElmtList,:) = true ;
                        
                 case 'JM'
+                    
                     if ~isfield(obj.param,'NbZ')
                         obj.param.NbZ  = -1:1; % default scan angles
                     end
@@ -126,6 +133,7 @@ classdef Experiment
                     
                     
                 case 'OS'
+                    
                     if ~isfield(obj.param,'angles')
                         obj.param.angles = 0 ; % default scan angles
                     end
@@ -179,21 +187,20 @@ classdef Experiment
                       
             
         end
-            
-        function obj = CalculateUSfield(obj,t_excitation,excitation,n_scan)
-
+        
+        function obj = InitializeProbe(obj,n_scan)
+            % take the parameter of current shoot to initialize probe
+            % characteristics : 
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan)) ;
-
+            % probe strcuture initialization :
+            
+           obj.MyProbe = obj.MyProbe.Set_ActiveList(ActiveList) ;
            
-           % probe strcuture initialization :
-           obj.MyProbe = ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
-                          obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
-
-        if obj.param.Activated_FieldII == 1
-            % in field, the excitation fieldII should be real
-
-            % define delay law for the probe :
+%            ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
+%                           obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
+%            
+           % define delay law for the probe :
               switch obj.param.FOC_type
                 
                  case 'OF' 
@@ -205,6 +212,14 @@ classdef Experiment
                   case 'JM'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:),obj.param.c);
               end
+            
+        end
+            
+        function obj = CalculateUSfield(obj,t_excitation,excitation,n_scan)
+
+        if obj.param.Activated_FieldII == 1
+            % in field, the excitation fieldII should be real
+
                     % Initialize home-made probe  :
                     % focus [0 0 0] will be overwritten by the delay law
                     Probe = xdc_rectangles(obj.MyProbe.rect,[10 10 10], [11 0 0]);   
@@ -234,12 +249,13 @@ classdef Experiment
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
                case 'OP'
+                   
                    % width of simulation BOX
-                   if obj.ScanParam(n_scan) <= 0
-                   DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
-                   else
-                   DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
-                   end
+%                    if obj.ScanParam(n_scan) <= 0
+%                    DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
+%                    else
+%                    DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
+%                    end
                    % taking into account additional propagation due to tilt scan
 
                    % angle           
@@ -249,7 +265,7 @@ classdef Experiment
            
            obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
                                  
-           [X,~,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
 
            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
    
@@ -269,26 +285,36 @@ classdef Experiment
                case 'OP'
                    
                    % difinition of initial field : 
-   
-                   
-            ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-            XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
-                       % F : field to match dimension issued by Field II
-            % setting the rotation inveration to center of the simulation
-
-            XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
-            
-            % rotated variable by angle theta
-            obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
-            F = interp1(t_excitation, excitation, T - XI/(obj.param.c),'linear',0)  ;         
-
-            obj.MySimulationBox.Field = real(F) ;  
+             obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
+             F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);
+             
+             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+             Ft = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
+                         T - ZZ/(obj.param.c),'linear',0)  ;   
+             FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
+             
+             % exp(1i*obj.omega0*obj.t).*hanning(length(obj.t)).^2'
+             % BEGIN old code 
+             
+%              ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+%              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
+%                        % F : field to match dimension issued by Field II
+%             % setting the rotation inveration to center of the simulation
+% 
+%             XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+%             
+%             % rotated variable by angle theta
+%             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
+%              F = interp1(texcitation,excitation,...
+%                          T - XI/(obj.param.c),'linear',0)  ;     
+              % END old code 
+ 
+             obj.MySimulationBox.Field = real(FF.*Ft) ;  
             
                    
            end
 
-            %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
-            
+       
         end
             
             

@@ -4,19 +4,20 @@
 
 % set_field('show_time',1);
 
-param.f0 = 6e6;       % Transducer center frequency [Hz]
-param.fs = 100e6;     % Sampling frequency using in FIELDII[Hz]
-param.fs_aq  = 10e6;  % Sampling frequency for the experiement [Hz]
-param.c = 1540;       % Speed of sound [m/s]
-param.lambda = param.c/param.f0; % Wavelength [m]
-param.element_height= 6/1000;    % Height of element [m] 6
-param.width = 0.2/1000;          % Width of element [m] - 0.11 for 15MhZ probe
-param.kerf = 0/1000;             % Distance between transducer elements [m]
-param.N_elements = 192 ;         % 192; % Number of elements
-param.X0 = -5/1000  ;            % prosition min of effective probe shooting
-param.X1 = -3/1000 ;              % prosition min of effective probe shooting
-param.Rfocus = 35/1000;          % Static Elevation focus
-param.attenuation = 0;           % en db/cm/Mhz
+param.f0 = 6e6;                     % Transducer center frequency [Hz]
+param.fs = 100e6;                   % Sampling frequency using in FIELDII[Hz]
+param.fs_aq  = 10e6;                % Sampling frequency for the experiement [Hz]
+param.Noc = 4 ;                     % Number of optical cycles
+param.c = 1540;                     % Speed of sound [m/s]
+param.lambda = param.c/param.f0;    % Wavelength [m]
+param.element_height= 6/1000;       % Height of element [m] 6
+param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
+param.kerf = 0/1000;                % Distance between transducer elements [m]
+param.N_elements = 192 ;            % 192; % Number of elements
+param.X0 = -5/1000  ;               % prosition min of effective probe shooting
+param.X1 =  5/1000 ;                % prosition min of effective probe shooting
+param.Rfocus = 35/1000;             % Static Elevation focus
+param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
 param.no_sub_y = 10; %for designed probes, you should put a value > 2 for proper calculation (10 is good!)
 param.farfield = param.width^2/(4*param.lambda); 
@@ -29,11 +30,11 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OP'; 
 
 param.focus       = 35/1000;        % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = -10*pi/180; % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = 0*pi/180;       % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation  = [1:2:50] ;      % decimation list of active actuators   - only active in OS mode 
-%[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
+
 param.NbZ         = 1:2;              % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = -5:5;              % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbX         = -10:10;              % 20 Nb de composantes de Fourier en X, 'JM'
  
 % waist of diffuse IR laser beam
 param.w0 = 5/1000 ; % in m 
@@ -51,9 +52,9 @@ param.Activated_FieldII = 0; % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-5 5]/1000; % in m
+    param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [17 30]/1000; % in m
+    param.Zrange = [25 35]/1000; % in m
 
     param.Nx = 150;
     param.Ny = 1;
