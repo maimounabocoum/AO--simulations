@@ -4,6 +4,7 @@ classdef ActuatorProbe
     
     properties   
         rect;
+        rectActive;
         center; 
         ActiveList
         DelayLaw;
@@ -11,6 +12,12 @@ classdef ActuatorProbe
     
    properties (Access = private)
    Nactuators
+   no_sub_x
+   no_sub_y
+   Height
+   Width
+   kerf
+   Rfocus
    end
 
         
@@ -48,7 +55,13 @@ classdef ActuatorProbe
                rect = Element_TranslationX(rect,-Xc);
                rect = Element_ElevationZ(rect,Rfocus);
 
-                obj.rect = rect;      
+                obj.rect        = rect;   
+                obj.Height      = Height ;
+                obj.Width       = Width ;
+                obj.no_sub_x    = no_sub_x ;
+                obj.no_sub_y    = no_sub_y ;
+                obj.kerf        = kerf;
+                obj.Rfocus      = Rfocus ;
                 
                 
         end
@@ -81,7 +94,34 @@ classdef ActuatorProbe
         function obj = Set_ActiveList(obj,ActiveList)
             % check that value are well into 1 and Nelement :
             
-            obj.ActiveList = ActiveList;  
+             obj.ActiveList = ActiveList;  
+             rect           = zeros(obj.Nactuators*obj.no_sub_x*obj.no_sub_y,19);
+             center         = zeros(obj.Nactuators,3);
+               %% absolute center of the probe:
+               Xc = (obj.Width + (obj.Nactuators-1)*(obj.kerf+obj.Width))/2;
+               %% get center coordinate of all actuator (even if not in ActiveList)
+               for i = 1:obj.Nactuators
+               center(i,:) = [obj.Width*(i-1)+obj.Width/2,obj.Height/2,0];
+               end
+               center = Vector_Translation(center,[-Xc,0,0]);
+        
+               %% initialiaze individual active actuators:
+                for i = 1:length(obj.ActiveList)               
+                  % creation of a single element with lower left corner located 
+                  % at position (0,0,0)
+                  Element = SingleElement(obj.Height,obj.Width,obj.no_sub_x,obj.no_sub_y,i);
+                  Element = Element_TranslationX(Element,(ActiveList(i)-1)*(obj.kerf+obj.Width));
+                  Element = Element_TranslationY(Element,-obj.Height/2);
+
+                  rect([1:obj.no_sub_x*obj.no_sub_y] + obj.no_sub_x*obj.no_sub_y*(i-1),:) = Element;
+                end
+                  
+               %% recentering all elements to (0,0,0):
+                       
+               rect = Element_TranslationX(rect,-Xc);
+               rect = Element_ElevationZ(rect,obj.Rfocus);
+
+                obj.rectActive = rect;      
             
         end
           

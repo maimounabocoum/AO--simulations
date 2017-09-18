@@ -222,7 +222,7 @@ classdef Experiment
 
                     % Initialize home-made probe  :
                     % focus [0 0 0] will be overwritten by the delay law
-                    Probe = xdc_rectangles(obj.MyProbe.rect,[10 10 10], [11 0 0]);   
+                    Probe = xdc_rectangles(obj.MyProbe.rectActive,[10 10 10], [11 0 0]);   
 
                     % calculate impulse response in FIELD II
                         t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);

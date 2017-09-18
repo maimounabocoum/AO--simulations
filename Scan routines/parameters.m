@@ -44,7 +44,7 @@ param.center = [0 0 20]/1000 ;    %  specify the center of the gaussian beam.
                                     %simulation box
 
 
-param.Activated_FieldII = 0; % 0 to generate field by yourself
+param.Activated_FieldII = 1;     % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX

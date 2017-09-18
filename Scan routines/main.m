@@ -65,6 +65,7 @@ end
   % waitbar(n_scan/CurrentExperiement.Nscan)
  end
 
+ 
  %close(h) 
  toc
  %CurrentExperiement.ShowAcquisitionLine();
