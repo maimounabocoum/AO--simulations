@@ -222,7 +222,7 @@ classdef Experiment
 
                     % Initialize home-made probe  :
                     % focus [0 0 0] will be overwritten by the delay law
-                    Probe = xdc_rectangles(obj.MyProbe.rect,[10 10 10], [11 0 0]);   
+                    Probe = xdc_rectangles(obj.MyProbe.rectActive,[10 10 10], [11 0 0]);   
 
                     % calculate impulse response in FIELD II
                         t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
@@ -249,16 +249,7 @@ classdef Experiment
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
                case 'OP'
-                   
-                   % width of simulation BOX
-%                    if obj.ScanParam(n_scan) <= 0
-%                    DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
-%                    else
-%                    DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
-%                    end
-                   % taking into account additional propagation due to tilt scan
-
-                   % angle           
+                           
                    tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
            end
@@ -286,27 +277,40 @@ classdef Experiment
                    
                    % difinition of initial field : 
              obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
-             F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.z,obj.param.c);
+             %F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);
              
-             Ft = interp1(tmin + obj.MyExcitation.t,obj.MyExcitation.Excitation,obj.MySimulationBox.time,'linear',0);
-             FF = (Ft(:))*(F(:)');
+             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+             %Et = obj.MyExcitation.Excitation(:)*ones(1,length(Z(:)));
+             %Ft = repmat(obj.MyExcitation.Excitation(:),1,length(Z(:)));
+                          
+             %Ft = exp( 1i*2*pi*obj.param.f0*( T - ZZ/(obj.param.c) ));
+             
+                              
+             % Npoint of time in column x spatial profile in the grid                 
+%              FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
+%                           % T time as column x number of point in the grid
+%              Ft = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
+%                                   T - ZZ/(obj.param.c) - angle(FF)/(2*pi*obj.param.f0),'linear' , 0 ); 
+%              Ft = real(Ft) ;
+%              FF = abs(FF) ;
+             
+             
              % exp(1i*obj.omega0*obj.t).*hanning(length(obj.t)).^2'
              % BEGIN old code 
-             
               ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-%              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
-%                        % F : field to match dimension issued by Field II
-%             % setting the rotation inveration to center of the simulation
+              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
+%            % F : field to match dimension issued by Field II
+%            % setting the rotation inveration to center of the simulation
 % 
-%             XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+              XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
 %             
 %             % rotated variable by angle theta
 %             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
-%              F = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
-%                          T - ZZ/(obj.param.c),'linear',0)  ;     
+              F = interp1(texcitation,excitation,...
+              T - XI/(obj.param.c),'linear',0)  ;     
               % END old code 
  
-             obj.MySimulationBox.Field = real(FF) ;  
+             obj.MySimulationBox.Field = FF.*Ft ;  
             
                    
            end

@@ -43,8 +43,8 @@ DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
  tic
- Hf = gcf;
-%h = waitbar(0,'Please wait...');
+% Hf = gcf;
+h = waitbar(0,'Please wait...');
 
  for n_scan = 1:CurrentExperiement.Nscan
  
@@ -53,7 +53,7 @@ end
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
    
     % retreive delay law for cuurent scan
@@ -62,13 +62,13 @@ end
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
           
-  % waitbar(n_scan/CurrentExperiement.Nscan)
+   waitbar(n_scan/CurrentExperiement.Nscan)
  end
 
  
- %close(h) 
+ close(h) 
  toc
- %CurrentExperiement.ShowAcquisitionLine();
+ CurrentExperiement.ShowAcquisitionLine();
  
 % [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
 % Transmission = squeeze( reshape(CurrentExperiement.DiffuseLightTransmission',[Ny,Nx,Nz]) );

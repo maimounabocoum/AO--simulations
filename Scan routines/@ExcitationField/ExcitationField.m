@@ -20,10 +20,9 @@ classdef ExcitationField
             % input probe intit
             obj.Probe       = Probe ;
             obj.omega0      = 2*pi*f0 ;
-            f0              = (obj.omega0)/(2*pi) ;
-            obj.omega0      =  2*pi*f0 ;
             obj.t           = (0:1/fs:Noc*1.5/f0);
-            obj.Excitation  =  real( exp(1i*obj.omega0*obj.t).*hanning(length(obj.t)).^2' );  
+            obj.Excitation  =  exp(1i*obj.omega0*obj.t).*( hanning(length(obj.t))'.^2 ) ;  
+            
 
         end
         
@@ -58,16 +57,14 @@ classdef ExcitationField
               F = fftshift(F,2);
              
                % interpolate field over input grid : 
-              Field_inter = interp1(x,F',x_in,'linear', 0 ) ;
+              Field_interp = interp1(x,F',x_in,'linear', 0 ) ;
+              Field_out(:,1,:) = Field_interp ;
               
-              % so for no implementation in y direction
-              Field_out= Field_inter ;
-               
 %               figure;
 %               subplot(1,2,1)
-%               imagesc(obj.x,z,abs(F_TF))
+%               imagesc(abs(F_TF))
 %               subplot(1,2,2)
-%               imagesc(abs(F))
+%               imagesc(angle(Field_interp))
 
             
             
@@ -76,18 +73,7 @@ classdef ExcitationField
             
         end
         
-%         function Ew = fourier(N, Et)
-%             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-%             Ew=fft(ifftshift(Et),obj.N)*obj.tRange/obj.N;
-%             Ew=fftshift(Ew);
-%         end
-%         
-%         function Et = ifourier(N, Ew)
-%             Et=ifft(ifftshift(Ew),N)*obj.N/obj.tRange;
-%             Et=fftshift(Et);
-%         end
-%         
-        
+      
     end
     
 end

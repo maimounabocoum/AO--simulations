@@ -95,7 +95,7 @@ classdef ActuatorProbe
             % check that value are well into 1 and Nelement :
             
              obj.ActiveList = ActiveList;  
-             rect           = zeros(obj.Nactuators*obj.no_sub_x*obj.no_sub_y,19);
+             rect           = zeros(length(obj.ActiveList)*obj.no_sub_x*obj.no_sub_y,19);
              center         = zeros(obj.Nactuators,3);
                %% absolute center of the probe:
                Xc = (obj.Width + (obj.Nactuators-1)*(obj.kerf+obj.Width))/2;

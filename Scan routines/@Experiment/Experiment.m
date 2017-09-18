@@ -249,17 +249,8 @@ classdef Experiment
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
                case 'OP'
-                   
-                   % width of simulation BOX
-%                    if obj.ScanParam(n_scan) <= 0
-%                    DZ0 = (obj.param.Xrange(2))*sin(obj.ScanParam(n_scan)) ;
-%                    else
-%                    DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
-%                    end
-                   % taking into account additional propagation due to tilt scan
-
-                   % angle           
-                   tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
+                           
+                   tmin = ( obj.param.Zrange(1)*sin(obj.ScanParam(n_scan)) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
            end
            
@@ -285,31 +276,40 @@ classdef Experiment
                case 'OP'
                    
                    % difinition of initial field : 
-             obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
-             F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);
+             %obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
+             %F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);
              
-             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-             Ft = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
-                         T - ZZ/(obj.param.c),'linear',0)  ;   
-             FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
+             % ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+             % Ft = repmat(obj.MyExcitation.Excitation(:),1,length(Z(:)));
+                          
+             %Ft = exp( 1i*2*pi*obj.param.f0*( T - ZZ/(obj.param.c) ));
+             
+                              
+             % Npoint of time in column x spatial profile in the grid                 
+%              FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
+%                           % T time as column x number of point in the grid
+%              Ft = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
+%                                   T - ZZ/(obj.param.c) - angle(FF)/(2*pi*obj.param.f0),'linear' , 0 ); 
+%              Ft = real(Ft) ;
+%              FF = abs(FF) ;
+             
              
              % exp(1i*obj.omega0*obj.t).*hanning(length(obj.t)).^2'
              % BEGIN old code 
-             
-%              ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-%              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
-%                        % F : field to match dimension issued by Field II
-%             % setting the rotation inveration to center of the simulation
+              ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
+%            % F : field to match dimension issued by Field II
+%            % setting the rotation inveration to center of the simulation
 % 
-%             XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+              XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
 %             
 %             % rotated variable by angle theta
 %             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
-%              F = interp1(texcitation,excitation,...
-%                          T - XI/(obj.param.c),'linear',0)  ;     
+              F = interp1(t_excitation,excitation,...
+              T - XI/(obj.param.c),'linear',0)  ;     
               % END old code 
  
-             obj.MySimulationBox.Field = real(FF.*Ft) ;  
+             obj.MySimulationBox.Field = real(F) ;  
             
                    
            end

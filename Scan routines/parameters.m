@@ -30,7 +30,7 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OP'; 
 
 param.focus       = 35/1000;        % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = 0*pi/180;       % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = (-10:2:10)*pi/180;       % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation  = [1:2:50] ;      % decimation list of active actuators   - only active in OS mode 
 
 param.NbZ         = 1:2;              % 8; % Nb de composantes de Fourier en Z, 'JM'
@@ -44,7 +44,7 @@ param.center = [0 0 20]/1000 ;    %  specify the center of the gaussian beam.
                                     %simulation box
 
 
-param.Activated_FieldII = 1;     % 0 to generate field by yourself
+param.Activated_FieldII = 0;     % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
