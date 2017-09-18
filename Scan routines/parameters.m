@@ -13,6 +13,8 @@ param.element_height= 6/1000;    % Height of element [m] 6
 param.width = 0.2/1000;          % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;             % Distance between transducer elements [m]
 param.N_elements = 192 ;         % 192; % Number of elements
+param.X0 = -5/1000  ;            % prosition min of effective probe shooting
+param.X1 = -3/1000 ;              % prosition min of effective probe shooting
 param.Rfocus = 35/1000;          % Static Elevation focus
 param.attenuation = 0;           % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -27,7 +29,7 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OP'; 
 
 param.focus       = 35/1000;        % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = (-20:20)*pi/180 ; % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = -10*pi/180; % Angular scan [m,m,m]                  - only active in OP and OS mode 
 param.decimation  = [1:2:50] ;      % decimation list of active actuators   - only active in OS mode 
 %[NBX,NBZ] = meshgrid(-NbX:NbX,1:NbZ);
 param.NbZ         = 1:2;              % 8; % Nb de composantes de Fourier en Z, 'JM'

@@ -89,7 +89,17 @@ classdef Experiment
                     % retreive the total number of scans     
                        obj.Nscan = length(obj.param.angles); 
                        obj.ScanParam = obj.param.angles ;
-                       obj.BoolActiveList = true(obj.param.N_elements,obj.Nscan);   
+                       
+                       % reindexation of X0, X1 for 0 to Lmax of the probe
+                       X0 = obj.param.X0 + (1/2)*obj.param.N_elements*obj.param.width;
+                       X1 = obj.param.X1 + (1/2)*obj.param.N_elements*obj.param.width;
+                       
+                       ElmtBorns   = [min(obj.param.N_elements,max(1,round(X0/obj.param.width))),...
+                                      max(1,min(obj.param.N_elements,round(X1/obj.param.width)))];
+                       ElmtBorns   = sort(ElmtBorns); % in case X0 and X1 are mixed up
+                       MedElmtList = ElmtBorns(1):ElmtBorns(2);  
+                       obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan);   
+                       obj.BoolActiveList(MedElmtList,:) = true ;
                        
                 case 'JM'
                     if ~isfield(obj.param,'NbZ')
@@ -104,7 +114,15 @@ classdef Experiment
                        obj.Nscan = length(obj.param.NbX*obj.param.NbZ); 
                        [NBX, NBZ] = meshgrid( obj.param.NbX , obj.param.NbZ ) ;
                        obj.ScanParam = [NBX(:), NBZ(:)];
-                       obj.BoolActiveList = true(obj.param.N_elements,obj.Nscan);                    
+                       % reindexation of X0, X1 for 0 to Lmax of the probe
+                       X0 = obj.param.X0 + (1/2)*obj.param.N_elements*obj.param.width;
+                       X1 = obj.param.X1 + (1/2)*obj.param.N_elements*obj.param.width;
+                       ElmtBorns   = [min(obj.param.N_elements,max(1,round(X0/obj.param.width))),...
+                                      max(1,min(obj.param.N_elements,round(X1/obj.param.width)))];
+                       ElmtBorns   = sort(ElmtBorns); % in case X0 and X1 are mixed up
+                       MedElmtList = ElmtBorns(1):ElmtBorns(2);  
+                       obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan);   
+                       obj.BoolActiveList(MedElmtList,:) = true ;                   
                     
                     
                 case 'OS'
@@ -166,12 +184,13 @@ classdef Experiment
 
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan)) ;
+
            
            % probe strcuture initialization :
            obj.MyProbe = ActuatorProbe(obj.param.N_elements,obj.param.element_height,obj.param.width,...
                           obj.param.no_sub_x,obj.param.no_sub_y,obj.param.kerf,ActiveList,obj.param.Rfocus);
 
-          if obj.param.Activated_FieldII == 1
+        if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
 
             % define delay law for the probe :
@@ -206,7 +225,8 @@ classdef Experiment
                     tmin = t - max(t_excitation)/2;
                     obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
                     xdc_free(Probe);
-         else
+        else
+           
          %%================= implementation without use of FILEDII=====================
          
           switch obj.param.FOC_type
@@ -220,48 +240,56 @@ classdef Experiment
                    else
                    DZ0 = (obj.param.Xrange(1))*sin(obj.ScanParam(n_scan)) ;
                    end
-                   % taking into account additional propagatoion du to tilt scan
+                   % taking into account additional propagation due to tilt scan
 
                    % angle           
                    tmin = ( obj.param.Zrange(1) )/(obj.param.c) ;
-                   %tmin = ( cos(obj.ScanParam(n_scan))*obj.param.Zrange(1) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
-          end
+           end
            
            obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
                                  
-           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
+           [X,~,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
 
            T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
    
            switch obj.param.FOC_type
+               
                 case 'OF'
+                    
             [Field,phi]= obj.GaussianPulse(X-obj.ScanParam(n_scan),Y,Z);   
             % F : field to match dimension issued by Field II
-            PHI = repmat(phi(:)',length(obj.MySimulationBox.time) , 1 );
-            FIELD =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
+             PHI = repmat(phi(:)',length(obj.MySimulationBox.time) , 1 );
+             FIELD =  repmat( Field(:)',length(obj.MySimulationBox.time) , 1 ); 
             
             F = interp1(t_excitation,excitation,T - PHI/(2*pi*obj.param.f0)+ max(t_excitation)/2,'linear',0)  ;  
 
             obj.MySimulationBox.Field = real(F.*FIELD) ;
+            
                case 'OP'
+                   
+                   % difinition of initial field : 
+   
+                   
             ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
             XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
                        % F : field to match dimension issued by Field II
             % setting the rotation inveration to center of the simulation
-            % box , ie x_c = 0 , and z_c = mean(obj.param.Zrange)
+
             XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+            
             % rotated variable by angle theta
             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
-            F = interp1(t_excitation,excitation, T - XI/(obj.param.c),'linear',0)  ;         
+            F = interp1(t_excitation, excitation, T - XI/(obj.param.c),'linear',0)  ;         
 
             obj.MySimulationBox.Field = real(F) ;  
+            
                    
            end
 
             %obj.MySimulationBox.Field = evalField('OF'); % OP and OS to be implmented
             
-            end
+        end
             
             
             
