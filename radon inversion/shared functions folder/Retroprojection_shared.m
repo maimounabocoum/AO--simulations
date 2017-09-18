@@ -8,7 +8,7 @@ if size(I,1)~=length(z_out)
     error('inconsistent data size')
 end
 
-
+ 
 
 
 % retroprojection : 
@@ -50,6 +50,13 @@ end
     colormap(parula)
     set(findall(H,'-property','FontSize'),'FontSize',15) 
   
+    
+    figure;
+imagesc(theta*180/pi,z_out*1e3,I)
+hold on
+plot(theta*180/pi,...
+    1e3*(19.2e-3- M0(:,1)').*sin(theta)+1e3*(20e-3- M0(:,2)').*cos(theta),...
+    '--','linewidth',3,'color','red')
 
 end
 

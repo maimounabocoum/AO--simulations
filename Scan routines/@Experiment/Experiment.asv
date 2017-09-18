@@ -250,10 +250,12 @@ classdef Experiment
                        % F : field to match dimension issued by Field II
             % setting the rotation inveration to center of the simulation
             % box , ie x_c = 0 , and z_c = mean(obj.param.Zrange)
-            XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+            XI = (XX*sin(obj.ScanParam(n_scan))+ (ZZ- mean(obj.param.Zrange))*cos(obj.ScanParam(n_scan))) ; 
             % rotated variable by angle theta
-            obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
-            F = interp1(t_excitation,excitation, T - XI/(obj.param.c),'linear',0)  ;         
+    
+            %F = imrotate(A,obj.ScanParam(n_scan)) ;
+            obj.MyProbe.DelayLaw =mean(obj.param.Zrange)/(obj.param.c) + XI/(obj.param.c) ;
+            F = interp1(t_excitation,excitation, T-mean(obj.param.Zrange)/(obj.param.c)  - XI/(obj.param.c),'linear',0)  ;         
 
             obj.MySimulationBox.Field = real(F) ;  
                    

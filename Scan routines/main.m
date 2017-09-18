@@ -7,6 +7,7 @@ addpath('..\radon inversion')
 field_init(0);
 
 parameters;
+IsSaved = 0 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,16 +16,24 @@ CurrentExperiement = Experiment(param);
 
 % initial excitation field :
 
-    Noc = 1; % number of optical cycles
+    Noc = 4; % number of optical cycles
     t_excitation = (0:1/param.fs:Noc*1.5/param.f0);
-    excitation =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation))';
+    excitation =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
+    
+%     excitation_env = hilbert(excitation);
+%     excitation_env= abs(excitation_env);
+% 
 %     figure;
-%     plot(t_excitation*1e6,real(excitation))
+%     plot(t_excitation*1e6,excitation)
+%     hold on 
+%     plot(t_excitation*1e6,excitation_env,'color','red')
 %     xlabel('time in \mu s')
 %     ylabel('a.u')
 %     title('field excitation')
     
-    % evaluate Phantom on simulation Box :
+
+    
+% evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 %use param.angles has an input to additionally show Radon transform
 
@@ -34,29 +43,28 @@ if param.Activated_FieldII == 1
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
- Hf = figure(1);
  tic
+% Hf = gcf;
 h = waitbar(0,'Please wait...');
-for n_scan = 1:CurrentExperiement.Nscan
- waitbar(n_scan/CurrentExperiement.Nscan)
 
+ for n_scan = 1:CurrentExperiement.Nscan
+ 
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 
-    %CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)
-     
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ',Hf)
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
    
     % retreive delay law for cuurent scan
     if param.Activated_FieldII == 1
      DelayLAWS(:,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
-    
-       
-      
-end
- 
+          
+   waitbar(n_scan/CurrentExperiement.Nscan)
+ end
+
+ close(h) 
  toc
  CurrentExperiement.ShowAcquisitionLine();
  
@@ -70,7 +78,7 @@ end
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- if param.FOC_type == 'OP'
+ if strcmp(param.FOC_type,'OP') && (IsSaved == 1)
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;

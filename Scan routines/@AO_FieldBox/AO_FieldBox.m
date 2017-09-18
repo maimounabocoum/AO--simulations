@@ -89,10 +89,15 @@ classdef AO_FieldBox
                 
         function [] = ShowMaxField(obj,plane,FigHandle)
             
+            if ~ishandle(FigHandle)
+                FigHandle = figure ;
+            end
+            
+            set(FigHandle,'WindowStyle','docked');      
+            set(FigHandle,'NextPlot', 'replace');        
             
             
-            set(FigHandle,'NextPlot', 'replace');          
-            [Nx,Ny,Nz] = SizeBox(obj);
+            [Nx,Ny,Nz]       = SizeBox(obj);
             [Field_max,Tmax] = max(obj.Field,[],1);
             % max(obj.Field,[],1) : returns for each colulm
             % the maximum field pressure.
@@ -104,7 +109,9 @@ classdef AO_FieldBox
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');
-            Field_max = reshape(obj.Field',[Ny,Nx,Nz,length(obj.time)]);     
+            output = envelope(obj.Field,300) ;
+            %output = obj.Field;
+            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
             for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
@@ -115,7 +122,6 @@ classdef AO_FieldBox
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
                 title(['P(t) on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
                 colorbar
-                caxis([0 2e-11])
                 drawnow
                %saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
             end

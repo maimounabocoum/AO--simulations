@@ -57,7 +57,7 @@ FILTER = filt*ones(1,length(MyImage.theta));
 
 
 % extract image back to initial size :
- [I,z_out] = ReduceDataSize( I,'y',MyImage.t,[0 50]*1e-3);%MyImage.L
+ [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% reconstruction BOX initialization (retroprojection):
