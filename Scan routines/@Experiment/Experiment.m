@@ -248,9 +248,14 @@ classdef Experiment
                 case 'OF'
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
-               case 'OP'
+                case 'OP'
                            
-                   tmin = ( obj.param.Zrange(1)*sin(obj.ScanParam(n_scan)) )/(obj.param.c) ;
+                   tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
+                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
+                   
+              case 'OS' 
+                  
+                   tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
            end
            
@@ -276,15 +281,11 @@ classdef Experiment
                case 'OP'
                    
                    % difinition of initial field : 
-             %obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
-             %F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);
-             
+             % obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
+             % F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);         
              % ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
              % Ft = repmat(obj.MyExcitation.Excitation(:),1,length(Z(:)));
-                          
-             %Ft = exp( 1i*2*pi*obj.param.f0*( T - ZZ/(obj.param.c) ));
-             
-                              
+             % Ft = exp( 1i*2*pi*obj.param.f0*( T - ZZ/(obj.param.c) ));                             
              % Npoint of time in column x spatial profile in the grid                 
 %              FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
 %                           % T time as column x number of point in the grid
@@ -307,9 +308,19 @@ classdef Experiment
 %             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
               F = interp1(t_excitation,excitation,...
               T - XI/(obj.param.c),'linear',0)  ;     
+          
+          % profil due to decimation :
+          profil0 = 0*obj.MyProbe.center(:,1) ;
+          profil0(obj.MyProbe.ActiveList) = 1 ;
+          P = interp1(obj.MyProbe.center(:,1),profil0,...
+                      X-Z*tan(obj.ScanParam(n_scan)),'linear',0) ;
+          
+          PP = repmat(P(:)',length(obj.MySimulationBox.time) , 1 );
+          
+
               % END old code 
  
-             obj.MySimulationBox.Field = real(F) ;  
+             obj.MySimulationBox.Field = real(F.*PP) ;  
             
                    
            end

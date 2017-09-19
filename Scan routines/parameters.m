@@ -29,9 +29,9 @@ param.farfield = param.width^2/(4*param.lambda);
 % OS : 'Structured Waves ' 
 param.FOC_type = 'OP'; 
 
-param.focus       = 35/1000;        % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = (-10:2:10)*pi/180;       % Angular scan [m,m,m]                  - only active in OP and OS mode 
-param.decimation  = [1:2:50] ;      % decimation list of active actuators   - only active in OS mode 
+param.focus       = 35/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
+param.angles      = 40*pi/180;             % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.decimation  = [1:2] ;               % decimation list of active actuators   - only active in OS mode 
 
 param.NbZ         = 1:2;              % 8; % Nb de composantes de Fourier en Z, 'JM'
 param.NbX         = -10:10;              % 20 Nb de composantes de Fourier en X, 'JM'
@@ -54,7 +54,7 @@ param.Activated_FieldII = 0;     % 0 to generate field by yourself
 
     param.Xrange = [-10 10]/1000; % in m
     param.Yrange = 0/1000;%[-0.1 0.1]/1000;
-    param.Zrange = [25 35]/1000; % in m
+    param.Zrange = [0 20]/1000; % in m
 
     param.Nx = 150;
     param.Ny = 1;
