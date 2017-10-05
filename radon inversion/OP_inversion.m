@@ -21,7 +21,7 @@ addpath('shared functions folder')
  load('saved images\SimulationTransmission.mat');
 
 N       = 2^12;
-Lobject = 1.2e-3;
+Lobject = 0.5e-3;
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
                       % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,10*Fc);
@@ -79,9 +79,10 @@ FILTER = filt*ones(1,length(MyImage.theta));
  for i = 1:size(DelayLAWS,2)
       Z_m(i,:) =   - DelayLAWS(:,i)*c;
  end
-[theta M0]    = EvalDelayLaw_shared( X_m , Z_m  ) ;
+[theta M0]    = EvalDelayLaw_shared( X_m , Z_m  , ActiveLIST ) ;
 
-Retroprojection_shared( I , X_m, z_out , theta, M0);
+Hf = figure;
+Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
 
 % Ireconstruct = OPinversionFunction( Angle_Rad , Z_m , I , SampleRate_Hz, c);
 % aveas(gcf,['gif folder\image',num2str(i),'.png'],'png')

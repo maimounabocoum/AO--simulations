@@ -122,7 +122,10 @@ classdef AO_FieldBox
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
                 title(['P(t) on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
                 colorbar
+                caxis([0.1*min(Field_max(:)) 0.9*max(Field_max(:))])
                 drawnow
+                %caxis('auto')
+                
                %saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
             end
                   
@@ -143,6 +146,7 @@ classdef AO_FieldBox
             set(FigHandle,'name','(XZ) maximum field values') ;
 
             imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
+            %view([0,90])
             shading interp
             xlabel('x (mm)')
             ylabel('z (mm)')

@@ -28,7 +28,14 @@ classdef Experiment
 
     end
     
-    methods
+methods ( Access = 'protected' )
+        
+        obj= SetShootLim(obj)
+        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList) 
+            
+end
+    
+methods ( Access = 'public' )
         
         % constructor :
         function obj = Experiment(param)
@@ -55,9 +62,8 @@ classdef Experiment
             
             obj = ConfigureProbeSequence(obj) ;
             
-            
-        end
-        
+        end   
+      
         function obj = ConfigureProbeSequence(obj)
             
             switch obj.param.FOC_type
@@ -147,32 +153,26 @@ classdef Experiment
                     % successive angle to scan.
                     [THETA, DEC] = meshgrid(obj.param.angles,obj.param.decimation);
                     obj.ScanParam = [THETA(:),DEC(:)];
-                    % initialization : all actuator non-actives
-                    obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan); 
                     
+                    % initialization : all actuator non-actives
+                    % BoolActiveList columns : list of active element table
+                    % for a given shoot
+                    obj.BoolActiveList = true(obj.param.N_elements,obj.Nscan); 
+            
                     for i_decimate = 1:length(obj.param.decimation)
                        
                         % selection of column index to modify for a given
                         % decimation
                        I = 1:length(obj.param.decimation):length(obj.param.angles)*length(obj.param.decimation);
-                       I = I + (i_decimate-1) ; % index od column with same decimate
+                       I = I + (i_decimate-1) ; % index of column with same decimate
                        
-                       % set each of those column using decimation map
-                       % described by Idecimate 
-                       %Idecimate = 1:obj.param.decimation(i_decimate):obj.param.N_elements ;
-                       %obj.BoolActiveList( Idecimate , I ) = true ;
                        
-                       %Idecimate = 1:obj.param.N_elements ;
-                       Imod = mod(1:obj.param.N_elements,2*obj.param.decimation(i_decimate)) ;
-                       %Idecimate( Imod < obj.param.decimation(i_decimate) )   = 1 ;
-                       %Idecimate( Imod >= obj.param.decimation(i_decimate) )  = 0 ;
-                       
-                       obj.BoolActiveList( Imod < obj.param.decimation(i_decimate) , I )  = true ;
-                       obj.BoolActiveList( Imod >= obj.param.decimation(i_decimate) , I ) = false ;
-                    
+                       obj.BoolActiveList( : , I ) = ...
+                       SetDecimate(obj,obj.param.decimation(i_decimate),obj.BoolActiveList(:,I) ) ;
+      
                     end
  
-                    
+                    obj = SetShootingLim(obj) ;
                     
                 
      
@@ -245,15 +245,18 @@ classdef Experiment
          %%================= implementation without use of FILEDII=====================
          
           switch obj.param.FOC_type
+              
                 case 'OF'
+                    
                    tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
+                   
                 case 'OP'
                            
                    tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
                    
-              case 'OS' 
+                case 'OS' 
                   
                    tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
                    tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
@@ -280,23 +283,6 @@ classdef Experiment
             
                case 'OP'
                    
-                   % difinition of initial field : 
-             % obj.MyExcitation = ExcitationField(obj.MyProbe,obj.param.f0,obj.param.fs,obj.param.Noc);
-             % F = obj.MyExcitation.Propagate(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z,obj.param.c);         
-             % ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
-             % Ft = repmat(obj.MyExcitation.Excitation(:),1,length(Z(:)));
-             % Ft = exp( 1i*2*pi*obj.param.f0*( T - ZZ/(obj.param.c) ));                             
-             % Npoint of time in column x spatial profile in the grid                 
-%              FF = repmat(F(:)',length(obj.MySimulationBox.time) , 1 );
-%                           % T time as column x number of point in the grid
-%              Ft = interp1(obj.MyExcitation.t,obj.MyExcitation.Excitation,...
-%                                   T - ZZ/(obj.param.c) - angle(FF)/(2*pi*obj.param.f0),'linear' , 0 ); 
-%              Ft = real(Ft) ;
-%              FF = abs(FF) ;
-             
-             
-             % exp(1i*obj.omega0*obj.t).*hanning(length(obj.t)).^2'
-             % BEGIN old code 
               ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
               XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
 %            % F : field to match dimension issued by Field II
@@ -321,8 +307,36 @@ classdef Experiment
               % END old code 
  
              obj.MySimulationBox.Field = real(F.*PP) ;  
-            
-                   
+             
+               case 'OS'
+                    
+              ZZ = repmat(Z(:)',length(obj.MySimulationBox.time) , 1 );
+              XX = repmat(X(:)',length(obj.MySimulationBox.time) , 1 );
+%            % F : field to match dimension issued by Field II
+%            % setting the rotation inveration to center of the simulation
+% 
+              XI = (XX*sin(obj.ScanParam(n_scan)) + ZZ*cos(obj.ScanParam(n_scan))) ; 
+%             
+%             % rotated variable by angle theta
+%             obj.MyProbe.DelayLaw = XX*sin(obj.ScanParam(n_scan)) ;
+              F = interp1(t_excitation,excitation,...
+              T - XI/(obj.param.c),'linear',0)  ;     
+          
+          % profil due to decimation :
+          profil0 = 0*obj.MyProbe.center(:,1) ;
+          profil0(obj.MyProbe.ActiveList) = 1 ;
+
+          P = interp1(obj.MyProbe.center(:,1),profil0,...
+                      X-Z*tan(obj.ScanParam(n_scan)),'linear',0) ;
+          
+          PP = repmat(P(:)',length(obj.MySimulationBox.time) , 1 );
+          
+
+              % END old code 
+ 
+             obj.MySimulationBox.Field = real(F.*PP) ;  
+             
+                  
            end
 
        
@@ -436,10 +450,7 @@ classdef Experiment
             % full profile calculated here to optimize loop Scan calulation :     
             
             LightTransmission = repmat(obj.DiffuseLightTransmission,length(obj.MySimulationBox.time),1)  ;
-            
-           % MarkedPhotons = (obj.MySimulationBox.Field).^2;
             Enveloppe = envelope(obj.MySimulationBox.Field,300);
-            
             MarkedPhotons = Enveloppe.^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
 
@@ -458,10 +469,6 @@ classdef Experiment
 
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
-            %dz_box = obj.MySimulationBox.z(2) - obj.MySimulationBox.z(1) ;
-            %dz_field = obj.param.c/obj.param.fs ;
-            %Nint = ceil(dz_box/dz_field); % smoothing parameter which model PhotoDiode?? averaging effect
-            % smooth(line,Nint)
             obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
             
 %             figure;
@@ -483,15 +490,20 @@ classdef Experiment
         end
         
         function [] = ShowAcquisitionLine(obj)
-               figure;
+            FigHandle = figure;
+            set(FigHandle,'WindowStyle','docked'); 
+            
             switch obj.param.FOC_type
+                
                 case 'OF'
-
             imagesc(obj.ScanParam*1e3,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('x (mm)')
                 case 'OP'
             imagesc(obj.ScanParam*180/pi,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('angles (°)')
+                case 'OS'
+            imagesc(1:obj.Nscan,obj.MySimulationBox.z*1e3,obj.AOSignal)
+            xlabel('scan param')
             end
             ylabel('z = ct (mm) ')
             title('\int_{x,y,z} P(x,y,z,t) dxdydz')

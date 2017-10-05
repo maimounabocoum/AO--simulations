@@ -1,19 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  main  program  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% maimouna bocoum 04-01-2017
-clearvars ;
 
-addpath('..\Field_II')
-addpath('..\radon inversion')
-field_init(0);
+test = (1:10)-5
+decimate = 2;
 
-parameters;
-IsSaved = 0 ;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%% Start an experiment
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-CurrentExperiement = Experiment(param);
-
+center =0;
+mod(test,2*decimate)
+mod(test,2*decimate)>=decimate
 
 
 

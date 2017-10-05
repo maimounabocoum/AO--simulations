@@ -136,8 +136,9 @@ classdef ActuatorProbe
                case 'focus'
                    % input parameter = angle of focalisation
                for i = 1:length(obj.ActiveList)
-                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:)) ;  
+                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:)) ;        
                end 
+               Delay = Delay - min(Delay);
      
                case 'plane'
                    % input parameters = drift angle
