@@ -20,7 +20,7 @@ addpath('shared functions folder')
  load('saved images\Simulation.mat');
  load('saved images\SimulationTransmission.mat');
 
-N       = 2^12;
+N       = 2^11;
 Lobject = 0.5e-3;
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
                       % we set it to kc = 100/Lobject 
@@ -63,10 +63,6 @@ FILTER = filt*ones(1,length(MyImage.theta));
 % %% reconstruction BOX initialization (retroprojection):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
- xsonde = linspace(0,192*0.2e-3,192);
- xsonde = xsonde - mean(xsonde) ;
- 
  % 1 - find x position for t = 0 :
  % Need to implement on real experiement : finding zero . Here it is not
  % necessary since t = 0 matches xsonde = 0 for all angles
