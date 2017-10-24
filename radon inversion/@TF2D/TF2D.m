@@ -46,6 +46,12 @@ classdef TF2D
             Ekxky=fftshift(Ekxky);
         end
         
+        function Exy = ifourier(obj, Ekxky)
+            %fftshift(Et);    %real(F) sera toujours positif pour phi=0
+            Exy=ifft2(ifftshift(Ekxky))*(obj.N/obj.xRange)*(obj.N/obj.yRange) ;
+            Exy=fftshift(Exy);
+        end
+        
     end
     
 end

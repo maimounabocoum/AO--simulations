@@ -20,44 +20,7 @@ addpath('shared functions folder')
  load('saved images\Simulation.mat');
  load('saved images\SimulationTransmission.mat');
 
-N       = 2^11;
-Lobject = 0.5e-3;
-Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
-                      % we set it to kc = 100/Lobject 
-MyImage = MyImage.InitializeFourier(N,10*Fc);
-%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
-MyImage.Fmax()       % maximum frequency sampling = 1/dt
-                 
-%% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
-
-%%% Fourier Tranform of Radon input image with respect to t
-% creating a fourier parameter set using the measure sample size in m
-
-MyImage.F_R = MyImage.fourier(MyImage.R) ;
-% MyImage = MyImage.PhaseCorrection(Fc);
-% MyImage.Show_F_R(Fc); % Fc : cut-off frequency used for screening
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% filtered inverse fourier transform :
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
-FilterType = 'ram-lak';%'ram-lak' 
-
-filt = FilterRadon(MyImage.f, MyImage.N ,FilterType , Fc);
-filt = filt(:);
-FILTER = filt*ones(1,length(MyImage.theta));
-% hold on
-% plot(MyImage.f,filt)
-
-%p = bsxfun(@times, p, H); % faster than for-loop
-%  I = MyImage.ifourier(MyImage.F_R);
- I = MyImage.ifourier(MyImage.F_R.*FILTER);
- 
-
-
-% extract image back to initial size :
- [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
+ [I,z_out] = DataFiltering(MyImage) ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% reconstruction BOX initialization (retroprojection):
@@ -67,23 +30,21 @@ FILTER = filt*ones(1,length(MyImage.theta));
  % Need to implement on real experiement : finding zero . Here it is not
  % necessary since t = 0 matches xsonde = 0 for all angles
  % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
- 
- [X,Z]= meshgrid(xsonde,z_out);
- img = zeros(size(X,1),size(X,2),'like',X);
 
  X_m = (1:192)*0.2*1e-3 ; 
+ X_m = X_m - mean(X_m); 
  for i = 1:size(DelayLAWS,2)
-      Z_m(i,:) =   - DelayLAWS(:,i)*c;
+      Z_m(i,:) =    -DelayLAWS(:,i)*c;
  end
 [theta M0]    = EvalDelayLaw_shared( X_m , Z_m  , ActiveLIST ) ;
 
-Hf = figure;
-Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
-
-% Ireconstruct = OPinversionFunction( Angle_Rad , Z_m , I , SampleRate_Hz, c);
-% aveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
-
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ Hf = figure;
+Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
+% subplot(211);plot(X_m*1e3,Ireconstruct(105,:)); subplot(212);plot(-20.5 + z_out*1e3,Ireconstruct(:,96))
+%  
+% fwhm = FWHM(Ireconstruct(105,:),X_m*1e3)
+% fwhm = FWHM(Ireconstruct(:,96),z_out*1e3)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

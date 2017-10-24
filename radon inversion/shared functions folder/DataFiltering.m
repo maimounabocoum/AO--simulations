@@ -2,8 +2,8 @@ function [I,z_out] = DataFiltering(MyImage)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
-N       = 2^11;
-Lobject = 0.5e-3;
+N       = 2^12;
+Lobject = 1e-3;
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
                       % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,10*Fc);
@@ -35,7 +35,7 @@ FILTER = filt*ones(1,length(MyImage.theta));
 %p = bsxfun(@times, p, H); % faster than for-loop
 %  I = MyImage.ifourier(MyImage.F_R);
  I = MyImage.ifourier(MyImage.F_R.*FILTER);
-
+ %I = MyImage.ifourier(MyImage.F_R);
 % extract image back to initial size :
  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
 

@@ -15,9 +15,18 @@ classdef LaserBeam
         end
         
         function Intensity = Eval(obj,x,y,z)
-            
            [X,~,Z] = meshgrid(x,y,z) ;
-           Intensity = exp(-2*((X-obj.center(1)).^2+(Z-obj.center(3)).^2)/(obj.w0)^2) ;
+           
+           Intensity = 0*X ;
+           
+           for i = 1:size(obj.w0,1) 
+           
+           Intensity = Intensity + ...
+               exp(-2*(X-obj.center(i,1)).^2/(obj.w0(i,1))^2 - 2*(Z-obj.center(i,3)).^2/(obj.w0(i,2))^2) ;
+           
+           
+           
+           end
            
            Intensity = Intensity(:)' ;
            

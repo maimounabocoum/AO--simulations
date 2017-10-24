@@ -1,4 +1,4 @@
-function [] = Retroprojection( I , X_m, z_out , theta, M0 ,H )
+function Ireconstruct = Retroprojection( I , X_m, z_out , theta, M0 ,H )
 % function created by maimouna bocoum 13/09/2017
 
 z_out = z_out(:)';
@@ -33,9 +33,6 @@ end
             + (z_out - M0(i,2)).*cos( theta(i) ) ;
         profil_1D(:,i) = interp1(z_out,I(:,i),t,'linear',0);
         Ireconstruct = Ireconstruct + reshape(projContrib,length(z_out),length(X_m)); 
-
-  end
-  
         %%% real time monitoring %%%   
        imagesc( X_m*1e3,z_out*1e3,Ireconstruct)
        colormap(parula)
@@ -45,6 +42,9 @@ end
        ylabel('z (mm)')
        caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
        drawnow 
+
+  end
+  
 
     
     %title('Reconstruction')

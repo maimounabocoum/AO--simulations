@@ -34,6 +34,7 @@ CurrentExperiement = Experiment(param);
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
+CurrentExperiement.ShowPhantom();
 %use param.angles has an input to additionally show Radon transform
 
 
@@ -57,7 +58,7 @@ end
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
    
     % retreive delay law for cuurent scan
-    if param.Activated_FieldII == 1
+    if strcmp(param.FOC_type,'OP')
      DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = ...
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
