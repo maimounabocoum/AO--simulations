@@ -12,7 +12,7 @@ THETA = atan2(Fy,Fx);
 
 ImageDirac = zeros(size(X)) ;
 % dirac
-ImageDirac = exp(-X.^2/(0.2e-3)^2-Y.^2/(4e-3)^2);
+ImageDirac = exp(-X.^2/(1e-3)^2-Y.^2/(3e-3)^2);
 % dirac
 %ImageDirac(N/2+20,N/2+20) = 1;
 

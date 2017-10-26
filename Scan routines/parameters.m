@@ -27,7 +27,7 @@ param.farfield = param.width^2/(4*param.lambda);
 % OP : 'Plane Waves'
 % JM :  'Jean-Michel continuoous waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OS'; 
+param.FOC_type = 'OP'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
 param.angles      = (-20:1:20)*pi/180;             % Angular scan [m,m,m]                  - only active in OP and OS mode 
@@ -40,7 +40,7 @@ param.NbX         = -10:10;               % 20 Nb de composantes de Fourier en X
 
 
 
-param.Activated_FieldII = 0 ;     % 0 to generate field by yourself
+param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -52,7 +52,7 @@ param.Activated_FieldII = 0 ;     % 0 to generate field by yourself
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
     param.Zrange = [10 30]/1000;   % in m
 
-    param.Nx = 130;
+    param.Nx = 150;
     param.Ny = 1;
     % in order to match the number of point in Z direction , and 
     % unshures Nz >=1
@@ -66,7 +66,7 @@ param.center = [0 0 20]/1000 ;
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [100 0 0]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [0 0 20]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [0.5]/1000;          % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     

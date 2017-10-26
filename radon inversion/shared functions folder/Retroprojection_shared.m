@@ -1,4 +1,4 @@
-function Ireconstruct = Retroprojection( I , X_m, z_out , theta, M0 ,H )
+function Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 ,H )
 % function created by maimouna bocoum 13/09/2017
 
 z_out = z_out(:)';

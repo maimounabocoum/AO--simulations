@@ -212,6 +212,11 @@ methods ( Access = 'public' )
                   case 'JM'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:),obj.param.c);
               end
+              
+              
+              
+              
+              
             
         end
             
