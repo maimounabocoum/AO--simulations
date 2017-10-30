@@ -1,4 +1,4 @@
-function [angle, M0] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
+function [angle, M0 , X0 , Z0] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
 %creation of function 11/09/2017 for delay law retreival using sequence
 %parameters. 
 
@@ -40,7 +40,8 @@ Nangle = size(ct , 1) ;
        % (X_m,0) - ct*ut
        X0 = X_m - u(1)*DelayLAWS(:,i)'*c ;
        Z0 = 0   - u(2)*DelayLAWS(:,i)'*c;
-       M0(i,:) = [ X0(Nmin) , Z0(Nmin)];
+       M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
+       M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
        plot( X0*1e3 , Z0*1e3 ,'linewidth',3,'color',cc(i,:)) 
        hold on
        

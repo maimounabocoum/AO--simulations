@@ -1,4 +1,4 @@
-function Ireconstruct = Retroprojection_shared(I,X_m,ActiveLIST,z_out,theta, M0 ,H )
+function Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta, M0 , X0 , Z0 , H )
 % function created by maimouna bocoum 13/09/2017
 
 z_out = z_out(:)';
@@ -27,12 +27,17 @@ end
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
             + (Z - M0(i,2)).*cos( theta(i) ) ;
+        % distance to origine
+        S =   (X - M0(i,1)).*cos( theta(i) ) ...
+            - (Z - M0(i,2)).*sin( theta(i) ) ;
       % common interpolation:  
+        
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
         
         projContrib = interp1(z_out,I(:,i),T(:),'linear',0);
-         
-     
+        projProfil = interp1(X_m,double(ActiveLIST(:,i)),S(:),'linear',0);
+        
+        projContrib = projContrib.*projProfil ;
        % retroprojection:  
         Ireconstruct = Ireconstruct + reshape(projContrib,length(z_out),length(X_m)); 
         %%% real time monitoring %%%   

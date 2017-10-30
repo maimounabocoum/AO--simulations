@@ -17,8 +17,10 @@ addpath('shared functions folder')
 % MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
- load('saved images\SimulationOS.mat');
- load('saved images\SimulationTransmissionOS.mat');
+%  load('saved images\SimulationOS.mat');
+%  load('saved images\SimulationTransmissionOS.mat');
+  load('saved images\SimulationOS.mat');
+  load('saved images\SimulationTransmissionOS.mat');
 
  [I,z_out] = DataFiltering(MyImage) ;
 
@@ -31,12 +33,13 @@ addpath('shared functions folder')
  % necessary since t = 0 matches xsonde = 0 for all angles
  % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
 
- X_m = (1:192)*0.2*1e-3 ; 
- X_m = X_m - mean(X_m); 
-[theta M0]    = EvalDelayLawOS_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
+X_m = (0:191)*0.2*1e-3 ; 
+%X_m = X_m - mean(X_m); 
+% (X0,Z0) : position of inital wavefront at t=0 , M0 point on that curve
+[theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
 
- Hf = figure;
-Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
+Hf = figure;
+Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta,M0,X0,Z0, Hf);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
