@@ -31,7 +31,7 @@ classdef Experiment
 methods ( Access = 'protected' )
         
         obj= SetShootLim(obj)
-        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList) 
+        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList,type) 
             
 end
     
@@ -148,10 +148,11 @@ methods ( Access = 'public' )
                         obj.param.decimation = 2 ; % default decimate
                     end
                     
-                    obj.Nscan = length(obj.param.angles)*length(obj.param.decimation); 
+                    obj.Nscan = 2*length(obj.param.angles)*length(obj.param.decimation); 
                     % we operate the full decimation scan for every
                     % successive angle to scan.
-                    [DEC,THETA] = meshgrid(obj.param.decimation,obj.param.angles);
+                    decimation = [1;1]*(obj.param.decimation) ;
+                    [DEC,THETA] = meshgrid(decimation(:),obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     
                     % initialization : all actuator non-actives
@@ -163,13 +164,21 @@ methods ( Access = 'public' )
                        
                         % selection of column index to modify for a given
                         % decimation
-                       I = 1:length(obj.param.angles);
-                       I = I + (i_decimate-1)*length(obj.param.angles) ; % index of column with same decimate
+                        
+                       i_phase      = 2*i_decimate - 1 ;
+                       i_nonphase   = 2*i_decimate  ;
                        
+                       I = 1:length(obj.param.angles) ;
+                       Iphase = I + (i_phase-1)*length(obj.param.angles) ;  % index of column with same decimate
+                       Inonphase = I + (i_nonphase-1)*length(obj.param.angles) ;    % index of column with same decimate
+
+                       kx = obj.param.df0x*obj.param.decimation(i_decimate);
                        
-                       obj.BoolActiveList( : , I ) = ...
-                       SetDecimate(obj,obj.param.decimation(i_decimate),obj.BoolActiveList(:,I) ) ;
-      
+                       obj.BoolActiveList( : , Iphase ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'cos') ;
+                       obj.BoolActiveList( : , Inonphase ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'sin') ;
+                   
                     end
  
                     obj = SetShootingLim(obj) ;

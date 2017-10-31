@@ -22,8 +22,18 @@ addpath('shared functions folder')
   load('saved images\SimulationOS.mat');
   load('saved images\SimulationTransmissionOS.mat');
 
- [I,z_out] = DataFiltering(MyImage) ;
+N       = 2^12;
+Lobject = 1e-3;
+Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
+                      % we set it to kc = 100/Lobject 
+MyImage = MyImage.InitializeFourier(N,10*Fc);
+MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
+MyImage.Fmax()        % maximum frequency sampling = 1/dt
+MyImage.F_R = MyImage.fourier(MyImage.R) ;
+MyImage.Show_F_R();
 
+% extract image back to initial size :
+%  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% reconstruction BOX initialization (retroprojection):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

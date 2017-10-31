@@ -34,8 +34,8 @@ FILTER = filt*ones(1,length(MyImage.theta));
 
 %p = bsxfun(@times, p, H); % faster than for-loop
 %  I = MyImage.ifourier(MyImage.F_R);
- %I = MyImage.ifourier(MyImage.F_R.*FILTER);
- I = MyImage.ifourier(MyImage.F_R);
+ I = MyImage.ifourier(MyImage.F_R.*FILTER);
+ %I = MyImage.ifourier(MyImage.F_R);
 % extract image back to initial size :
  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
 
