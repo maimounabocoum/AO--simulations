@@ -39,11 +39,10 @@ end
         projProfil1 = interp1(X_m,double(ActiveLIST(:,i)),S(:),'linear',0);
         projProfil2 = interp1(X_m,double(ActiveLIST(:,i+1)),S(:),'linear',0);
         
-        projProfil = (projProfil1 + 1i*projProfil2) ;
         %projKx = sum(double(ActiveLIST(:,i))'.*exp(1i*(Kx(i)/L)*X_m));
         %projProfil = interp1(X_m,exp(1i*(Kx(i)/L)*X_m),S(:),'linear',0);
         
-        projContrib = projContrib.*projProfil ;
+        projContrib = projContrib.*projProfil1 ;
        % retroprojection:  
         Ireconstruct = Ireconstruct + reshape(projContrib,length(z_out),length(X_m)); 
         %%% real time monitoring %%%   
