@@ -36,7 +36,7 @@ end
 
   end
   
-        %%% real time monitoring %%%   
+                  %%% real time monitoring %%%   
        imagesc( X_m*1e3,z_out*1e3,Ireconstruct)
        colormap(parula)
        cb = colorbar ;
@@ -45,6 +45,8 @@ end
        ylabel('z (mm)')
        caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
        drawnow 
+  
+
 
     
     %title('Reconstruction')
