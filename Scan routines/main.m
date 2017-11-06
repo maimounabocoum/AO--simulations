@@ -34,6 +34,7 @@ CurrentExperiement = Experiment(param);
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
+CurrentExperiement.ShowPhantom();
 %use param.angles has an input to additionally show Radon transform
 
 
@@ -57,7 +58,7 @@ end
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
    
     % retreive delay law for cuurent scan
-    if param.Activated_FieldII == 1
+    if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
      DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = ...
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
@@ -91,11 +92,23 @@ end
  [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
  
      %--------------------- saving datas -------------
+     switch param.FOC_type
+         
+         case 'OP'
+             
  save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
      if param.Activated_FieldII == 1
-     save('..\radon inversion\saved images\Simulation.mat','MyImage','DelayLAWS','ActiveLIST')
+     save('..\radon inversion\saved images\Simulation_field.mat','MyImage','DelayLAWS','ActiveLIST')
      else
      save('..\radon inversion\saved images\Simulation.mat','MyImage')
+     end
+         case 'OS'
+             
+ save('..\radon inversion\saved images\SimulationTransmissionOS_field.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
+     if param.Activated_FieldII == 1
+     save('..\radon inversion\saved images\SimulationOS_field.mat','MyImage','DelayLAWS','ActiveLIST')
+     end           
+             
      end
      %%%%%%%%%%%%%%%%%%%%
  end

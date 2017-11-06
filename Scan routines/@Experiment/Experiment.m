@@ -31,7 +31,7 @@ classdef Experiment
 methods ( Access = 'protected' )
         
         obj= SetShootLim(obj)
-        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList) 
+        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList,type) 
             
 end
     
@@ -148,10 +148,11 @@ methods ( Access = 'public' )
                         obj.param.decimation = 2 ; % default decimate
                     end
                     
-                    obj.Nscan = length(obj.param.angles)*length(obj.param.decimation); 
+                    obj.Nscan = 2*length(obj.param.angles)*length(obj.param.decimation); 
                     % we operate the full decimation scan for every
                     % successive angle to scan.
-                    [THETA, DEC] = meshgrid(obj.param.angles,obj.param.decimation);
+                    decimation = [1;1]*(obj.param.decimation) ;
+                    [DEC,THETA] = meshgrid(decimation(:),obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     
                     % initialization : all actuator non-actives
@@ -163,13 +164,21 @@ methods ( Access = 'public' )
                        
                         % selection of column index to modify for a given
                         % decimation
-                       I = 1:length(obj.param.decimation):length(obj.param.angles)*length(obj.param.decimation);
-                       I = I + (i_decimate-1) ; % index of column with same decimate
+                        
+                       i_phase      = 2*i_decimate - 1 ;
+                       i_nonphase   = 2*i_decimate  ;
                        
+                       I = 1:length(obj.param.angles) ;
+                       Iphase = I + (i_phase-1)*length(obj.param.angles) ;  % index of column with same decimate
+                       Inonphase = I + (i_nonphase-1)*length(obj.param.angles) ;    % index of column with same decimate
+
+                       kx = obj.param.df0x*obj.param.decimation(i_decimate);
                        
-                       obj.BoolActiveList( : , I ) = ...
-                       SetDecimate(obj,obj.param.decimation(i_decimate),obj.BoolActiveList(:,I) ) ;
-      
+                       obj.BoolActiveList( : , Iphase ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'cos') ;
+                       obj.BoolActiveList( : , Inonphase ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'sin') ;
+                   
                     end
  
                     obj = SetShootingLim(obj) ;
@@ -212,6 +221,11 @@ methods ( Access = 'public' )
                   case 'JM'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:),obj.param.c);
               end
+              
+              
+              
+              
+              
             
         end
             
@@ -435,10 +449,13 @@ methods ( Access = 'public' )
              else
    
              imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,Transmission)
-             xlabel('\theta (°)')
+             xlabel('x(mm)')
              ylabel('z (mm)')
              title('diffused light transmission profile')
              colorbar
+             zR = [] ;
+             R = [];
+             
              
             end
                 
@@ -453,35 +470,11 @@ methods ( Access = 'public' )
             Enveloppe = envelope(obj.MySimulationBox.Field,300);
             MarkedPhotons = Enveloppe.^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
-
-%             figure;
-%             for i = 1:10:length(obj.MySimulationBox.time)
-%             sumY = sum(sum(MarkedPhotons,1),2) ;
-%             plot(obj.MySimulationBox.z*1e3,squeeze(sumY(:,:,:,i)))
-%             ylim([0 5e-22])
-%             title(['c t = ',num2str(obj.MySimulationBox.time(i)*obj.param.c*1e3),'mm'])
-%             %imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3,squeeze(MarkedPhotons(:,:,:,i))')
-%             xlabel('x (mm)')
-%             ylabel('z (mm)')
-%             colorbar
-%             drawnow
-%             end
-
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
             obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
             
-%             figure;
-%             plot(obj.MySimulationBox.time*obj.param.c*1e3,line,'marker','o')
-%             hold on 
-%             plot(obj.MySimulationBox.time*obj.param.c*1e3,smooth(line,Nint),'g','linewidth',3)
-%             hold on 
-%             plot(obj.MySimulationBox.z*1e3,obj.AOSignal(:,n),'--r','linewidth',3)
-%             legend({'raw signal','smoothed','interpolated'}) ;
-%             title('tagged photons')
-%             xlabel('z = c x t (mm)')
-%             ylabel('a.u')
-            
+
 
           
            

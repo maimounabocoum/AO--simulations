@@ -17,8 +17,10 @@ addpath('shared functions folder')
 % MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
- load('saved images\Simulation.mat');
- load('saved images\SimulationTransmission.mat');
+%  load('saved images\SimulationOS.mat');
+%  load('saved images\SimulationTransmissionOS.mat');
+  load('saved images\SimulationOS.mat');
+  load('saved images\SimulationTransmissionOS.mat');
 
  [I,z_out] = DataFiltering(MyImage) ;
 
@@ -31,21 +33,20 @@ addpath('shared functions folder')
  % necessary since t = 0 matches xsonde = 0 for all angles
  % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
 
- X_m = (1:192)*0.2*1e-3 ; 
-%  X_m = X_m - mean(X_m); 
-%  for i = 1:size(DelayLAWS,2)
-%       Z_m(i,:) =    -DelayLAWS(:,i)*c;
-%  end
- 
-[theta M0]    = EvalDelayLaw_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
+X_m = (0:191)*0.2*1e-3 ; 
+%X_m = X_m - mean(X_m); 
+% (X0,Z0) : position of inital wavefront at t=0 , M0 point on that curve
 [theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
 
- Hf = figure;
-Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
-% subplot(211);plot(X_m*1e3,Ireconstruct(105,:)); subplot(212);plot(-20.5 + z_out*1e3,Ireconstruct(:,96))
-%  
-% fwhm = FWHM(Ireconstruct(105,:),X_m*1e3)
-% fwhm = FWHM(Ireconstruct(:,96),z_out*1e3)
+Hf = figure;
+Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta,M0,X0,Z0,Kx,Hf);
+
+
+% inversion through inverse fourier transform:
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,24 +60,4 @@ xlabel('x (mm)')
 ylabel('y (mm)')
 drawnow   
 
-% subplot(223)
-% title('simulation input phantom')
-% 
-% imvisTF = ObjectInitial.fourier(imvis);
-% plot(MyImage.f,abs(imvisTF))
-% xlabel('fx (m-1)')
-% ylabel('y (mm)')
-% XLIM = get(gca,'xlim');
-% 
-% subplot(224)
-% ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
-% plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
-% title('object fourier transform in the vertical direction')
-% xlabel('fx (m-1)')
-% ylabel('y (mm)')
-% xlim(XLIM)
-
-
-%rmpath('..\Scan routines')
-%rmpath('functions')
 
