@@ -134,21 +134,23 @@ classdef OS < TF2D
         
         function [Iout,theta,decim] = AddSinCos(obj,Iin)
             
-           % find number of different angular value :
+           % find number of unique couple values:
            ScanParam = [obj.decimation(:),obj.theta(:)];
            [Angles,ia,ib] = unique(ScanParam,'rows') ;
            theta = Angles(:,2) ;
            decim = Angles(:,1) ;
            
-           Iout = zeros(size(Iin,1),size(Iin,2)/2) ;
+           % divide the second dimension by the number of phases = 4
+           Iout = zeros(size(Iin,1),size(Iin,2)/4) ;
            
            
            for i = 1:length(ia)
                
            Isimilardecimate = sort( find(ib == i) ) ;
                
-           Iout(:,i) = (Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
-               
+%            Iout(:,i) = (Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+%                        -1i*(Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+           Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
                
            end       
         end
