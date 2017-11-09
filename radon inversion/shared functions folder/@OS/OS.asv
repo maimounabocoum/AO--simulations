@@ -123,9 +123,11 @@ classdef OS < TF2D
             I0 = obj.N/2 + 1 ;
             
             Iout = zeros(obj.N,obj.N) ;
-            Iout(:,I0 + decimation) = Iin ;
-            Iout(:,I0 - decimation) = Iin ;
-            Iout(:,I0) = Iout(:,I0)/2 ;
+            Iout(:,1+decimation) = Iin ;
+            Iout(:,obj.N - decimation(1:end-1)) = Iin(:,2:end) ;
+            Iout = ifftshift(Iout,2) ;
+            %Iout(:,I0) = Iout(:,I0)/2 ;
+            
             
             
         end
@@ -145,7 +147,7 @@ classdef OS < TF2D
            % accounting for single zero order
            Iout = zeros(size(Iin,1),1+(size(Iin,2)-1)/4) ;
            
-           Iout(:,1) = hilbert(Iin(:, 1 )) ;
+           Iout(:,1) = Iin(:,Isimilardecimate(1)
            % starting loop after 0 order
            for i = 2:length(ia)
                
