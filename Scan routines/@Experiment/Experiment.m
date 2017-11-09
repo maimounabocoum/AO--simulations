@@ -148,10 +148,10 @@ methods ( Access = 'public' )
                         obj.param.decimation = 2 ; % default decimate
                     end
                     
-                    obj.Nscan = 2*length(obj.param.angles)*length(obj.param.decimation); 
-                    % we operate the full decimation scan for every
+                    obj.Nscan = 4*length(obj.param.angles)*length(obj.param.decimation); 
+                    % we operate the full 4-phases decimation scan for every
                     % successive angle to scan.
-                    decimation = [1;1]*(obj.param.decimation) ;
+                    decimation = [1;1;1;1]*(obj.param.decimation) ;
                     [DEC,THETA] = meshgrid(decimation(:),obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     
@@ -165,19 +165,31 @@ methods ( Access = 'public' )
                         % selection of column index to modify for a given
                         % decimation
                         
-                       i_phase      = 2*i_decimate - 1 ;
-                       i_nonphase   = 2*i_decimate  ;
+                       i_cos      = 4*i_decimate - 3 ;
+                       i_ncos     = 4*i_decimate - 2 ;
+                       i_sin      = 4*i_decimate - 1 ;
+                       i_nsin     = 4*i_decimate     ;
                        
                        I = 1:length(obj.param.angles) ;
-                       Iphase = I + (i_phase-1)*length(obj.param.angles) ;  % index of column with same decimate
-                       Inonphase = I + (i_nonphase-1)*length(obj.param.angles) ;    % index of column with same decimate
+                       
+                       Icos  = I + ( i_cos-1 )*length(obj.param.angles) ;  % index of column with same decimate
+                       Incos = I + (i_ncos-1 )*length(obj.param.angles) ;  % index of column with same decimate
+                       Isin  = I + (i_sin-1  )*length(obj.param.angles) ;    % index of column with same decimate
+                       Insin = I + (i_nsin-1 )*length(obj.param.angles) ;  % index of column with same decimate
 
                        kx = obj.param.df0x*obj.param.decimation(i_decimate);
                        
-                       obj.BoolActiveList( : , Iphase ) = ...
-                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'cos') ;
-                       obj.BoolActiveList( : , Inonphase ) = ...
-                       SetDecimate(obj,kx,obj.BoolActiveList(:,Iphase),'sin') ;
+                       obj.BoolActiveList( : , Icos ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Icos),'cos') ;
+                       
+                       obj.BoolActiveList( : , Incos ) = ...
+                       ~obj.BoolActiveList( : , Icos );
+                   
+                       obj.BoolActiveList( : , Isin ) = ...
+                       SetDecimate(obj,kx,obj.BoolActiveList(:,Isin),'sin') ;
+                   
+                       obj.BoolActiveList( : , Insin ) = ...
+                       ~obj.BoolActiveList( : , Isin );
                    
                     end
  

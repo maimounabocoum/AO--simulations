@@ -58,25 +58,21 @@ else
 Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*X);   
 end
 
-Irad0 = Irad.*Mask0 ;
-Irad = Irad.*Mask ;
+Irad = Irad.*Mask0 ;
+%Irad = Irad.*Mask ;
 % plot(x,Mask0)
 % hold on
 % plot(x,Mask)
 % hold off
-imagesc([Irad0,Irad])
+imagesc(Irad)
 AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
                             (1:size(Irad,1))-d_offset,'linear',0) ;
 drawnow
-pause(1)
+
 
 axis equal
 end
  
-Alter = repmat([1 -1],...
-                1 , length(CurrentExperiement.ScanParam(:,1))/2 );
-Kx = Alter.*(CurrentExperiement.ScanParam(:,2)');
-
 figure;
 imagesc(CurrentExperiement.ScanParam(:,1)*180/pi,z*1e3,AOSignal)
 
@@ -86,7 +82,7 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              param.fs_aq,...
              param.c); 
           
- MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
+MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
 [MyImage.F_R, MyImage.theta,MyImage.decimation ] = MyImage.AddSinCos(MyImage.F_R) ;
 FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
  
