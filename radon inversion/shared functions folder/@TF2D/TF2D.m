@@ -50,6 +50,12 @@ classdef TF2D
             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
             Exkz = fft(ifftshift(Exz,1),obj.N,1)*(obj.zRange/obj.N) ;
             Exkz = fftshift(Exkz,1);
+         end
+        
+         function Ekxz = ifourierx(obj, Exz)
+            %fftshift(Et);    %real(F) sera toujours positif pour phi=0
+            Ekxz = ifft(fftshift(Exz,2),obj.N,2)*(obj.xRange/obj.N) ;
+            Ekxz = ifftshift(Ekxz,2);
         end
         
         function Exz = ifourier(obj, Ekxkz)

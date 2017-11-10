@@ -13,7 +13,7 @@ param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
-param.N_elements = 192 ;            % 192; % Number of elements
+param.N_elements = 192;            % 192; % Number of elements
 param.X0 = -19.2/1000  ;               % prosition min of effective probe shooting
 param.X1 =  19.2/1000 ;                % prosition min of effective probe shooting
 param.Rfocus = 35/1000;             % Static Elevation focus
@@ -64,7 +64,7 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 % waist of diffuse IR laser beam
-param.w0 = [2 6]/1000 ; % in m 
+param.w0 = [5 7]/1000 ; % in m 
 param.center = [0 0 20]/1000 ;      
              % specify the center of the gaussian beam.
                                     % if this value is commented, 

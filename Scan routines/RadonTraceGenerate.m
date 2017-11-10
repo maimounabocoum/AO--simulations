@@ -41,7 +41,7 @@ CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan) ;
 DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
  end
  
-X_m = (0:191)*0.2*1e-3 ; 
+X_m = (1:param.N_elements)*param.width; 
 ActiveLIST = CurrentExperiement.BoolActiveList ;
 [angle, M0] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , param.c);
  
@@ -50,20 +50,23 @@ theta = angle(n_scan);
 [Irad,Mcorner] = RotateTheta(X,Z,MyTansmission,theta);
 d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0;     
 d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
+
+
 Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
+           if n_scan ==1
+           Mask = cos(0*X);    
+           else
 if mod(n_scan,2) == 0
-Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*X);
+Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
 else
-Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*X);   
+Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
+           end
 
 Irad = Irad.*Mask0 ;
 %Irad = Irad.*Mask ;
-% plot(x,Mask0)
-% hold on
-% plot(x,Mask)
-% hold off
+
 imagesc(Irad)
 AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
                             (1:size(Irad,1))-d_offset,'linear',0) ;
@@ -71,8 +74,10 @@ drawnow
 
 
 axis equal
+% MaskList(n_scan,:) = Mask(1,:) ;
 end
  
+%%
 figure;
 imagesc(CurrentExperiement.ScanParam(:,1)*180/pi,z*1e3,AOSignal)
 
@@ -86,27 +91,23 @@ MyImage.F_R = MyImage.fourierz( MyImage.R ) ;
 [MyImage.F_R, MyImage.theta,MyImage.decimation ] = MyImage.AddSinCos(MyImage.F_R) ;
 FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
  
-figure; imagesc( abs(FTF) );
- 
- % test : fourier transform of original object
-%  [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
-%  [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
-%  
-%  Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
-%  TinterpFFT = MyImage.fourier( Tinterp );
-%  figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
-
-%% inverse fourier transform on calculated datas :
-% [Angles,~,Iangles] = unique(obj.theta) ;
-% for iangle=1:length(Angles)
-% Iextract = find(Iangles == iangle);
-
 OriginIm = MyImage.ifourier(FTF) ;
-figure; imagesc( abs(fftshift(OriginIm,2)) );
-figure; imagesc( abs(OriginIm) );
 
+figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
+axis([-60 60 -100 100])
+
+figure; imagesc( abs(OriginIm) );
+%figure;imagesc(CurrentExperiement.BoolActiveList)
 
 %% saving data to reconstruct folder
+%test : fourier transform of original object
+ [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
+ [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
+ 
+ Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
+ TinterpFFT = MyImage.fourier( Tinterp );
+ figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
+
 
  if (IsSaved == 1)
  x_phantom = CurrentExperiement.MySimulationBox.x ;
