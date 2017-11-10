@@ -30,12 +30,12 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OS'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = [0,10]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
 param.df0x = (1/(param.N_elements*param.width)) ;
-param.decimation  = [0:1:50];  % decimation list of active actuators   - only active in OS mode 
+param.decimation  = [1:50];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
@@ -72,8 +72,8 @@ param.center = [0 0 20]/1000 ;
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-1 0 20; 1 0 20]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [0.5; 0.5]/1000;          % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Positions = [-0.9 0 20; 0.9 0 20]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [0.8; 0.8]/1000;          % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     
     

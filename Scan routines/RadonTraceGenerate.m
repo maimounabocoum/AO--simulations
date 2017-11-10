@@ -94,7 +94,7 @@ figure; imagesc( abs(FTF) );
 %  
 %  Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
 %  TinterpFFT = MyImage.fourier( Tinterp );
-%  imagesc(MyImage.fx/MyImage.dfx,MyImage.fz,abs(TinterpFFT))
+%  figure; imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
 
 %% inverse fourier transform on calculated datas :
 % [Angles,~,Iangles] = unique(obj.theta) ;

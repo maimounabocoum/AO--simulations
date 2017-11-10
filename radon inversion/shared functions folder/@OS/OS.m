@@ -145,15 +145,15 @@ classdef OS < TF2D
            % accounting for single zero order
            Iout = zeros(size(Iin,1),1+(size(Iin,2)-1)/4) ;
            
-           Iout(:,1) = hilbert(Iin(:, 1 )) ;
+           Iout(:,1) =  Iin(:, 1 ) ;
            % starting loop after 0 order
            for i = 2:length(ia)
                
            Isimilardecimate = sort( find(ib == i) ) ;
                
-%            Iout(:,i) = (Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-%                        -1i*(Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
-           Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
+            Iout(:,i) = (Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+                        -1i*(Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+           %Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
                
            end       
            
