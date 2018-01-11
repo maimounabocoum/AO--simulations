@@ -58,14 +58,14 @@ classdef OS < TF2D
                 DXsample = obj.c*1/(obj.SamplingRate) ; 
                 obj = obj.Initialize(N,1/DXsample);
                 % interpolated trace on fourier param
-                obj.R = interp1(t,obj.R,obj.t,'linear',0);
+                obj.R = interp1(t,obj.R,obj.ct,'linear',0);
             elseif nargin == 3
                 N = varargin{1};
                 Fc = varargin{2};
-                t = obj.t ;  
+                t = obj.ct ;  
                 obj = obj.Initialize(N,Fc);        
                 % interpolated trace on fourier param
-                obj.R = interp1(t,obj.R,obj.t,'linear',0);
+                obj.R = interp1(t,obj.R,obj.ct,'linear',0);
                 
             end
         
@@ -159,7 +159,7 @@ classdef OS < TF2D
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
            
            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-                       +1i*( Iin(:,Isimilardecimate(2)) - Iin(:,Isimilardecimate(4)) );
+                       +1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
           % Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
             Iout(:,i) = Iout(:,i)/2 ;   
            end       

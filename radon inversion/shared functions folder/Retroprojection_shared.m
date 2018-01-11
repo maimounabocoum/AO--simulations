@@ -38,10 +38,6 @@ end
        % retroprojection:  
         Ireconstruct = Ireconstruct + reshape(projContrib,length(z_out),length(X_m)); 
         %%% real time monitoring %%%   
-
-      % drawnow 
-  end
-  
        imagesc( X_m*1e3,z_out*1e3,Ireconstruct)
        colormap(parula)
        cb = colorbar ;
@@ -49,6 +45,12 @@ end
        xlabel('x (mm)')
        ylabel('z (mm)')
        caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
+       
+       %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
+       drawnow 
+  end
+  
+
     
     %title('Reconstruction')
     ylabel(cb,'AC tension (mV)')

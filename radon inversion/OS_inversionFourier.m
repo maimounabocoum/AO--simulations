@@ -19,53 +19,50 @@ addpath('shared functions folder')
 %% simulation traces 
 %  load('saved images\SimulationOS.mat');
 %  load('saved images\SimulationTransmissionOS.mat');
-  load('saved images\SimulationOS.mat');
+  load('saved images\SimulationOS_field.mat');
   load('saved images\SimulationTransmissionOS.mat');
 
-N       = 2^12;
-Lobject = 1e-3;
-Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
-                      % we set it to kc = 100/Lobject 
-MyImage = MyImage.InitializeFourier(N,10*Fc);
-MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
-MyImage.Fmax()        % maximum frequency sampling = 1/dt
-MyImage.F_R = MyImage.fourier(MyImage.R) ;
-MyImage.Show_F_R();
+MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
+[MyImage.F_R, MyImage.theta,MyImage.decimation ] = MyImage.AddSinCos(MyImage.F_R) ;
+FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
 
-% extract image back to initial size :
-%  [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);%MyImage.L
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% reconstruction BOX initialization (retroprojection):
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+OriginIm = MyImage.ifourier(FTF) ;
 
- % 1 - find x position for t = 0 :
- % Need to implement on real experiement : finding zero . Here it is not
- % necessary since t = 0 matches xsonde = 0 for all angles
- % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
+figure('DefaultAxesFontSize',18); 
+imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
+axis([-40 40 -100 100])
+title('reconstructed fourier transform')
 
-X_m = (0:191)*0.2*1e-3 ; 
-%X_m = X_m - mean(X_m); 
-% (X0,Z0) : position of inital wavefront at t=0 , M0 point on that curve
-[theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
+figure; imagesc( abs(OriginIm) );
+title('reconstructed object')
+%figure;imagesc(CurrentExperiement.BoolActiveList)
 
-Hf = figure;
-Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta,M0,X0,Z0,Kx,Hf);
-
-
-% inversion through inverse fourier transform:
-
-
+%% saving data to reconstruct folder
+%test : fourier transform of original object
+ [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
+ [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
+ 
+ Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
+ TinterpFFT = MyImage.fourier( Tinterp );
+ 
+ figure('DefaultAxesFontSize',18);  
+ imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
+ axis([-40 40 -100 100])
+ xlabel('Fx/dfx')
+ ylabel('Fz/dfz')
+ title('object fourier transform')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure
+figure('DefaultAxesFontSize',18);  
 imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
 colorbar
 title('simulation input phantom')
-ylim([min(z_out*1e3) max(z_out*1e3)])
 xlabel('x (mm)')
 ylabel('y (mm)')
 drawnow   

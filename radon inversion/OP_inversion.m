@@ -17,7 +17,7 @@ addpath('shared functions folder')
 % MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
- load('saved images\Simulation.mat');
+ load('saved images\Simulation_field.mat');
  load('saved images\SimulationTransmission.mat');
 
  [I,z_out] = DataFiltering(MyImage) ;
@@ -42,6 +42,7 @@ addpath('shared functions folder')
 
  Hf = figure;
 Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
+
 % subplot(211);plot(X_m*1e3,Ireconstruct(105,:)); subplot(212);plot(-20.5 + z_out*1e3,Ireconstruct(:,96))
 %  
 % fwhm = FWHM(Ireconstruct(105,:),X_m*1e3)
@@ -59,22 +60,6 @@ xlabel('x (mm)')
 ylabel('y (mm)')
 drawnow   
 
-% subplot(223)
-% title('simulation input phantom')
-% 
-% imvisTF = ObjectInitial.fourier(imvis);
-% plot(MyImage.f,abs(imvisTF))
-% xlabel('fx (m-1)')
-% ylabel('y (mm)')
-% XLIM = get(gca,'xlim');
-% 
-% subplot(224)
-% ObjectInitial_FI = ObjectInitial.fourier(ObjectInitial_I);
-% plot(ObjectInitial.f,sum(abs(ObjectInitial_FI),2))
-% title('object fourier transform in the vertical direction')
-% xlabel('fx (m-1)')
-% ylabel('y (mm)')
-% xlim(XLIM)
 
 
 %rmpath('..\Scan routines')
