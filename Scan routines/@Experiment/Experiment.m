@@ -31,7 +31,7 @@ classdef Experiment
 methods ( Access = 'protected' )
         
         obj= SetShootLim(obj)
-        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList) 
+        BoolActiveList = SetDecimate(obj,decimation,BoolActiveList,type) 
             
 end
     
@@ -148,10 +148,12 @@ methods ( Access = 'public' )
                         obj.param.decimation = 2 ; % default decimate
                     end
                     
-                    obj.Nscan = length(obj.param.angles)*length(obj.param.decimation); 
-                    % we operate the full decimation scan for every
-                    % successive angle to scan.
-                    [DEC,THETA] = meshgrid(obj.param.decimation,obj.param.angles);
+                    obj.Nscan = 4*length(obj.param.angles)*length(obj.param.decimation)...
+                                + 1 ; 
+                    % we operate the full 4-phases decimation scan for every
+                    % successive angle to scan +  fondamental
+                    decimation = [1;1;1;1]*(obj.param.decimation) ;
+                    [DEC,THETA] = meshgrid([0;decimation(:)],obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     
                     % initialization : all actuator non-actives
@@ -163,13 +165,35 @@ methods ( Access = 'public' )
                        
                         % selection of column index to modify for a given
                         % decimation
-                       I = 1:length(obj.param.angles);
-                       I = I + (i_decimate-1)*length(obj.param.angles) ; % index of column with same decimate
+                        
+                       i_cos      = 4*i_decimate - 3 ;
+                       i_ncos     = 4*i_decimate - 2 ;
+                       i_sin      = 4*i_decimate - 1 ;
+                       i_nsin     = 4*i_decimate - 0 ;
                        
+                       I = (1:length(obj.param.angles)) + 1 ;
                        
-                       obj.BoolActiveList( : , I ) = ...
-                       SetDecimate(obj,obj.param.decimation(i_decimate),obj.BoolActiveList(:,I) ) ;
-      
+                       Icos  = I + ( i_cos-1 )*length(obj.param.angles) ;  % index of column with same decimate
+                       Incos = I + (i_ncos-1 )*length(obj.param.angles) ;  % index of column with same decimate
+                       Isin  = I + (i_sin-1  )*length(obj.param.angles) ;    % index of column with same decimate
+                       Insin = I + (i_nsin-1 )*length(obj.param.angles) ;  % index of column with same decimate
+
+                        fx = obj.param.df0x*obj.param.decimation(i_decimate);
+%                        Neff = 1/(fx*obj.param.width);
+%                        fx   = 1/(Neff*obj.param.width);
+                       
+                       obj.BoolActiveList( : , Icos ) = ...
+                       SetDecimate(obj,fx,obj.BoolActiveList(:,Icos),'cos') ;
+                       
+                       obj.BoolActiveList( : , Incos ) = ...
+                       ~obj.BoolActiveList( : , Icos );
+                   
+                       obj.BoolActiveList( : , Isin ) = ...
+                       SetDecimate(obj,fx,obj.BoolActiveList(:,Isin),'sin') ;
+                   
+                       obj.BoolActiveList( : , Insin ) = ...
+                       ~obj.BoolActiveList( : , Isin );
+                   
                     end
  
                     obj = SetShootingLim(obj) ;
@@ -464,12 +488,7 @@ methods ( Access = 'public' )
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
             obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
-            
 
-
-          
-           
-            
             
         end
         

@@ -1,8 +1,10 @@
-function Ireconstruct = Retroprojection_shared(I,X_m,ActiveLIST,z_out,theta, M0 ,H )
+function Ireconstruct = Retroprojection_shared(I,X_m,z_out,theta, M0 ,H )
 % function created by maimouna bocoum 13/09/2017
 
 z_out = z_out(:)';
 
+size(I,1)
+length(z_out)
 % check consistancy of data dimensions : 
 if size(I,1)~=length(z_out)
     error('inconsistent data size')
@@ -43,9 +45,9 @@ end
        xlabel('x (mm)')
        ylabel('z (mm)')
        caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
+       
+       %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
        drawnow 
-       pause(1)
-
   end
   
 
@@ -55,15 +57,7 @@ end
     colormap(parula)
     set(findall(H,'-property','FontSize'),'FontSize',15) 
 
-     
-%     figure
-%     imagesc(theta*180/pi,t*1e3,profil_1D)
-%     figure;
-% imagesc(theta*180/pi,z_out*1e3,I)
-% hold on
-% plot(theta*180/pi,...
-%     1e3*(19.2e-3- M0(:,1)').*sin(theta)+1e3*(20e-3- M0(:,2)').*cos(theta),...
-%     '--','linewidth',3,'color','red')
+
 
 end
 

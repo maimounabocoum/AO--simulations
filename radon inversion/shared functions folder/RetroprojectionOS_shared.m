@@ -1,6 +1,7 @@
-function Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta, M0 , X0 , Z0 , H )
+function Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta, M0 , X0 , Z0 , Kx, H )
 % function created by maimouna bocoum 13/09/2017
 
+L = max(X_m) - min(X_m) ;
 z_out = z_out(:)';
 
 % check consistancy of data dimensions : 
@@ -22,7 +23,7 @@ end
 %  A = axes ;
  set(H,'WindowStyle','docked');
  
-  for i= 1:length(theta)
+  for i= 1:2:length(theta)
        
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
@@ -35,21 +36,25 @@ end
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
         
         projContrib = interp1(z_out,I(:,i),T(:),'linear',0);
-        projProfil = interp1(X_m,double(ActiveLIST(:,i)),S(:),'linear',0);
+        projProfil1 = interp1(X_m,double(ActiveLIST(:,i)),S(:),'linear',0);
+        projProfil2 = interp1(X_m,double(ActiveLIST(:,i+1)),S(:),'linear',0);
+        
+        projProfil = (projProfil1 + 1i*projProfil2) ;
+        %projKx = sum(double(ActiveLIST(:,i))'.*exp(1i*(Kx(i)/L)*X_m));
+        %projProfil = interp1(X_m,exp(1i*(Kx(i)/L)*X_m),S(:),'linear',0);
         
         projContrib = projContrib.*projProfil ;
        % retroprojection:  
         Ireconstruct = Ireconstruct + reshape(projContrib,length(z_out),length(X_m)); 
         %%% real time monitoring %%%   
-       imagesc( X_m*1e3,z_out*1e3,Ireconstruct)
+       imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))
        colormap(parula)
        cb = colorbar ;
-       title(['angle(°): ',num2str(theta(i)*180/pi)])
+       title(['angle(°): ',num2str(theta(i)*180/pi),'Kx',num2str(Kx(i))])
        xlabel('x (mm)')
        ylabel('z (mm)')
-       caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
+       caxis( [ min(real(Ireconstruct(:))) , real(max(Ireconstruct(:))) ] )
        drawnow 
-       pause(1)
 
   end
   

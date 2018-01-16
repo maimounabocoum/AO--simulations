@@ -16,6 +16,11 @@ function [angle, M0 , X0 , Z0] = EvalDelayLawOS_shared( X_m , DelayLAWS , Active
  
 % ct = M0 M(t)
 Nangle = size(ct , 1) ;
+
+% initialization:
+angle = zeros(1,Nangle);
+M0 = zeros(Nangle,2);
+
 % 0 is defined by the (0,0) on probe linear plane
 
   Hf = figure;
@@ -23,6 +28,7 @@ Nangle = size(ct , 1) ;
   subplot(211)
     cc = jet(Nangle);
     colormap(jet);
+ 
     
     for i = 1:Nangle     
        % find index of minimum active element :

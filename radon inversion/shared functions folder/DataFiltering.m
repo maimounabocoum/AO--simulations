@@ -3,12 +3,12 @@ function [I,z_out] = DataFiltering(MyImage)
 %   Detailed explanation goes here
 
 N       = 2^12;
-Lobject = 1e-3;
+Lobject = 1*1e-3;
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
                       % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,10*Fc);
 %MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
-MyImage.Fmax()       % maximum frequency sampling = 1/dt
+MyImage.Fmax()        % maximum frequency sampling = 1/dt
                  
 %% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
 
