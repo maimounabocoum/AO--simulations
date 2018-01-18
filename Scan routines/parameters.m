@@ -72,7 +72,7 @@ param.center = [0 0 20]/1000 ;
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [0 0 19.1; 0 0 20.9]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [0.5 0 19.1; -0.5 0 20.9]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [0.8; 0.8]/1000;          % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     
