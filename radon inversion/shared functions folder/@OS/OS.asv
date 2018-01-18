@@ -124,7 +124,7 @@ classdef OS < TF2D
             
             Iout = zeros(obj.N,obj.N) ;
             Iout(:,I0 + decimation) = Iin ;
-            Iout(:,I0 - decimation) = conj(flipud(Iin)) ;
+            Iout(:,I0 - decimation) = conj(Iin) ;
             Iout(:,I0) = Iout(:,I0)/2 ;
             
             
@@ -159,11 +159,11 @@ classdef OS < TF2D
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
            
            % sin-cos sequence
-          % Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+           Iout(:,i) = Iin(:,Isimilardecimate(1)) + 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
-           Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-                     - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+%            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+%                        +1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
                    
                    
           % Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
