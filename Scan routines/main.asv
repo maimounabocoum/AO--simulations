@@ -22,14 +22,15 @@ CurrentExperiement = Experiment(param);
 %     excitation_env = hilbert(excitation);
 %     excitation_env= abs(excitation_env);
 % 
-%     figure;
-%     plot(t_excitation*1e6,excitation)
-%     hold on 
-%     plot(t_excitation*1e6,excitation_env,'color','red')
-%     xlabel('time in \mu s')
-%     ylabel('a.u')
-%     title('field excitation')
+    figure;
+    plot(t_excitation*1e6,excitation)
+    hold on 
+    plot(t_excitation*1e6,excitation,'color','red')
+    xlabel('time in \mu s')
+    ylabel('a.u')
+    title('field excitation')
     
+    figure; plot(t_excitation*1e6,cumsum((excitation).^2/(1.5*1e6)))
 
     
 % evaluate Phantom on simulation Box :
@@ -105,8 +106,8 @@ end
          
          case 'OP'
  
-             AOSignal = CurrentExperiement.AOSignal ;
-             ScanParam = CurrentExperiement.ScanParam;
+%              AOSignal = CurrentExperiement.AOSignal ;
+%              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
  save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')
@@ -116,7 +117,7 @@ end
      save('..\radon inversion\saved images\Simulation.mat','MyImage')
      end
          case 'OS'
-            save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\saved images\Simulation_fieldOF.mat','MyImage','DelayLAWS','ActiveLIST') 
+%save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
   MyImage = OS(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
