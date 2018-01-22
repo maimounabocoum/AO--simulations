@@ -22,17 +22,14 @@ CurrentExperiement = Experiment(param);
 %     excitation_env = hilbert(excitation);
 %     excitation_env= abs(excitation_env);
 % 
-    figure;
-    plot(t_excitation*1e6,excitation)
-    hold on 
-    plot(t_excitation*1e6,excitation,'color','red')
-    xlabel('time in \mu s')
-    ylabel('a.u')
-    title('field excitation')
+%     figure;
+%     plot(t_excitation*1e6,excitation)
+%     hold on 
+%     plot(t_excitation*1e6,excitation,'color','red')
+%     xlabel('time in \mu s')
+%     ylabel('a.u')
+%     title('field excitation')
     
-    % calcul de 
-    figure; plot(t_excitation*1e6,cumsum((1e6*excitation).^2/(1.5*1e6)))
-
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
