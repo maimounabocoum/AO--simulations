@@ -64,7 +64,6 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
-
 Irad = Irad.*Mask0 ;
 %Irad = Irad.*Mask ;  
 
@@ -99,7 +98,7 @@ FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
 OriginIm = MyImage.ifourier(FTF) ;
 
 figure('DefaultAxesFontSize',18); 
-imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
+imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF));
 axis([-40 40 -100 100])
 title('reconstructed fourier transform')
 
@@ -119,6 +118,7 @@ title('reconstructed object')
  Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
  TinterpFFT = MyImage.fourier( Tinterp );
  figure('DefaultAxesFontSize',18);  
+%  ishermitian(TinterpFFT(512:514,512:514))
  imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
  axis([-40 40 -100 100])
  xlabel('Fx/dfx')

@@ -120,17 +120,35 @@ classdef OS < TF2D
         
         function Iout = GetFourier(obj,Iin,decimation)
             
+            % decimation : vector with single element matching decimation
+            
             I0 = obj.N/2 + 1 ;
             
+            % initialization of fourier matrix
             Iout = zeros(obj.N,obj.N) ;
+            %
+            
             Iout(:,I0 + decimation) = Iin ;
-            Iout(:,I0 - decimation) = conj(flipud(Iin)) ;
+            
+            % add conjugate except for 0 order
+            % complexe conjuaget
+            CONJ = conj(flipud(Iin));
+            
+            for i = 2:length(decimation)
+            Iout(:,I0 - (i-1)) = [0 ; CONJ(1:end-1,i)] ;
+            end
+            
             Iout(:,I0) = Iout(:,I0)/2 ;
             
             
         end
         
         function [Iout,theta,decim] = AddSinCos(obj,Iin)
+            
+            % this functions takes the four acquisition frame and 
+            % compresses it into a single frame according to
+            % exp(-ifx x) = cos - i sin
+            %   ..        = (h1-h2) - i(h3-h4)
             
            % find number of unique couple values:
            ScanParam = [obj.decimation(:),obj.theta(:)];
@@ -159,9 +177,10 @@ classdef OS < TF2D
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
            
            % sin-cos sequence
-          % Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+           %Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
+           
            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
                    
