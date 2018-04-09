@@ -35,7 +35,7 @@ param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only 
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
 param.df0x = (1/(param.N_elements*param.width)) ;
-param.decimation  = [1:20];  % decimation list of active actuators   - only active in OS mode 
+param.decimation  = [1:10];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
@@ -46,7 +46,7 @@ param.NbX         = -10:10;               % 20 Nb de composantes de Fourier en X
 
 
 
-param.Activated_FieldII = 0 ;     % 0 to generate field by yourself
+param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -54,9 +54,9 @@ param.Activated_FieldII = 0 ;     % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-15 15]/1000; % in m
+    param.Xrange = [-13 13]/1000; % in m
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
-    param.Zrange = [1 31]/1000;   % in m
+    param.Zrange = [8 32]/1000;   % in m
 
     param.Nx = 150;
     param.Ny = 1;

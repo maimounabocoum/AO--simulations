@@ -135,7 +135,7 @@ classdef OS < TF2D
             CONJ = conj(flipud(Iin));
             
             for i = 2:length(decimation)
-            Iout(:,I0 - (i-1)) = [0 ; CONJ(1:end-1,i)] ;
+            Iout(:,I0 - decimation(i)) = [0 ; CONJ(1:end-1,i)] ;
             end
             
             Iout(:,I0) = Iout(:,I0)/2 ;

@@ -64,8 +64,10 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
-Irad = Irad.*Mask0 ;
+ Irad = Irad.*Mask0 ;
 %Irad = Irad.*Mask ;  
+
+Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
 
@@ -98,11 +100,17 @@ FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
 OriginIm = MyImage.ifourier(FTF) ;
 
 figure('DefaultAxesFontSize',18); 
+%imagesc(MyImage.decimation,MyImage.fz/MyImage.dfz,abs(MyImage.F_R));
 imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF));
 axis([-40 40 -100 100])
 title('reconstructed fourier transform')
 
-figure; imagesc( abs(OriginIm) );
+figure('DefaultAxesFontSize',18);
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));
+xlabel('x(mm)')
+ylabel('z(mm)')
+xlim(param.Xrange*1000)
+ylim(param.Zrange*1000)    
 title('reconstructed object')
 %figure;imagesc(CurrentExperiement.BoolActiveList)
 
@@ -111,6 +119,8 @@ title('reconstructed object')
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
+ 
+%  figure('DefaultAxesFontSize',18);  ; imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
  
  [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
  [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
@@ -134,7 +144,7 @@ title('reconstructed object')
 
 
      %--------------------- saving datas -------------
- save('..\radon inversion\saved images\SimulationTransmissionOS.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
+ save('..\radon inversion\saved images\SimulationTransmissionOS.mat','x_phantom','y_phantom','z_phantom','Field_Profile','MyTansmission','R','zR')
  save('..\radon inversion\saved images\SimulationOS.mat','MyImage','DelayLAWS','ActiveLIST','AOSignal')
      %%%%%%%%%%%%%%%%%%%%
  end
