@@ -7,9 +7,10 @@ classdef OS < TF2D
         theta
         decimation
         ct
-        R      % Input radon transform of the object        
-        F_R    % Fourier Transform of R with respect to t direction       
-        L      % [min max] : dimension of input image in z direction
+        rawData
+        R       % Input radon transform of the object        
+        F_R     % Fourier Transform of R with respect to t direction       
+        L       % [min max] : dimension of input image in z direction
     end
     
     properties (Access = private)
@@ -34,12 +35,12 @@ classdef OS < TF2D
             obj.ct = ct; % longitudinal index for reconstruction box
             obj.c = c ;
             obj.L = [min(ct),max(ct)] ;
-            obj.R = InputImage;
+            obj.rawData = InputImage;
             obj.theta = theta;          
             obj.decimation = decimation; 
             
             % interpolation of raw data into fourier grid :
-            obj.R = interp1(ct,obj.R,obj.z,'linear',0);
+            obj.R = interp1(ct,obj.rawData,obj.z,'linear',0);
     
             else
             msg = 'dimension matrix mismatch';
@@ -149,15 +150,12 @@ classdef OS < TF2D
            % starting loop after 0 order
 %                        fx = (26.0417)*decim(i_decimate);
 %                        Neff = 1/(fx*(0.2*1e-3));
-%                        fxeff   = 1/(Neff*1e-3);
-%                        
+%                        fxeff   = 1/(Neff*1e-3);                      
            for i = 2:length(ia)
                
-           Isimilardecimate = sort( find(ib == i) ) ;
-           
+           Isimilardecimate = sort( find(ib == i) ) ;           
            % cos = Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2))
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
-           
            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
                        +1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
           % Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
@@ -165,7 +163,47 @@ classdef OS < TF2D
            end       
            
         end
-                
+           
+        function [Iout,theta,decim] = AddSinCosRef(obj,Iin,Field_Profile)
+
+            
+           N = size(Field_Profile,2);
+           % find number of unique couple values:
+           ScanParam = [obj.decimation(:),obj.theta(:)];
+           [Angles,ia,ib] = unique(ScanParam,'rows') ;
+           % ia : index of singleton representing group
+           % ib : index list of goups
+
+           theta = Angles(:,2)  ; % same size as ia 
+           decim = Angles(:,1)  ; % same size as ia 
+           
+           Iout  = zeros( size(Field_Profile,1) , N ) ;
+           P0 = repmat(Iin(:,1),1,N);
+           Iout  = P0.*Field_Profile(:,:,1);
+
+               
+           for i = 2:length(ia)
+
+               Isimilardecimate = sort( find(ib == i) ) ;  
+
+                P1 = repmat(Iin(:,Isimilardecimate(1)),1,N);
+                P2 = repmat(Iin(:,Isimilardecimate(2)),1,N);
+                P3 = repmat(Iin(:,Isimilardecimate(3)),1,N);
+                P4 = repmat(Iin(:,Isimilardecimate(4)),1,N);
+
+               Iout = Iout... 
+                      + P1.*Field_Profile(:,:, 2 + 4*(i-2)) ...
+                      - P2.*Field_Profile(:,:, 3 + 4*(i-2)) ...
+                      + 1i*( P3.*Field_Profile(:,:, 4 + 4*(i-2))...
+                      - P4.*Field_Profile(:,:, 5 + 4*(i-2)) ) ;
+% 
+%                 imagesc(Iout)
+%                 colorbar
+%                 drawnow               
+           end       
+           
+        end
+        
         function Fm = Fmax(obj)
             dt = obj.ct(2) - obj.ct(1) ;
             Fm = 1/dt; % in m-1
