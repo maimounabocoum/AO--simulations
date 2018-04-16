@@ -5,11 +5,11 @@ classdef OS < TF2D
     properties
         % image parameters
         theta
-        decimation
-        ct
-        R      % Input radon transform of the object        
-        F_R    % Fourier Transform of R with respect to t direction       
-        L      % [min max] : dimension of input image in z direction
+        decimation      % n list 
+        ct              % time vector in m
+        R               % Input signal interpolated on z grid       
+        F_R             % Fourier Transform of R with respect to t direction       
+        L               % [min max] : dimension of input image in z direction
     end
     
     properties (Access = private)
@@ -118,58 +118,147 @@ classdef OS < TF2D
 
         end
         
-        function Iout = GetFourier(obj,Iin,decimation)
+        function Iout = GetFourierX(obj,Iin,decimation,theta)
             
             % decimation : vector with single element matching decimation
-            
+            decimation = unique(decimation);
+            [Angles,ia,ib] = unique(theta) ;
+            Ntheta = length(Angles);
             I0 = obj.N/2 + 1 ;
             
             % initialization of fourier matrix
-            Iout = zeros(obj.N,obj.N) ;
+            Iout = zeros(obj.N,obj.N,Ntheta) ;
             %
+            for n_angle = 1:Ntheta
             
-            Iout(:,I0 + decimation) = Iin ;
+            Iin_angle = Iin(:, find(ib==ia(n_angle)) ) ;   
+            
+            Iout(:,I0 + decimation,n_angle) = Iin_angle ;
             
             % add conjugate except for 0 order
             % complexe conjuaget
-            CONJ = conj(flipud(Iin));
+            CONJ = conj(Iin_angle);
             
             for i = 2:length(decimation)
-            Iout(:,I0 - decimation(i)) = [0 ; CONJ(1:end-1,i)] ;
+            Iout(:,I0 - decimation(i),n_angle) = [0 ; CONJ(1:end-1,i)] ;
             end
             
-            Iout(:,I0) = Iout(:,I0)/2 ;
+            Iout(:,I0,n_angle) = Iout(:,I0,n_angle)/2 ;
+            
+            end
+            
+            
+        end
+        
+        function Iout = GetFourier(obj,Iin,decimation,theta)
+            
+            % decimation : vector with single element matching decimation
+            decimation = unique(decimation);
+            [Angles,ia,ib] = unique(theta) ;
+            Ntheta = length(Angles);
+            I0 = obj.N/2 + 1 ;
+            
+            % initialization of fourier matrix
+            Iout = zeros(obj.N,obj.N,Ntheta) ;
+            %
+            for n_angle = 1:Ntheta
+            
+            Iin_angle = Iin(:, find(ib==ia(n_angle)) ) ;   
+            
+            Iout(:,I0 + decimation,n_angle) = Iin_angle ;
+            
+            % add conjugate except for 0 order
+            % complexe conjuaget
+            CONJ = conj(flipud(Iin_angle));
+            
+            for i = 2:length(decimation)
+            Iout(:,I0 - decimation(i),n_angle) = [0 ; CONJ(1:end-1,i)] ;
+            end
+            
+            Iout(:,I0,n_angle) = Iout(:,I0,n_angle)/2 ;
+            
+            end
+            
+            
+        end
+        
+        function DelayLaw_out = ResizeDelayByAngle(obj,DelayLaw, decimation , theta )
+            
+            [Decim,iad,ibd] = unique(decimation);
+            [Angles,ia,ib] = unique(theta) ;
+            Ntheta = length(Angles);
+            Ndecimation = length(Decim);
+            
+            DelayLaw_out = zeros(size(DelayLaw,1),Ntheta,Ndecimation);
+            
+            for n_dec = 1:Ndecimation
+
+            DelayLaw_out(:,ia,n_dec) = DelayLaw(:,find(n_dec==ibd)) ;
+
+            end
+            
+        end
+        
+        function Iout = GetAngles(obj,Iin,decimation,theta)
+            
+            % decimation : vector with single element matching decimation
+            [Decim,iad,ibd] = unique(decimation);
+            [Angles,ia,ib] = unique(theta) ;
+            Ntheta = length(Angles);
+            Ndecimation = length(Decim);
+            I0 = obj.N/2 + 1 ;
+            
+            % initialization of fourier matrix
+            Iout = zeros(obj.N,Ntheta,Ndecimation) ;
+            %
+            for n_dec = 1:Ndecimation
+
+            Iout(:,ia,n_dec) = Iin(:,find(n_dec==ibd)) ;
+
+            end
             
             
         end
         
         function [Iout,theta,decim] = AddSinCos(obj,Iin)
-            
+            % Iin : signal 
+            % size(Iin,1) = number of lines corresponds to dimention of
+            % time vector
+            %size(Iin,1) = number of col corresponds to number aquisition
             % this functions takes the four acquisition frame and 
             % compresses it into a single frame according to
             % exp(-ifx x) = cos - i sin
             %   ..        = (h1-h2) - i(h3-h4)
             
            % find number of unique couple values:
+           % decimate with be sorted in order
            ScanParam = [obj.decimation(:),obj.theta(:)];
            [Angles,ia,ib] = unique(ScanParam,'rows') ;
            % ia : index of singleton representing group
-           % ib : index list of goups
+           % 1:length(thetaUniq) correspond to first 0 decimate
+           % ib : index list of goups, same group number is equivalent to
+           % same angle and same decimate
 
            theta = Angles(:,2)  ; % same size as ia 
+           thetaUniq = unique(theta,'rows') ;
+           
            decim = Angles(:,1)  ; % same size as ia 
            
            % divide the second dimension by the number of phases = 4
            % accounting for single zero order
-           Iout = zeros(size(Iin,1),1+(size(Iin,2)-1)/4) ;
+           % (size(Iin,2)-length(thetaUniq)) : number of decimation
+           % + length(thetaUniq) : for 0 order
+           Iout = zeros(size(Iin,1),length(thetaUniq) +(size(Iin,2)-length(thetaUniq))/4) ;
            
-           Iout(:,1) = Iin( : , 1 ) ;
+           Iout(: , 1:length(thetaUniq)) = Iin( : , 1:length(thetaUniq) ) ;
            % starting loop after 0 order
 %                        fx = (26.0417)*decim(i_decimate);
 %                        Neff = 1/(fx*(0.2*1e-3));
 %                        fxeff   = 1/(Neff*1e-3);
 %                        
-           for i = 2:length(ia)
+
+           % length(ia) : number of different groups without repetition
+           for i = (length(thetaUniq)+1):length(ia)
                
            Isimilardecimate = sort( find(ib == i) ) ;
            
@@ -195,7 +284,45 @@ classdef OS < TF2D
             dt = obj.ct(2) - obj.ct(1) ;
             Fm = 1/dt; % in m-1
         end
-        
+   
+        function [I,z_out] = DataFiltering(obj,Lobject)
+            
+N       = 2^12;
+Lobject = 1*1e-3;
+Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
+                      % we set it to kc = 100/Lobject 
+obj = obj.InitializeFourier(N,10*Fc);
+%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
+obj.Fmax()        % maximum frequency sampling = 1/dt
+                 
+%% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
+
+%%% Fourier Tranform of Radon input image with respect to t
+% creating a fourier parameter set using the measure sample size in m
+
+obj.F_R = obj.fourier(obj.R) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filtered inverse fourier transform :
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
+FilterType = 'ram-lak';%'ram-lak' 
+
+filt = FilterRadon(obj.f, obj.N ,FilterType , Fc);
+filt = filt(:);
+FILTER = filt*ones(1,length(obj.theta));
+% hold on
+% plot(MyImage.f,filt)
+
+%p = bsxfun(@times, p, H); % faster than for-loop
+%  I = MyImage.ifourier(MyImage.F_R);
+ I = obj.ifourier(obj.F_R.*FILTER);
+ %I = MyImage.ifourier(MyImage.F_R);
+% extract image back to initial size :
+ [I,z_out] = ReduceDataSize( I,'y',obj.t,obj.L);%MyImage.L
+
+
+        end
         
 
     

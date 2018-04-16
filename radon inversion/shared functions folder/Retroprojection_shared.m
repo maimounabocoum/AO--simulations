@@ -20,9 +20,9 @@ end
  [X,Z]= meshgrid(X_m,z_out);
  Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
-%  H = figure;
+figure;
 %  A = axes ;
- set(H,'WindowStyle','docked');
+
  
   for i= 1:length(theta)
        
@@ -48,6 +48,7 @@ end
        
        %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
        drawnow 
+
   end
   
 

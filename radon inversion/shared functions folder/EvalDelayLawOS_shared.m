@@ -9,17 +9,24 @@ function [angle, M0 , X0 , Z0] = EvalDelayLawOS_shared( X_m , DelayLAWS , Active
 
 
 % DelayLAWS : each column represents the delay law in s for all probe
-% elements. Note: non active elements are set to zero
- for i = 1:size(DelayLAWS,2)
-      ct(i,:) =    DelayLAWS(:,i)*c;
- end
+% each line the angle of shoot
+% Last dimension is the décimate value
+
+% convert seconds to distance
+ct =    DelayLAWS*c ;
+
+for i_decimate = 1:size(DelayLAWS,3)
+
+
+      
+
  
 % ct = M0 M(t)
-Nangle = size(ct , 1) ;
+Nangle = size(ct ,  2 ) ;
 
 % initialization:
-angle = zeros(1,Nangle);
-M0 = zeros(Nangle,2);
+angle(:,i_decimate) = zeros(1,Nangle);
+M0(:,i_decimate)    = zeros(Nangle,2);
 
 % 0 is defined by the (0,0) on probe linear plane
 
@@ -44,11 +51,11 @@ M0 = zeros(Nangle,2);
        
        % affichage des coordonnée initiales :
        % (X_m,0) - ct*ut
-       X0 = X_m - u(1)*DelayLAWS(:,i)'*c ;
-       Z0 = 0   - u(2)*DelayLAWS(:,i)'*c;
-       M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
-       M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
-       plot( X0*1e3 , Z0*1e3 ,'linewidth',3,'color',cc(i,:)) 
+       X0(:,i_decimate)   = X_m - u(1)*DelayLAWS(:,i)'*c ;
+       Z0(:,i_decimate)   = 0   - u(2)*DelayLAWS(:,i)'*c;
+       M0(i,1,i_decimate) = 0 - u(1)*DelayLAWS(1,i)'*c; 
+       M0(i,2,i_decimate) = 0   - u(2)*DelayLAWS(1,i)'*c;
+       plot( X0(:,i_decimate)*1e3 , Z0(:,i_decimate)*1e3 ,'linewidth',3,'color',cc(i,:)) 
        hold on
        
     end
@@ -66,7 +73,7 @@ ylabel('angle (°)')
     
 
 
-
+end
 
 
 
