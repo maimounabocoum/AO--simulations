@@ -25,12 +25,11 @@ CurrentExperiement = Experiment(param);
 %     figure;
 %     plot(t_excitation*1e6,excitation)
 %     hold on 
-%     plot(t_excitation*1e6,excitation_env,'color','red')
+%     plot(t_excitation*1e6,excitation,'color','red')
 %     xlabel('time in \mu s')
 %     ylabel('a.u')
 %     title('field excitation')
     
-
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
@@ -43,6 +42,9 @@ if param.Activated_FieldII == 1
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
+ [Nx,Ny,Nz]   = SizeBox(CurrentExperiement.MySimulationBox);
+ Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
+ 
  tic
  Hf = gcf;
  h = waitbar(0,'Please wait...');
@@ -56,6 +58,12 @@ end
 
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
+    
+    % field profile
+    [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
+    % max(obj.Field,[],1) : returns for each colulm
+    % the maximum field pressure.
+    Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
    
     % retreive delay law for cuurent scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
@@ -96,17 +104,18 @@ end
          
          case 'OP'
  
-             
+%              AOSignal = CurrentExperiement.AOSignal ;
+%              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')
      if param.Activated_FieldII == 1
      save('..\radon inversion\saved images\Simulation_field.mat','MyImage','DelayLAWS','ActiveLIST')
      else
      save('..\radon inversion\saved images\Simulation.mat','MyImage')
      end
          case 'OS'
-             
+%save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
   MyImage = OS(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
@@ -114,7 +123,7 @@ end
              param.c); 
              
      save('..\radon inversion\saved images\SimulationTransmissionOS.mat',...
-          'x_phantom','y_phantom','z_phantom','MyTansmission','R','zR');
+          'x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile');
     save('..\radon inversion\saved images\SimulationOS.mat',...
                                       'MyImage','DelayLAWS','ActiveLIST');
      if param.Activated_FieldII == 1

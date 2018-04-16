@@ -20,7 +20,8 @@ addpath('shared functions folder')
  load('saved images\Simulation_field.mat');
  load('saved images\SimulationTransmission.mat');
 
- [I,z_out] = DataFiltering(MyImage) ;
+ Lobject = 2e-3 ;
+ [I,z_out] = MyImage.DataFiltering(Lobject) ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% reconstruction BOX initialization (retroprojection):
