@@ -212,7 +212,7 @@ classdef OS < TF2D
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
             + (Z - M0(i,2)).*cos( theta(i) ) ;
-        S =   (X  - M0(i,1)).*cos( theta(i) ) ...
+        S =   (X - mean(X_m)  - M0(i,1)).*cos( theta(i) ) ...
             - (Z - M0(i,2)).*sin( theta(i) ) ;
       % common interpolation:  
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
@@ -227,14 +227,14 @@ classdef OS < TF2D
        % retroprojection:  
         Ireconstruct = Ireconstruct + h0.*projContrib; 
         %%% real time monitoring %%%   
-       imagesc( X_m*1e3,z_out*1e3,real(h0))%real(Ireconstruct)
+       imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))%real(Ireconstruct)
        colormap(parula)
        cb = colorbar ;
        title(['angle(°): ',num2str(theta(i)*180/pi)])
        ylim(obj.L*1e3)
        xlabel('x (mm)')
        ylabel('z (mm)')
-       %caxis( [ min(real(projContrib(:))) , real(max(projContrib(:))) ] )
+       caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )
        %caxis( [ min(real(Ireconstruct(:))) , real(max(Ireconstruct(:))) ] )
        
        %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])

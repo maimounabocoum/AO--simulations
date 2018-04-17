@@ -47,11 +47,17 @@ ActiveLIST = CurrentExperiement.BoolActiveList ;
  
 for n_scan = 1:CurrentExperiement.Nscan
 theta = angle(n_scan);
-[Irad,Mcorner] = RotateTheta(X,Z,MyTansmission,theta);
+[Irad,MMcorner] = RotateTheta(X,Z,MyTansmission,theta);
+u = [cos(theta) ; -sin(theta)] ;
+v = [sin(theta); cos(theta)]   ;
+
+% MMcorner : displacement vector of box edge after rotation
+
 d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0;     
 d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
+%+ MMcorner'*v
 
-Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2,...
+Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
            if n_scan ==1
            Mask = cos(0*X);    
@@ -82,6 +88,12 @@ end
  
 AOSignal = AOSignal + 0*1e-3*rand(size(AOSignal)) ;
 %%
+% AOSignal = CurrentExperiement.AOSignal ;
+% X_m = (1:param.N_elements)*param.width; 
+% Lprobe = param.N_elements*(param.width + param.kerf) ;
+% x = CurrentExperiement.MySimulationBox.x + Lprobe/2;
+% z = CurrentExperiement.MySimulationBox.z ;
+
 figure;
 imagesc(CurrentExperiement.ScanParam(:,2),z*1e3,AOSignal)
 xlabel('order N_x')
@@ -96,6 +108,7 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
 MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
 FILTER = MyImage.GetFILTER(1e-3);
 MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
+%MyImage.R   = MyImage.ifourierz(MyImage.F_R) ;
 
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
 
@@ -104,7 +117,7 @@ MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
 
 %% resolution par iradon
 % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
-DelayLAWS_  = MyImage.SqueezeRepeat(DelayLAWS) ;
+DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
 ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
 
  c = 1540 ;
@@ -115,7 +128,7 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
- Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m-mean( X_m) , MyImage.z , theta , M0 , decimation , param.df0x);
+ Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
 %%
 % FTFx : matrix with fourier composant : first cols = first decimation,
 % vaying angle , second lines : second decimate, varying angle...
