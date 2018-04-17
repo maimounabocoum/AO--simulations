@@ -72,7 +72,7 @@ Field_Profile(:,:,n_scan) = Mask0 ;
 % correction matrice
 
 
-imagesc(Mask0)
+imagesc(Irad)
 AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
                             (1:size(Irad,1))-d_offset,'linear',0) ;
 drawnow
@@ -94,8 +94,8 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              param.c); 
           
 MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
-%[I,z_out] = MyImage.DataFiltering(MyImage.F_R,Lobject) ;
-MyImage.R   = MyImage.ifourierz(MyImage.F_R) ;
+FILTER = MyImage.GetFILTER(1e-3);
+MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
 
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
 
@@ -110,20 +110,26 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  c = 1540 ;
  
 % %[theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS_(:,1)  , ActiveLIST_(:,1) , c) ;
- [theta M0]    = EvalDelayLawOS_shared( X_m , DelayLAWS_  , ActiveLIST_ , c) ;
+ [theta M0]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
  Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m , MyImage.z , theta , M0 , decimation , param.df0x);
 %%
+% FTFx : matrix with fourier composant : first cols = first decimation,
+% vaying angle , second lines : second decimate, varying angle...
 
+FTFxz = MyImage.fourierz(FTFx);
+MyImage.ScatterFourier(FTFxz,decimation , theta);
 
 FTF = MyImage.GetFourierX( FTFx  , decimation , theta ) ;
+
 OriginIm = MyImage.ifourierx(FTF(:,:,1)) ;
 
 figure('DefaultAxesFontSize',18); 
 imagesc(MyImage.fx/MyImage.dfx,MyImage.z*1e3,abs(FTF(:,:,21)));
+
 %imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF));
 %axis([-40 40 -100 100])
 axis([-40 40 0 70])
@@ -152,12 +158,12 @@ title('reconstructed object')
  Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
  TinterpFFT = MyImage.fourier( Tinterp );
  TinterpFFTx = MyImage.fourierx( Tinterp );
-%  figure('DefaultAxesFontSize',18);  
-%  imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
-%  axis([-40 40 -100 100])
-%  xlabel('Fx/dfx')
-%  ylabel('Fz/dfz')
-%  title('object fourier transform')
+ figure('DefaultAxesFontSize',18);  
+ imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
+ axis([-40 40 -100 100])
+ xlabel('Fx/dfx')
+ ylabel('Fz/dfz')
+ title('object fourier transform')
 
   figure('DefaultAxesFontSize',18);  
  imagesc(MyImage.fx/MyImage.dfx,MyImage.z*1e3,abs(TinterpFFTx))

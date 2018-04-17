@@ -2,7 +2,7 @@
 clearvars;
 
 theta = -20:20;
-Nbx   = [0:10];
+Nbx   = [10];
 L     = 10e-3;
 Lobj  = 50e-3 ;
 N = 2^10;

@@ -212,7 +212,7 @@ classdef OS < TF2D
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
             + (Z - M0(i,2)).*cos( theta(i) ) ;
-        S =   (X - M0(i,1)).*cos( theta(i) ) ...
+        S =   (X - mean(X_m)  - M0(i,1)).*cos( theta(i) ) ...
             - (Z - M0(i,2)).*sin( theta(i) ) ;
       % common interpolation:  
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
@@ -364,22 +364,12 @@ classdef OS < TF2D
             Fm = 1/dt; % in m-1
         end
    
-        function [I,z_out] = DataFiltering(obj,Lobject)
+        function FILTER = GetFILTER(obj,Lobject)
             
-N       = 2^12;
-Lobject = 1*1e-3;
+
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
-                      % we set it to kc = 100/Lobject 
-obj = obj.InitializeFourier(N,10*Fc);
-%MyImage.Show_R();    % show Radon transform (ie interpolated raw data)
-obj.Fmax()        % maximum frequency sampling = 1/dt
-                 
+             
 %% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
-
-%%% Fourier Tranform of Radon input image with respect to t
-% creating a fourier parameter set using the measure sample size in m
-
-obj.F_R = obj.fourier(obj.R) ;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filtered inverse fourier transform :
@@ -387,20 +377,32 @@ obj.F_R = obj.fourier(obj.R) ;
 % filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
 FilterType = 'ram-lak';%'ram-lak' 
 
-filt = FilterRadon(obj.f, obj.N ,FilterType , Fc);
+filt = FilterRadon(obj.fx, obj.N ,FilterType , Fc);
 filt = filt(:);
 FILTER = filt*ones(1,length(obj.theta));
-% hold on
-% plot(MyImage.f,filt)
-
-%p = bsxfun(@times, p, H); % faster than for-loop
-%  I = MyImage.ifourier(MyImage.F_R);
- I = obj.ifourier(obj.F_R.*FILTER);
- %I = MyImage.ifourier(MyImage.F_R);
-% extract image back to initial size :
- [I,z_out] = ReduceDataSize( I,'y',obj.t,obj.L);%MyImage.L
 
 
+
+        end
+        
+        function [] = ScatterFourier(obj,FFTin,decimate,theta)
+           % decimate and theta are of the same length and map the data in
+           % FFTin (FFTin(:,i) associated to decimate(i),theta(i))
+             figure ;
+             
+            for i = 1:length(decimate)
+                
+                fx = (obj.dfx)*decimate(i)*cos(theta(i)) + (obj.fz)*sin(theta(i));
+                fz = (obj.dfx)*decimate(i)*sin(theta(i)) + (obj.fz)*cos(theta(i));
+                
+               
+                scatter3( fx/obj.dfx, fz/obj.dfz, abs(FFTin(:,i)),36, abs(FFTin(:,i)) )
+                axis([-40 40 -100 100])
+                hold on
+                drawnow  
+            end
+            view([0 90])
+            
         end
         
 
