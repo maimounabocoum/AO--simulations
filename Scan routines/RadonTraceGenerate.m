@@ -115,7 +115,7 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
- Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m , MyImage.z , theta , M0 , decimation , param.df0x);
+ Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m-mean( X_m) , MyImage.z , theta , M0 , decimation , param.df0x);
 %%
 % FTFx : matrix with fourier composant : first cols = first decimation,
 % vaying angle , second lines : second decimate, varying angle...

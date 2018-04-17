@@ -7,7 +7,7 @@ addpath('..\radon inversion')
 field_init(0);
 
 parameters;
-IsSaved = 1 ;
+IsSaved = 0 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,7 +67,7 @@ end
    
     % retreive delay law for cuurent scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
-     DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = ...
+     DelayLAWS( :  ,n_scan) = ...
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
           
