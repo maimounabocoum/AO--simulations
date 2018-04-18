@@ -43,19 +43,21 @@ DelayLAWS( : ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
  
 X_m = (1:param.N_elements)*param.width; 
 ActiveLIST = CurrentExperiement.BoolActiveList ;
-[angle, M0] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
+
+% C : point of invariation by rotation of angle theta
+[angle, M0 , ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
  
 for n_scan = 1:CurrentExperiement.Nscan
 theta = angle(n_scan);
-[Irad,MMcorner] = RotateTheta(X,Z,MyTansmission,theta);
+% C : center of rotation = [mean(X_m),0]
+[Irad,MMcorner] = RotateTheta(X,Z,MyTansmission,theta,C(n_scan,:));
 u = [cos(theta) ; -sin(theta)] ;
 v = [sin(theta); cos(theta)]   ;
 
 % MMcorner : displacement vector of box edge after rotation
 
-d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0;     
-d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
-%+ MMcorner'*v
+% d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0     
+% d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
 
 Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
@@ -79,8 +81,9 @@ Field_Profile(:,:,n_scan) = Mask0 ;
 
 
 imagesc(Irad)
-AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
-                            (1:size(Irad,1))-d_offset,'linear',0) ;
+AOSignal(:,n_scan) = trapz(x,Irad,2) ;
+% AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
+%                             (1:size(Irad,1))-d_offset,'linear',0) ;
 drawnow
 
 axis equal
@@ -122,8 +125,7 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
 
  c = 1540 ;
  
-% %[theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS_(:,1)  , ActiveLIST_(:,1) , c) ;
- [theta M0]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+ [theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
@@ -133,15 +135,31 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
 % FTFx : matrix with fourier composant : first cols = first decimation,
 % vaying angle , second lines : second decimate, varying angle...
 
-FTFxz = MyImage.fourierz(FTFx);
-MyImage.ScatterFourier(FTFxz,decimation , theta);
+%FTFxz = MyImage.fourierz(FTFx);
+% MyImage.ScatterFourier(FTFxz,decimation , theta);
 
-FTF = MyImage.GetFourierX( FTFx  , decimation , theta ) ;
-
-OriginIm = MyImage.ifourierx(FTF(:,:,1)) ;
-
+%FTF = MyImage.GetFourierX( FTFx  , decimation , theta ) ;
+FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
+OriginIm = 0 ;
 figure('DefaultAxesFontSize',18); 
-imagesc(MyImage.fx/MyImage.dfx,MyImage.z*1e3,abs(FTF(:,:,21)));
+for nplot = 1:size(FTF,3)
+subplot(121)
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(FTF(:,:,nplot)));
+ylim(param.Zrange*1000) 
+xlim(param.Xrange*1000) 
+subplot(122)
+OriginIm = OriginIm + FTF(:,:,nplot) ;
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));   
+ylim(param.Zrange*1000) 
+xlim(param.Xrange*1000) 
+T = unique(theta) ;
+title(['theta = ',num2str(180*T(nplot)/pi)])
+drawnow
+pause(1)
+
+end
+
+
 
 %imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF));
 %axis([-40 40 -100 100])

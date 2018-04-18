@@ -1,4 +1,4 @@
-function [angle, M0 , X0 , Z0] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
+function [angle, M0 , X0 , Z0 , C] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
 %creation of function 11/09/2017 for delay law retreival using sequence
 %parameters. 
 
@@ -7,6 +7,7 @@ function [angle, M0 , X0 , Z0] = EvalDelayLawOS_shared( X_m , DelayLAWS , Active
 % x local de la position des piezos élements coincident avec les coordonée
 % du labo sur l'axe des x : (X_m,0)
 
+% C is the fixed point. Value [0,0] is returned for theta = 0
 
 % DelayLAWS : each column represents the delay law in s for all probe
 % each line the angle of shoot
@@ -21,7 +22,7 @@ Nangle = size(ct ,  2 ) ;
 % initialization:
 angle = zeros(1,Nangle); % angle emission of wavefront inittialization
 M0    = zeros(Nangle,2); % initial position of wavefront inittialization
-
+C     = zeros(Nangle,2);
 % 0 is defined by the (0,0) on probe linear plane
 
   Hf = figure;
@@ -36,13 +37,19 @@ M0    = zeros(Nangle,2); % initial position of wavefront inittialization
    
        Nmin = find(ActiveLIST(:,i) == 1, 1 );
        Nmax = find(ActiveLIST(:,i) == 1, 1, 'last' );
-        
-       angle(i) = asin( (ct(Nmax,i)-ct(Nmin,i))/(X_m(Nmax) - X_m(Nmin)) );
-              % definition ut vector :
-       u = [sin(angle(i)),cos(angle(i))];
-
-
        
+ 
+       angle(i) = asin( (ct(Nmax,i)-ct(Nmin,i))/(X_m(Nmax) - X_m(Nmin))  );
+       % truncation of angle by 6 unit decimate
+       angle(i) = round(angle(i)*100000)/100000 ;
+       
+       % definition ut vector orthogonal to initial (linear) wavefront:
+       % equation of previous wavefront : y = 0
+       % equation of new wavefront : y = ax + b
+       % intersection equation : x = -b/a if a not equals to 0 , set to 0
+       % otherwise
+       
+       u = [sin(angle(i)),cos(angle(i))];
        
        % affichage des coordonnée initiales :
        % (X_m,0) - ct*ut
@@ -51,7 +58,17 @@ M0    = zeros(Nangle,2); % initial position of wavefront inittialization
        M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
        M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
        plot( X0(:)*1e3 , Z0(:)*1e3 ,'linewidth',3,'color',cc(i,:)) 
+       
+       if ~(Z0(end)-Z0(1)) == 0
+
+%        a = (Z0(end)-Z0(1))/(X0(end)-X0(1));
+%        b = -(Z0(end)*X0(1)-Z0(1)*X0(end))/(X0(end)-X0(1));
+       C(i,1) = (Z0(end)*X0(1)-Z0(1)*X0(end))/(Z0(end)-Z0(1));
+       C(i,2) = 0;
+       end
+       % evaluate fixed point over rotation
        hold on
+       plot( C(i,1)*1e3 , C(i,2)*1e3 ,'x','color','black') 
        
     end
     

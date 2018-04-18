@@ -1,11 +1,11 @@
-function [Iout,MMcorner] = RotateTheta(X,Z,Iin,theta)
+function [Iout,MMcorner] = RotateTheta(X,Z,Iin,theta,C)
 % created by maimouna bocoum 
 % 25/10/2017
 
-% rotation with respect to box center
+% rotation with respect to box center in x , and 0 coordinate in z
 
-X = X - mean(X(:));
-%Z = Z - mean(Z(:));
+X = X - C(1);
+Z = Z - C(2);
 
 % matrix of rotation (0,0) : center of rotation
 M = [cos(theta), sin(theta) ; -sin(theta), cos(theta)];

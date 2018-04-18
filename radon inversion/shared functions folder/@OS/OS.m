@@ -150,6 +150,52 @@ classdef OS < TF2D
             
         end
         
+        function Iout = InverseFourierX(obj,Iin,decimation,theta, C )
+            
+            % decimation : vector with single element matching decimation
+            decimation = unique(decimation);
+            [Angles,ia,ib] = unique(theta) ;
+            Ntheta = length(Angles);
+            I0 = obj.N/2 + 1 ;
+            [S,CT] = meshgrid(obj.x + mean(obj.L),obj.z) ;
+            
+            % initialization of fourier matrix
+            Iout = zeros(obj.N,obj.N,Ntheta) ;
+            % center of rotation 
+
+            
+            % reconstruction of fourier in direction X for each angular
+            % value
+            for n_angle = 1:Ntheta
+            
+            Iin_angle = Iin(:, find(ib==ia(n_angle)) ) ;   
+            
+            Iout(:,I0 + decimation , n_angle ) = Iin_angle ;
+            
+            % add conjugate except for 0 order
+            % complexe conjuaget
+            CONJ = conj(Iin_angle);
+            
+            for i = 2:length(decimation)
+            Iout(:,I0 - decimation(i),n_angle) = [0 ; CONJ(1:end-1,i)] ;
+            end
+            
+            Iout(:,I0,n_angle) = Iout(:,I0,n_angle)/2 ;
+            
+            % inverse fourier 
+            Iout(:,:,n_angle) = obj.ifourierx(Iout(:,:,n_angle)) ;
+            
+            
+            % rotation of coordinates :
+
+            [Itemp,MMcorner] = RotateTheta(S,CT,Iout(:,:,n_angle),-Angles(n_angle),C) ;
+            Iout(:,:,n_angle) = Itemp ;
+
+            end
+            
+            
+        end
+        
         function Iout = GetFourier(obj,Iin,decimation,theta)
             
             % decimation : vector with single element matching decimation
