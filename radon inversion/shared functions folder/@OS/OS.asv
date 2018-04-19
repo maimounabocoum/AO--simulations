@@ -7,11 +7,11 @@ classdef OS < TF2D
         ct              % time vector in m
         R               % Input signal interpolated on z grid       
         F_R             % Fourier Transform of R with respect to t direction   
+        Lx             % [min max] : dimension of input image in z direction
+        Lz               % [min max] : dimension of input image in z direction
     end
     
     properties (Access = private)
-        Lx              % [min max] : dimension of input image in z direction
-        Lz              % [min max] : dimension of input image in z direction
         theta
         decimation      % n list 
         SamplingRate         % Samplinf frequency in Hz
@@ -22,7 +22,7 @@ classdef OS < TF2D
     
     methods
         
-        function obj = OS(InputImage,theta,decimation,df0x,ct,SamplingRate,c,Lx)
+        function obj = OS(InputImage,theta,decimation,df0x,ct,SamplingRate,c)
             %N: number of points for fourier transform
             N = 2^10 ;
             Fmax_x = (N-1)*df0x;
@@ -34,7 +34,6 @@ classdef OS < TF2D
             obj.SamplingRate = SamplingRate ;
             obj.ct = ct; % longitudinal index for reconstruction box
             obj.c = c ;
-            obj.Lx = Lx ;
             obj.Lz = [min(ct),max(ct)] ;
             obj.R = InputImage;
             obj.theta = theta;          
@@ -159,7 +158,7 @@ classdef OS < TF2D
             [Angles,ia,ib] = unique(theta) ;
             Ntheta = length(Angles);
             I0 = obj.N/2 + 1 ;
-            [X,Z] = meshgrid(obj.x + mean(obj.Lx),obj.z) ;
+            [S,CT] = meshgrid(obj.x + mean(obj.L),obj.z) ;
             
             % initialization of fourier matrix
             Iout = zeros(obj.N,obj.N,Ntheta) ;
@@ -190,7 +189,7 @@ classdef OS < TF2D
             
             % rotation of coordinates :
 
-            [Itemp,MMcorner] = RotateTheta(X,Z,Iout(:,:,n_angle),-Angles(n_angle),C(n_angle,:)) ;
+            [Itemp,MMcorner] = RotateTheta(S,CT,Iout(:,:,n_angle),-Angles(n_angle),C) ;
             Iout(:,:,n_angle) = Itemp ;
 
             end

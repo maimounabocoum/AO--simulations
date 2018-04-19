@@ -2,7 +2,8 @@ function [Iout,MMcorner] = RotateTheta(X,Z,Iin,theta,C)
 % created by maimouna bocoum 
 % 25/10/2017
 
-% rotation with respect to box center in x , and 0 coordinate in z
+% rotation with respect to box center in x , using fixed point of rotation
+% C
 
 X = X - C(1);
 Z = Z - C(2);

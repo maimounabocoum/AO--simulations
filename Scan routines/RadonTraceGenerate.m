@@ -46,26 +46,22 @@ ActiveLIST = CurrentExperiement.BoolActiveList ;
 
 % C : point of invariation by rotation of angle theta
 [angle, M0 , ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
- 
+%% run scan 
+figure ;
 for n_scan = 1:CurrentExperiement.Nscan
-theta = angle(n_scan);
+% theta = angle(n_scan);
 % C : center of rotation = [mean(X_m),0]
-[Irad,MMcorner] = RotateTheta(X,Z,MyTansmission,theta,C(n_scan,:));
+[Irad,MMcorner] = RotateTheta( X , Z , MyTansmission , angle(n_scan) , C(n_scan,:) );
+
 u = [cos(theta) ; -sin(theta)] ;
-v = [sin(theta); cos(theta)]   ;
-
-% MMcorner : displacement vector of box edge after rotation
-
-% d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0     
-% d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
+v = [sin(theta) ; cos(theta)]  ;
 
 Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
            if n_scan ==1
            Mask = cos(0*X);    
            else
-
-               
+            
 if mod(n_scan,2) == 0
 Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
 else
@@ -74,18 +70,16 @@ end
            end
  Irad = Irad.*Mask0 ;
 %Irad = Irad.*Mask ;  
-
 Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
-
-
-imagesc(Irad)
+imagesc(x*1e3,z*1e3,Irad)
+xlabel('x(mm)')
+ylabel('ct(mm)')
 AOSignal(:,n_scan) = trapz(x,Irad,2) ;
 % AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
 %                             (1:size(Irad,1))-d_offset,'linear',0) ;
 drawnow
-
 axis equal
 end
  
@@ -106,7 +100,7 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
              param.fs_aq,...
-             param.c); 
+             param.c,[min(X_m) , max(X_m)]); 
           
 MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
 FILTER = MyImage.GetFILTER(1e-3);
@@ -167,10 +161,10 @@ axis([-40 40 0 70])
 title('reconstructed fourier along x')
 
 figure('DefaultAxesFontSize',18);
-imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));
+imagesc(MyImage.x*1e3 + mean(X_m)*1000,MyImage.z*1e3,real(OriginIm));
 xlabel('x(mm)')
 ylabel('z(mm)')
-xlim(param.Xrange*1000)
+xlim(param.Xrange*1000+ mean(X_m)*1000)
 ylim(param.Zrange*1000)    
 title('reconstructed object')
 
