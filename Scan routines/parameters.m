@@ -27,10 +27,10 @@ param.farfield = param.width^2/(4*param.lambda);
 % OP : 'Plane Waves'
 % JM :  'Jean-Michel continuoous waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OF'; 
+param.FOC_type = 'OP'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = (-20:20)*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = (-40:40)*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
