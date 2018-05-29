@@ -30,12 +30,12 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OS'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = [20,0,20]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = [-10:10]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
 param.df0x = (1/(param.N_elements*param.width)) ;
-param.decimation  = 1:20;  % decimation list of active actuators   - only active in OS mode 
+param.decimation  = [1,10];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;

@@ -101,15 +101,14 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.MySimulationBox.z,...
              param.fs_aq,...
              param.c,[min(X_m) , max(X_m)]); 
-          
-MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
-FILTER = MyImage.GetFILTER(1e-3);
-MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
-%MyImage.R   = MyImage.ifourierz(MyImage.F_R) ;
+   
+         
+ MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
+ FILTER = MyImage.GetFILTER(1e-3);
+ MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
+
 
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
-
-
 
 
 %% resolution par iradon
@@ -125,7 +124,10 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % X_m : interpolation vector for reconstruction
  % z :
  Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
-%%
+xlim(param.Xrange*1000+ mean(X_m)*1000)
+ylim(param.Zrange*1000) 
+ 
+ %%
 % FTFx : matrix with fourier composant : first cols = first decimation,
 % vaying angle , second lines : second decimate, varying angle...
 
@@ -167,6 +169,7 @@ ylabel('z(mm)')
 xlim(param.Xrange*1000+ mean(X_m)*1000)
 ylim(param.Zrange*1000)    
 title('reconstructed object')
+colorbar
 
 
 %% saving data to reconstruct folder

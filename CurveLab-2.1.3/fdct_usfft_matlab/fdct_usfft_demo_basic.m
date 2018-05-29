@@ -10,6 +10,7 @@ disp(['localized in both space and frequency.']);
 disp(' ');
 
 % fdct_usfft_demo_basic.m -- This demo displays a curvelet
+clearvars;
 
 m = 512;
 n = 512;
@@ -21,12 +22,13 @@ disp('Take curvelet transform: fdct_usfft');
 tic; C = fdct_usfft(X,0); toc;
 
 %specify one curvelet
-s = 5;
-w = 1;
-[A,B] = size(C{s}{w});
-a = ceil((A+1)/2);
-b = ceil((B+1)/2);
-C{s}{w}(a,b) = 1;
+j = 5;
+%2^(ceil(j/2)+1)
+l = 1;
+[A,B] = size(C{j}{l});
+k1 = ceil((A+1)/2);
+k2 = ceil((B+1)/2);
+C{j}{l}(k1,k2) = 1;
 
 %adjoint curvelet transform
 disp('Take adjoint curvelet transform: afdct_usfft');
@@ -34,6 +36,8 @@ tic; Y = afdct_usfft(C,0); toc;
 
 %display the curvelet
 F = ifftshift(fft2(fftshift(Y)));
+
+figure;
 subplot(1,2,1); colormap gray; imagesc(real(Y)); axis('image'); ...
     title('a curvelet: spatial viewpoint');
 subplot(1,2,2); colormap gray; imagesc(abs(F)); axis('image'); ...

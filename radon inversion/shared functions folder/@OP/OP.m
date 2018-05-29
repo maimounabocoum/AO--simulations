@@ -150,6 +150,8 @@ FILTER = filt*ones(1,length(obj.theta));
  I = obj.ifourier(obj.F_R.*FILTER);
  %I = MyImage.ifourier(MyImage.F_R);
 % extract image back to initial size :
+
+figure ; imagesc(obj.theta,obj.f,abs(I))
  [I,z_out] = ReduceDataSize( I,'y',obj.t,obj.L);%MyImage.L
 
 

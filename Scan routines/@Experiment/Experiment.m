@@ -152,7 +152,12 @@ methods ( Access = 'public' )
                                 + length(obj.param.angles) ; 
                     % we operate the full 4-phases decimation scan for every
                     % successive angle to scan +  fondamental
+                    if ~isempty(obj.param.decimation)
                     decimation = [1;1;1;1]*(obj.param.decimation) ;
+                    else
+                    decimation = [];
+                    end
+                    
                     [DEC,THETA] = meshgrid([0;decimation(:)],obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     

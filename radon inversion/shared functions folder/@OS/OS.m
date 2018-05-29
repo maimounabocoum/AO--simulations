@@ -279,7 +279,7 @@ classdef OS < TF2D
        colormap(parula)
        cb = colorbar ;
        title(['angle(°): ',num2str(theta(i)*180/pi)])
-       ylim(obj.L*1e3)
+       ylim(obj.Lz*1e3)
        xlabel('x (mm)')
        ylabel('z (mm)')
        caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )
@@ -425,10 +425,10 @@ Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simpl
 % filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
 FilterType = 'ram-lak';%'ram-lak' 
 
-filt = FilterRadon(obj.fx, obj.N ,FilterType , Fc);
+filt = FilterRadon(obj.fz, obj.N ,FilterType , Fc);
 filt = filt(:);
-FILTER = filt*ones(1,length(obj.theta));
-
+FILTER = filt*ones(1,length(obj.theta)) ;
+%FILTER = filt*(1-2*df0x*(obj.decimation).*sin(obj.theta).*cos(obj.theta))'  ;
 
 
         end
