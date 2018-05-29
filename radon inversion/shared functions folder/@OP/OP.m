@@ -51,14 +51,25 @@ classdef OP < TF_t
                 DXsample = obj.c*1/(obj.SamplingRate) ; 
                 obj = obj.Initialize(N,1/DXsample);
                 % interpolated trace on fourier param
+
+                if  size(obj.R,2) == 1
                 obj.R = interp1(t,obj.R,obj.t,'linear',0);
+                obj.R = obj.R' ;
+                else
+                obj.R = interp1(t,obj.R,obj.t,'linear',0);   
+                end
             elseif nargin == 3
                 N = varargin{1};
                 Fc = varargin{2};
                 t = obj.t ;  
                 obj = obj.Initialize(N,Fc);        
                 % interpolated trace on fourier param
+                if  size(obj.R,2) == 1
                 obj.R = interp1(t,obj.R,obj.t,'linear',0);
+                obj.R = obj.R' ;
+                else
+                obj.R = interp1(t,obj.R,obj.t,'linear',0);   
+                end
                 
             end
         
