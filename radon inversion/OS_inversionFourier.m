@@ -23,10 +23,11 @@ addpath('shared functions folder')
   load('saved images\SimulationTransmissionOS.mat');
    load('saved images\Field_Profile.mat');
  %% test reconstruction
- 
- sum(Field_Profile,3)
- 
- 
+%  
+%  Iref = sum(Field_Profile,3);
+%  figure; imagesc(Iref);
+FTF = MyImage.AddSinCosRef(MyImage.rawData, Field_Profile) ;
+figure; imagesc(abs(FTF)) 
  
  %% fourier reconstruction
 MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
