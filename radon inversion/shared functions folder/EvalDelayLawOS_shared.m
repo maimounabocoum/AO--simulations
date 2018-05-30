@@ -53,8 +53,8 @@ C     = zeros(Nangle,2);
        
        % affichage des coordonnée initiales :
        % (X_m,0) - ct*ut
-       X0(:)   = X_m - u(1)*DelayLAWS(:,i)'*c ;
-       Z0(:)   = 0   - u(2)*DelayLAWS(:,i)'*c;
+       X0   = X_m - u(1)*DelayLAWS(:,i)'*c ;
+       Z0   = 0   - u(2)*DelayLAWS(:,i)'*c;
        M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
        M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
        plot( X0(:)*1e3 , Z0(:)*1e3 ,'linewidth',3,'color',cc(i,:)) 

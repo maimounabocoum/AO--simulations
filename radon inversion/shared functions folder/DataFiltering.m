@@ -3,7 +3,7 @@ function [I,z_out] = DataFiltering(MyImage)
 %   Detailed explanation goes here
 
 N       = 2^12;
-Lobject = 3*1e-3;
+Lobject = 1*1e-3;
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
                       % we set it to kc = 100/Lobject 
 MyImage = MyImage.InitializeFourier(N,10*Fc);
