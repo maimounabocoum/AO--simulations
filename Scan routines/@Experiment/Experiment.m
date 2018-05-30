@@ -70,7 +70,7 @@ methods ( Access = 'public' )
                 
                 case 'OF'
                     % get the center position X for each scan line               
-                       [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.MySimulationBox.x );
+                       [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.param.X0 , obj.param.X1 );
                        Scan(isnan(Scan)) = [] ;  
                        % retreive the total number od scans     
                        obj.Nscan = length(Scan);        
