@@ -3,11 +3,11 @@
 clearvars ;
 
 addpath('..\Field_II')
-addpath('..\radon inversion')
+addpath('..\radon inversion\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 1 ;
+IsSaved = 0 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -102,6 +102,10 @@ end
      %--------------------- saving datas -------------
      switch param.FOC_type
          
+         case 'OF'
+ 
+ MyImage = OF(CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,CurrentExperiement.AOSignal,param.fs_aq,param.c); 
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')        
          case 'OP'
  
 %              AOSignal = CurrentExperiement.AOSignal ;
@@ -138,5 +142,5 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rmpath('..\radon inversion')
+% rmpath('..\radon inversion')
 field_end;

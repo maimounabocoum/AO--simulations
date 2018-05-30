@@ -14,8 +14,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;            % 192; % Number of elements
-param.X0 = -19/1000  ;               % prosition min of effective probe shooting
-param.X1 =  19/1000 ;                % prosition min of effective probe shooting
+param.X0 = -5/1000  ;               % prosition min of effective probe shooting
+param.X1 =  5/1000 ;                % prosition min of effective probe shooting
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -25,9 +25,9 @@ param.farfield = param.width^2/(4*param.lambda);
 %% type of focalization to apply for the virtual experiment :
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
-% JM :  'Jean-Michel continuoous waves'
+% JM : 'Jean-Michel continuoous waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OS'; 
+param.FOC_type = 'OF'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
 param.angles      = [-10:10]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
@@ -54,9 +54,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-13 13]/1000; % in m
+    param.Xrange = [-4 4]/1000; % in m
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
-    param.Zrange = [8 32]/1000;   % in m
+    param.Zrange = [10 30]/1000;   % in m
 
     param.Nx = 150;
     param.Ny = 1;
