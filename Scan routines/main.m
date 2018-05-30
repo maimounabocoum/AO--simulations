@@ -93,7 +93,11 @@ end
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  if (IsSaved == 1)
-
+     
+     % saving folder name with todays date
+     SubFolderName = generateSubFolderName('..\radon inversion\saved images') ;
+     FileName   = generateSaveName(SubFolderName ,'type',param.FOC_type);
+     
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
@@ -105,7 +109,8 @@ end
          case 'OF'
  
  MyImage = OF(CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,CurrentExperiement.AOSignal,param.fs_aq,param.c); 
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')        
+ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage')     
+ 
          case 'OP'
  
 %              AOSignal = CurrentExperiement.AOSignal ;
