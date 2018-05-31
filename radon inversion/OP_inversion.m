@@ -17,8 +17,8 @@ addpath('shared functions folder')
 % MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
 %% simulation traces 
- load('saved images\Simulation_field.mat');
- load('saved images\SimulationTransmission.mat');
+%  load('saved images\Simulation_field.mat');
+%  load('saved images\SimulationTransmission.mat');
 
  Lobject = 2e-3 ;
  [I,z_out] = MyImage.DataFiltering(Lobject) ;
@@ -52,14 +52,14 @@ Ireconstruct = Retroprojection_shared( I , X_m, z_out , theta, M0 , Hf);
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure
-imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-colorbar
-title('simulation input phantom')
-ylim([min(z_out*1e3) max(z_out*1e3)])
-xlabel('x (mm)')
-ylabel('y (mm)')
-drawnow   
+% figure
+% imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+% colorbar
+% title('simulation input phantom')
+% ylim([min(z_out*1e3) max(z_out*1e3)])
+% xlabel('x (mm)')
+% ylabel('y (mm)')
+% drawnow   
 
 
 

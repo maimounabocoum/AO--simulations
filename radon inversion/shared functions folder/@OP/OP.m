@@ -22,7 +22,9 @@ classdef OP < TF_t
         
         function obj = OP(InputImage,theta,t,SamplingRate,c)
             %N: number of points for fourier transform
-            obj@TF_t(t);
+            N = 2^10 ;
+            Fmax = 1/(t(2)-t(1));
+            obj@TF_t(N,Fmax);
             
             if (size(InputImage) == [length(t),length(theta)])
             % checkin that dimension match the input image
@@ -30,7 +32,7 @@ classdef OP < TF_t
             obj.z = t; % longitudinal index for reconstruction box
             obj.c = c ;
             obj.L = [min(t),max(t)] ;
-            obj.R = InputImage;
+            obj.R = interp1(t,InputImage,obj.t,'linear',0);
             obj.theta = theta;            
     
             else
@@ -164,6 +166,27 @@ FILTER = filt*ones(1,length(obj.theta));
 
 figure ; imagesc(obj.theta,obj.f,abs(I))
  [I,z_out] = ReduceDataSize( I,'y',obj.t,obj.L);%MyImage.L
+
+
+        end
+        
+        function FILTER = GetFILTER(obj,Lobject)
+            
+
+Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
+             
+%% Nyist principle states the sampling of the object to reconstruct to be such that w > w_max/2 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filtered inverse fourier transform :
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filter options : 'ram-lak' (default) , 'cosine', 'hamming' , 'hann'
+FilterType = 'ram-lak';%'ram-lak' 
+
+filt = FilterRadon(obj.f, obj.N ,FilterType , Fc);
+filt = filt(:);
+FILTER = filt*ones(1,length(obj.theta)) ;
+%FILTER = filt*(1-2*df0x*(obj.decimation).*sin(obj.theta).*cos(obj.theta))'  ;
 
 
         end

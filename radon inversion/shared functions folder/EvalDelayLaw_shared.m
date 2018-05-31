@@ -2,6 +2,8 @@ function [angle, M0 , X0 , Z0] = EvalDelayLaw_shared( X_m , DelayLAWS  , ActiveL
 %creation of function 11/09/2017 for delay law retreival using sequence
 %parameters. 
 
+screenPlot = 0 ;
+
 % DelayLAWS : each column represents the delay law in s for all probe
 % elements. Note: non active elements are set to zero
  for i = 1:size(DelayLAWS,2)
@@ -17,11 +19,13 @@ M0 = zeros(Nangle,2);
 
 % 0 is defined by the (0,0) on probe linear plane
 
-%   Hf = figure;
-%   set(Hf,'WindowStyle','docked');
-%   subplot(211)
-%     cc = jet(Nangle);
-%     colormap(jet);
+if screenPlot == 1
+  Hf = figure;
+  set(Hf,'WindowStyle','docked');
+  subplot(211)
+    cc = jet(Nangle);
+    colormap(jet);
+end
     
     for i = 1:Nangle     
        % find index of minimum active element :
@@ -38,23 +42,26 @@ M0 = zeros(Nangle,2);
        Z0 = 0   - u(2)*DelayLAWS(:,i)'*c;
        M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
        M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
-%        plot( X0*1e3 , Z0*1e3 ,'linewidth',3,'color',cc(i,:)) 
-%        hold on
+       if screenPlot == 1
+       plot( X0*1e3 , Z0*1e3 ,'linewidth',3,'color',cc(i,:)) 
+       hold on
+       end
        
     end
-%     
-%     cb = colorbar ;
-%     ylabel(cb,'angular index (a.u.)')
-%     xlabel('X (mm)')
-%     ylabel('Z(mm)')
-%     set(gca,'YDir','reverse')
-%     
-% subplot(212)
-% plot(180/pi*angle,'-o','linewidth',3)
-% xlabel('shoot index')
-% xlabel('angle (°)')
-    
 
+if screenPlot == 1    
+    cb = colorbar ;
+    ylabel(cb,'angular index (a.u.)')
+    xlabel('X (mm)')
+    ylabel('Z(mm)')
+    set(gca,'YDir','reverse')
+    
+subplot(212)
+plot(180/pi*angle,'-o','linewidth',3)
+xlabel('shoot index')
+xlabel('angle (°)')
+    
+end
 
 
 
