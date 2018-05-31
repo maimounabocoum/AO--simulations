@@ -7,7 +7,7 @@ addpath('..\radon inversion\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 0 ;
+IsSaved = 1 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,6 +88,11 @@ end
 % hold on
 % plot(CurrentExperiement.MySimulationBox.z*1e3,CurrentExperiement.AOSignal(:,64)/max(CurrentExperiement.AOSignal(:,64)))
  
+% set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+% [cx,cy,c] = improfile;
+% figure;
+% plot(cy(1) + sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c/1000)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

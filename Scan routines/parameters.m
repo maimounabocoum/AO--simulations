@@ -14,8 +14,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;            % 192; % Number of elements
-param.X0 = -5/1000  ;               % prosition min of effective probe shooting
-param.X1 =  5/1000 ;                % prosition min of effective probe shooting
+param.X0 = -20/1000  ;               % prosition min of effective probe shooting
+param.X1 =  20/1000 ;                % prosition min of effective probe shooting
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -27,10 +27,10 @@ param.farfield = param.width^2/(4*param.lambda);
 % OP : 'Plane Waves'
 % JM : 'Jean-Michel continuoous waves'
 % OS : 'Structured Waves ' 
-param.FOC_type = 'OF'; 
+param.FOC_type = 'OP'; 
 
 param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = [-10:10]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = [-20:20]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
@@ -54,9 +54,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-4 4]/1000; % in m
+    param.Xrange = [-15 15]/1000; % in m
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
-    param.Zrange = [10 30]/1000;   % in m
+    param.Zrange = [10 38]/1000;   % in m
 
     param.Nx = 150;
     param.Ny = 1;
@@ -64,16 +64,16 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 % waist of diffuse IR laser beam
-param.w0 = [6 8]/1000 ; % in m 
-param.center = [0 0 20]/1000 ;      
+param.w0 = [14 14]/1000 ; % in m 
+param.center = [0 0 22]/1000 ;      
              % specify the center of the gaussian beam.
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-2 0 20; 2 0 20]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [1; 1]/1000;          % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Positions = [0 0 19.54; 0 0 24.46]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [1.4; 1.4]/1000;          % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     
     
