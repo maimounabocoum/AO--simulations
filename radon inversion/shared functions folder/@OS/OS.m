@@ -246,7 +246,7 @@ classdef OS < TF2D
         function Ireconstruct = Retroprojection(obj, I , X_m , z_out , theta , M0 , decimation , df0x )
             
         % function created by maimouna bocoum 13/09/2017
-
+        ScreenResult = 0 ;
         z_out = z_out(:)';
 
         % check consistancy of data dimensions : 
@@ -264,7 +264,9 @@ classdef OS < TF2D
  [X,Z]= meshgrid(X_m,z_out);
  Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
+ if ScreenResult == 0
  figure;
+ end
 %  A = axes ;
 
  
@@ -288,6 +290,7 @@ classdef OS < TF2D
        % retroprojection:  
         Ireconstruct = Ireconstruct + h0.*projContrib; 
         %%% real time monitoring %%%   
+         if ScreenResult == 1
        imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))%real(Ireconstruct)
        colormap(parula)
        cb = colorbar ;
@@ -295,22 +298,21 @@ classdef OS < TF2D
        ylim(obj.Lz*1e3)
        xlabel('x (mm)')
        ylabel('z (mm)')
-       caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )
-       %caxis( [ min(real(Ireconstruct(:))) , real(max(Ireconstruct(:))) ] )
-       
+       caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )  
        %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
        drawnow 
+         end
 
   
-      end
+   end
 
 
     
-    %title('Reconstruction')
+     if ScreenResult == 1
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(gcf,'-property','FontSize'),'FontSize',15) 
-
+     end
 
 
  end
