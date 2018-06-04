@@ -124,6 +124,8 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % X_m : interpolation vector for reconstruction
  % z :
  Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+figure
+imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
 xlim(param.Xrange*1000+ mean(X_m)*1000)
 ylim(param.Zrange*1000) 
  

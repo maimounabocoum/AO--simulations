@@ -122,7 +122,7 @@ end
 %              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')
+ save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
      if param.Activated_FieldII == 1
      save('..\radon inversion\saved images\Simulation_field.mat','MyImage','DelayLAWS','ActiveLIST')
      else
@@ -134,16 +134,10 @@ end
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
              param.fs_aq,...
-             param.c); 
-             
-     save('..\radon inversion\saved images\SimulationTransmissionOS.mat',...
-          'x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile');
-    save('..\radon inversion\saved images\SimulationOS.mat',...
-                                      'MyImage','DelayLAWS','ActiveLIST');
-     if param.Activated_FieldII == 1
-     save('..\radon inversion\saved images\SimulationOS_field.mat',...
-                                      'MyImage','DelayLAWS','ActiveLIST')
-     end           
+             param.c,[param.X0 , param.X1]); 
+     
+    save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
+                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile')            
              
      end
      %%%%%%%%%%%%%%%%%%%%

@@ -171,7 +171,7 @@ classdef ActuatorProbe
                    Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param)) ;
                    end
                    
-                   Delay = Delay - min(Delay);
+                   Delay = Delay - min(Delay(obj.ActiveList));
                    
                    
                case 'user'

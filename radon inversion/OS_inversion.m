@@ -2,9 +2,9 @@
 %%%%%%%%%%%%%%% load experiemental data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %clearvars;
-addpath('functions')
-addpath('..\Scan routines')
-addpath('shared functions folder')
+% addpath('functions')
+% addpath('..\Scan routines')
+% addpath('shared functions folder')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % update of the OP structure
                             % X : theta 
@@ -16,48 +16,98 @@ addpath('shared functions folder')
  c = 1540 ; % sound velocity in m/s
 % MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
 
-%% simulation traces 
-%  load('saved images\SimulationOS.mat');
-%  load('saved images\SimulationTransmissionOS.mat');
-  load('saved images\SimulationOS.mat');
-  load('saved images\SimulationTransmissionOS.mat');
-
- [I,z_out] = DataFiltering(MyImage) ;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %% reconstruction BOX initialization (retroprojection):
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
- % 1 - find x position for t = 0 :
- % Need to implement on real experiement : finding zero . Here it is not
- % necessary since t = 0 matches xsonde = 0 for all angles
- % imagesc(MyImage.theta*180/pi,xsonde, DelayLAWS) %-- view simulated delay
-
-X_m = (0:191)*0.2*1e-3 ; 
-%X_m = X_m - mean(X_m); 
-% (X0,Z0) : position of inital wavefront at t=0 , M0 point on that curve
-[theta,M0,X0,Z0]    = EvalDelayLawOS_shared( X_m , DelayLAWS  , ActiveLIST , c) ;
-
-Hf = figure;
-Ireconstruct = RetroprojectionOS_shared(I,X_m,ActiveLIST,z_out,theta,M0,X0,Z0,Kx,Hf);
+%% reconstruction using iradon
+X_m = (1:192)*(0.2*1e-3) ;
 
 
-% inversion through inverse fourier transform:
+    MyImage.F_R = MyImage.fourierz(MyImage.R) ;   
+    FILTER = MyImage.GetFILTER(1e-3);
+    %MyImage.R   = MyImage.ifourierz((MyImage.F_R)) ;
+    R   = MyImage.ifourierz((MyImage.F_R).*FILTER) ;
+    
+    [FTFx,~,decimation] = MyImage.AddSinCos(R) ;
+   
+    % resolution par iradon
+    % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
+    % imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
+    
+    DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+       
+    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
 
+    OriginIm = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation ,MyImage.dfx);
+%     OriginIm(1:400,:) = 0;
+%     OriginIm(1000:1024,:) = 0;
+    
+    Hresconstruct = figure;
+    set(Hresconstruct,'WindowStyle','docked');
+    imagesc(X_m*1e3,MyImage.z*1e3,real(OriginIm));
+    xlim(MyImage.Lx*1e3+20)
+    ylim(MyImage.Lz*1e3)
+    xlabel('x(mm)')
+    ylabel('z(mm)')
+    title('OS reconstruct')
+    cb = colorbar;
+    ylabel(cb,'a.u')
+    colormap(parula)
+    set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
+
+
+%% inversion through inverse fourier transform:
+
+%% reconstruction using ifourier
+X_m = (1:192)*(0.2*1e-3) - mean(X_m );
+[FTFx,~,decimation] = MyImage.AddSinCos(MyImage.R) ;
+DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+[theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m , DelayLAWS_  , ActiveLIST_ , c) ;
+
+FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
+
+
+
+    
+OriginIm = 0 ;
+figure; 
+for nplot = 1:size(FTF,3)
+subplot(121)
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(FTF(:,:,nplot)));
+ylim(MyImage.Lz*1e3)
+% xlim([X0,X1]) 
+OriginIm = OriginIm + FTF(:,:,nplot) ;
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));   
+T = unique(theta) ;
+title(['theta = ',num2str(180*T(nplot)/pi)])
+drawnow
+pause(1)
+end
+
+figure;
+imagesc(MyImage.x*1e3+20,MyImage.z*1e3,real(OriginIm))
+%     xlim(MyImage.Lx*1e3+20)
+ylim(MyImage.Lz*1e3)
+title('OS fourier')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u')
+colormap(parula)
+set(findall(gcf,'-property','FontSize'),'FontSize',15) 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %% plotting the final results and its fourier transform
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure
-imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-colorbar
-title('simulation input phantom')
-ylim([min(z_out*1e3) max(z_out*1e3)])
-xlabel('x (mm)')
-ylabel('y (mm)')
-drawnow   
+% figure
+% imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+% colorbar
+% title('simulation input phantom')
+% ylim([min(z_out*1e3) max(z_out*1e3)])
+% xlabel('x (mm)')
+% ylabel('y (mm)')
+% drawnow   
 
 

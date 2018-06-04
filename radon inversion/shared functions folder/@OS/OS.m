@@ -6,12 +6,13 @@ classdef OS < TF2D
         % image parameters
         ct              % time vector in m
         R               % Input signal interpolated on z grid       
-        F_R             % Fourier Transform of R with respect to t direction   
+        F_R             % Fourier Transform of R with respect to t direction
+        Lx              % [min max] : dimension of input image in z direction
+        Lz              % [min max] : dimension of input image in z direction
     end
     
     properties (Access = private)
-        Lx              % [min max] : dimension of input image in z direction
-        Lz              % [min max] : dimension of input image in z direction
+
         theta
         decimation      % n list 
         SamplingRate         % Samplinf frequency in Hz
@@ -265,7 +266,7 @@ classdef OS < TF2D
  [X,Z]= meshgrid(X_m,z_out);
  Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
- if ScreenResult == 0
+ if ScreenResult == 1
  figure;
  end
 %  A = axes ;

@@ -510,12 +510,14 @@ methods ( Access = 'public' )
             imagesc(obj.ScanParam*180/pi,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('angles (°)')
                 case 'OS'
-            imagesc(1:obj.Nscan,obj.MySimulationBox.z*1e3,obj.AOSignal)
+            imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('scan param')
             end
             ylabel('z = ct (mm) ')
             title('\int_{x,y,z} P(x,y,z,t) dxdydz')
-            colorbar
+            cb = colorbar ;
+            ylabel(cb,'a.u')
+            set(findall(FigHandle,'-property','FontSize'),'FontSize',15) 
 
             
         end
