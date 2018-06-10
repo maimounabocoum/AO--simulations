@@ -91,7 +91,7 @@ end
 % set(findall(gcf,'-property','FontSize'),'FontSize',15) 
 % [cx,cy,c] = improfile;
 % figure;
-% plot(cy(1) + sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c/1000)
+% plot(cx(1) + sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c/max(c))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
@@ -114,7 +114,7 @@ end
          case 'OF'
  
  MyImage = OF(CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,CurrentExperiement.AOSignal,param.fs_aq,param.c); 
- save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage')     
+ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage');  
  
          case 'OP'
  
@@ -122,12 +122,8 @@ end
 %              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
-     if param.Activated_FieldII == 1
-     save('..\radon inversion\saved images\Simulation_field.mat','MyImage','DelayLAWS','ActiveLIST')
-     else
-     save('..\radon inversion\saved images\Simulation.mat','MyImage')
-     end
+save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR');
+
          case 'OS'
 %save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
   MyImage = OS(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam(:,1),...

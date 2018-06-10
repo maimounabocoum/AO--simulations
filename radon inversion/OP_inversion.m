@@ -2,9 +2,9 @@
 %%%%%%%%%%%%%%% load experiemental data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %clearvars;
-addpath('functions')
-addpath('..\Scan routines')
-addpath('shared functions folder')
+% addpath('functions')
+% addpath('..\Scan routines')
+% addpath('shared functions folder')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % update of the OP structure
                             % X : theta 
@@ -14,15 +14,9 @@ addpath('shared functions folder')
 %% experiemental input datas :
 % load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
  c = 1540 ; % sound velocity in m/s
-% MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
-
-%% simulation traces 
-  load('saved images\Simulation_field.mat');
-  load('saved images\SimulationTransmission.mat');
-
 
     R_FT = MyImage.fourier(MyImage.R) ;
-    FILTER = MyImage.GetFILTER(3e-3) ;
+    FILTER = MyImage.GetFILTER(1e-3) ;
     I = MyImage.ifourier(R_FT.*FILTER) ;
     [I,z_out] = ReduceDataSize( I,'y',MyImage.t,MyImage.L);
 

@@ -87,17 +87,19 @@ classdef AO_FieldBox
             
         end
                 
-        function [] = ShowMaxField(obj,plane,FigHandle)
+        function Iout = ShowMaxField(obj,plane,FigHandle)
             
-            if ~ishandle(FigHandle)
-                FigHandle = figure ;
-            end
-            
-            set(FigHandle,'WindowStyle','docked');      
-            set(FigHandle,'NextPlot', 'replace');        
+%             if ~ishandle(FigHandle)
+%                 FigHandle = figure ;
+%             end
+%             
+%             set(FigHandle,'WindowStyle','docked');      
+%             set(FigHandle,'NextPlot', 'replace');        
             
             
             [Nx,Ny,Nz]       = SizeBox(obj);
+            % Field : column = time (Npoint) same as obj.time
+            %         line = number of point
             [Field_max,Tmax] = max(obj.Field,[],1);
             % max(obj.Field,[],1) : returns for each colulm
             % the maximum field pressure.
@@ -106,6 +108,17 @@ classdef AO_FieldBox
             
             switch plane
                 
+                case 'Xt'
+            %set(FigHandle,'name','(XT) field values for fixed z');
+            output = obj.Field;
+            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);  
+            subplot(212)
+            Iout = squeeze(Field_max(1,:,2,:))' ;
+%             imagesc(obj.x*1e3+19.2,obj.time*1e6,Iout);
+%                 xlabel('x (mm)')
+%                 ylabel('t (\mu s)')
+%                 title(['P(t), z(t)= ',num2str((obj.z(2))*1e3),'mm']) 
+  
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');

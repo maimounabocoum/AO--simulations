@@ -7,15 +7,15 @@
 param.f0 = 6e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency using in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency for the experiement [Hz]
-param.Noc = 1 ;                     % Number of optical cycles
+param.Noc = 2 ;                     % Number of optical cycles
 param.c = 1540;                     % Speed of sound [m/s]
 param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;            % 192; % Number of elements
-param.X0 = -10/1000  ;               % prosition min of effective probe shooting
-param.X1 =  10/1000 ;                % prosition min of effective probe shooting
+param.X0 = -19.2/1000  ;               % prosition min of effective probe shooting
+param.X1 =  19.2/1000 ;                % prosition min of effective probe shooting
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -30,12 +30,12 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OS'; 
 
 param.focus       = 10/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = [-20:20]*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
-param.df0x = 50;%(1/(param.N_elements*param.width)) ;
-param.decimation  = [3,4,5];  % decimation list of active actuators   - only active in OS mode 
+param.df0x = (1/(param.N_elements*param.width)) ;
+param.decimation  = [1:20];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
@@ -54,7 +54,7 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-10 10]/1000  % in m
+    param.Xrange = [-10 10]/1000;  % in m
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
     param.Zrange = [2 25]/1000;   % in m
 
@@ -72,9 +72,9 @@ param.center = [0 0 13]/1000 ;
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-3.5 0 13; -0.1 0 13]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [0 0 13; 1000 0 13]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [1; 1.5*1]/1000;          % dimension in all direction [dim ; dim ; ...]
-    param.phantom.Types = {'cilinder','cilinder'} ;   % available types exemple : { 'square', 'gaussian', ...}
+    param.phantom.Types = {'gaussian','cilinder'} ;   % available types exemple : { 'square', 'gaussian', ...}
     
     
 %% Probe defintion :

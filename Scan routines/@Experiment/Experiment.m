@@ -504,7 +504,7 @@ methods ( Access = 'public' )
             switch obj.param.FOC_type
                 
                 case 'OF'
-            imagesc(obj.ScanParam*1e3,obj.MySimulationBox.z*1e3,obj.AOSignal)
+            imagesc(obj.ScanParam*1e3+20,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('x (mm)')
                 case 'OP'
             imagesc(obj.ScanParam*180/pi,obj.MySimulationBox.z*1e3,obj.AOSignal)

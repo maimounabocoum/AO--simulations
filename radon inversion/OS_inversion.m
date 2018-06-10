@@ -58,7 +58,8 @@ X_m = (1:192)*(0.2*1e-3) ;
 %% inversion through inverse fourier transform:
 
 %% reconstruction using ifourier
-X_m = (1:192)*(0.2*1e-3) - mean(X_m );
+X_m = (1:192)*(0.2*1e-3) ; 
+X_m = X_m - mean(X_m );
 [FTFx,~,decimation] = MyImage.AddSinCos(MyImage.R) ;
 DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
 ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
