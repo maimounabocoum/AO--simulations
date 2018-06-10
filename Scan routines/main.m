@@ -67,7 +67,7 @@ end
    
     % retreive delay law for cuurent scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
-     DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = ...
+     DelayLAWS( :  ,n_scan) = ...
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
           

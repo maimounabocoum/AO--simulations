@@ -149,10 +149,15 @@ methods ( Access = 'public' )
                     end
                     
                     obj.Nscan = 4*length(obj.param.angles)*length(obj.param.decimation)...
-                                + 1 ; 
+                                + length(obj.param.angles) ; 
                     % we operate the full 4-phases decimation scan for every
                     % successive angle to scan +  fondamental
+                    if ~isempty(obj.param.decimation)
                     decimation = [1;1;1;1]*(obj.param.decimation) ;
+                    else
+                    decimation = [];
+                    end
+                    
                     [DEC,THETA] = meshgrid([0;decimation(:)],obj.param.angles);
                     obj.ScanParam = [THETA(:),DEC(:)];
                     
@@ -171,11 +176,11 @@ methods ( Access = 'public' )
                        i_sin      = 4*i_decimate - 1 ;
                        i_nsin     = 4*i_decimate - 0 ;
                        
-                       I = (1:length(obj.param.angles)) + 1 ;
+                       I = (1:length(obj.param.angles)) + length(obj.param.angles) ;
                        
                        Icos  = I + ( i_cos-1 )*length(obj.param.angles) ;  % index of column with same decimate
                        Incos = I + (i_ncos-1 )*length(obj.param.angles) ;  % index of column with same decimate
-                       Isin  = I + (i_sin-1  )*length(obj.param.angles) ;    % index of column with same decimate
+                       Isin  = I + (i_sin-1  )*length(obj.param.angles) ;  % index of column with same decimate
                        Insin = I + (i_nsin-1 )*length(obj.param.angles) ;  % index of column with same decimate
 
                         fx = obj.param.df0x*obj.param.decimation(i_decimate);
@@ -261,7 +266,7 @@ methods ( Access = 'public' )
                     % set excitation in FIELD II:  
                     xdc_excitation (Probe, excitation);
                     % set delay law in FIELD II: 
-                    xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw);
+                    xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
                     % calculate field on MySimulationBox.Points() with FIELD II: 
                     [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
    

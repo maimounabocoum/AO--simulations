@@ -33,54 +33,75 @@ z = CurrentExperiement.MySimulationBox.z ;
 % radon transform of the image :
 AOSignal = zeros(length(z),CurrentExperiement.Nscan) ;
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
+X_m = (1:param.N_elements)*param.width; 
+
+
+[X_radon,Z_radon] = meshgrid(X_m,z(1));
+X_radon = X_radon  - mean(X_m) ;
+Z_radon = Z_radon - mean(z);
 
 
  for n_scan = 1:CurrentExperiement.Nscan
 theta = CurrentExperiement.ScanParam(n_scan,1);
 CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan) ;
-DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
+%DelayLAWS( : ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
+M = [cos(theta), sin(theta) ; -sin(theta), cos(theta)];
+z_radon = M*[X_radon(:)';Z_radon(:)'];
+DelayLAWS( : ,n_scan) = z_radon(2,:)'/param.c; 
  end
- 
-X_m = (1:param.N_elements)*param.width; 
-ActiveLIST = CurrentExperiement.BoolActiveList ;
-[angle, M0] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , param.c);
- 
-for n_scan = 1:CurrentExperiement.Nscan
-theta = angle(n_scan);
-[Irad,Mcorner] = RotateTheta(X,Z,MyTansmission,theta);
-d_offset = (Lprobe/2-M0(n_scan,1))*sin(theta) + (Z0-M0(n_scan,2))*cos(theta)-Z0;     
-d_offset = d_offset/(z(2)-z(1)); % convert to pixels for sum 
 
-Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2,...
+
+ActiveLIST = CurrentExperiement.BoolActiveList ;
+figure;plot(DelayLAWS) 
+% C : point of invariation by rotation of angle theta
+[angle, M0 , ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
+figure;plot(C) 
+
+%% run scan 
+figure ;
+for n_scan = 1:CurrentExperiement.Nscan
+% theta = angle(n_scan);
+% C : center of rotation = [mean(X_m),0]
+[Irad,MMcorner] = RotateTheta( X , Z , MyTansmission , angle(n_scan) , C(n_scan,:) );
+
+u = [cos(theta) ; -sin(theta)] ;
+v = [sin(theta) ; cos(theta)]  ;
+
+Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
            if n_scan ==1
            Mask = cos(0*X);    
            else
-
-               
+            
 if mod(n_scan,2) == 0
 Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
 else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
-
-Irad = Irad.*Mask0 ;
+ Irad = Irad.*Mask0 ;
 %Irad = Irad.*Mask ;  
+Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
-
-
-imagesc(Irad)
-AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
-                            (1:size(Irad,1))-d_offset,'linear',0) ;
+imagesc(x*1e3,z*1e3,Irad)
+xlabel('x(mm)')
+ylabel('ct(mm)')
+AOSignal(:,n_scan) = trapz(x,Irad,2) ;
+% AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
+%                             (1:size(Irad,1))-d_offset,'linear',0) ;
 drawnow
-
-
 axis equal
 end
  
+AOSignal = AOSignal + 0*1e-3*rand(size(AOSignal)) ;
 %%
+% AOSignal = CurrentExperiement.AOSignal ;
+% X_m = (1:param.N_elements)*param.width; 
+% Lprobe = param.N_elements*(param.width + param.kerf) ;
+% x = CurrentExperiement.MySimulationBox.x + Lprobe/2;
+% z = CurrentExperiement.MySimulationBox.z ;
+
 figure;
 imagesc(CurrentExperiement.ScanParam(:,2),z*1e3,AOSignal)
 xlabel('order N_x')
@@ -90,22 +111,76 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
              param.fs_aq,...
-             param.c); 
-          
-MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
-[MyImage.F_R, MyImage.theta,MyImage.decimation ] = MyImage.AddSinCos(MyImage.F_R) ;
-FTF = MyImage.GetFourier(MyImage.F_R,MyImage.decimation ) ;
+             param.c,[min(X_m) , max(X_m)]); 
+   
+
+ MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
+ [Fkt , theta , decimation ] = MyImage.AddSinCos(MyImage.F_R) ;
+
+%% resolution par iradon
+% FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
+DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+
+
  
-OriginIm = MyImage.ifourier(FTF) ;
+ [theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
+ % Hf = figure;
+ % X_m : interpolation vector for reconstruction
+ % z :
+Ireconstruct = MyImage.iRadon( Fkt , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+
+% FILTER = MyImage.GetFILTER(1e-3,size(Fkt,2)) ;
+% F = MyImage.ifourierz(FILTER.*Fkt) ;
+% Ireconstruct = MyImage.Retroprojection( real(F) , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+% xlim(param.Xrange*1000+ mean(X_m)*1000)
+% ylim(param.Zrange*1000) 
+ 
+ %%
+% FTFx : matrix with fourier composant : first cols = first decimation,
+% vaying angle , second lines : second decimate, varying angle...
+
+%FTFxz = MyImage.fourierz(FTFx);
+% MyImage.ScatterFourier(FTFxz,decimation , theta);
+
+%FTF = MyImage.GetFourierX( FTFx  , decimation , theta ) ;
+FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
+OriginIm = 0 ;
 figure('DefaultAxesFontSize',18); 
-imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
-axis([-40 40 -100 100])
-title('reconstructed fourier transform')
+for nplot = 1:size(FTF,3)
+subplot(121)
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(FTF(:,:,nplot)));
+ylim(param.Zrange*1000) 
+xlim(param.Xrange*1000) 
+subplot(122)
+OriginIm = OriginIm + FTF(:,:,nplot) ;
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));   
+ylim(param.Zrange*1000) 
+xlim(param.Xrange*1000) 
+T = unique(theta) ;
+title(['theta = ',num2str(180*T(nplot)/pi)])
+drawnow
+pause(1)
 
-figure; imagesc( abs(OriginIm) );
+end
+
+
+
+%imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF));
+%axis([-40 40 -100 100])
+axis([-40 40 0 70])
+title('reconstructed fourier along x')
+
+figure('DefaultAxesFontSize',18);
+imagesc(MyImage.x*1e3 + mean(X_m)*1000,MyImage.z*1e3,real(OriginIm));
+xlabel('x(mm)')
+ylabel('z(mm)')
+xlim(param.Xrange*1000+ mean(X_m)*1000)
+ylim(param.Zrange*1000)    
 title('reconstructed object')
-%figure;imagesc(CurrentExperiement.BoolActiveList)
+colorbar
+
 
 %% saving data to reconstruct folder
 %test : fourier transform of original object
@@ -113,11 +188,14 @@ title('reconstructed object')
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  
+%  figure('DefaultAxesFontSize',18);imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+ 
  [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
  [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
  
  Tinterp = interp2(Xp,Zp,MyTansmission,X,Z,'linear',0) ;
  TinterpFFT = MyImage.fourier( Tinterp );
+ TinterpFFTx = MyImage.fourierx( Tinterp );
  figure('DefaultAxesFontSize',18);  
  imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(TinterpFFT))
  axis([-40 40 -100 100])
@@ -125,16 +203,19 @@ title('reconstructed object')
  ylabel('Fz/dfz')
  title('object fourier transform')
 
-%  figure('DefaultAxesFontSize',18);
-%  plot(MyImage.fz/MyImage.dfz,abs(TinterpFFT(:,523)))
-%  xlim([-100 100])
-%  title(['fx/dfx = ',num2str(MyImage.fx(523)/MyImage.dfx)])
+  figure('DefaultAxesFontSize',18);  
+ imagesc(MyImage.fx/MyImage.dfx,MyImage.z*1e3,abs(TinterpFFTx))
+ axis([-40 40 0 70])
+ xlabel('Fx/dfx')
+ ylabel('z(mm)')
+ title('object X fourier transform')
+
  
  if (IsSaved == 1)
 
 
      %--------------------- saving datas -------------
- save('..\radon inversion\saved images\SimulationTransmissionOS.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR')
+ save('..\radon inversion\saved images\SimulationTransmissionOS.mat','x_phantom','y_phantom','z_phantom','Field_Profile','MyTansmission','R','zR')
  save('..\radon inversion\saved images\SimulationOS.mat','MyImage','DelayLAWS','ActiveLIST','AOSignal')
      %%%%%%%%%%%%%%%%%%%%
  end
