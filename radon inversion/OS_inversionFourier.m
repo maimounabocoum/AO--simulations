@@ -21,12 +21,13 @@ addpath('shared functions folder')
 %  load('saved images\SimulationTransmissionOS.mat');
   load('saved images\SimulationOS_field.mat');
   load('saved images\SimulationTransmissionOS.mat');
-  load('saved images\Field_Profile.mat');
+   load('saved images\Field_Profile.mat');
  %% test reconstruction
- 
- sum(Field_Profile,3)
- 
- 
+%  
+%  Iref = sum(Field_Profile,3);
+%  figure; imagesc(Iref);
+FTF = MyImage.AddSinCosRef(MyImage.rawData, Field_Profile) ;
+figure; imagesc(abs(FTF)) 
  
  %% fourier reconstruction
 MyImage.F_R = MyImage.fourierz( MyImage.R ) ;    
@@ -42,7 +43,12 @@ imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
 axis([-40 40 -100 100])
 title('reconstructed fourier transform')
 
-figure; imagesc( abs(OriginIm) );
+figure('DefaultAxesFontSize',18);
+imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));
+xlabel('x(mm)')
+ylabel('z(mm)')
+xlim(param.Xrange*1000)
+ylim(param.Zrange*1000)    
 title('reconstructed object')
 %figure;imagesc(CurrentExperiement.BoolActiveList)
 
