@@ -3,7 +3,7 @@
 clearvars ;
 
 addpath('..\Field_II')
-addpath('..\radon inversion')
+addpath('..\radon inversion\shared functions folder')
 field_init(0);
 
 parameters;
@@ -88,12 +88,21 @@ end
 % hold on
 % plot(CurrentExperiement.MySimulationBox.z*1e3,CurrentExperiement.AOSignal(:,64)/max(CurrentExperiement.AOSignal(:,64)))
  
+% set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+% [cx,cy,c] = improfile;
+% figure;
+% plot(cx(1) + sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c/max(c))
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  if (IsSaved == 1)
-
+     
+     % saving folder name with todays date
+     SubFolderName = generateSubFolderName('..\radon inversion\saved images') ;
+     FileName   = generateSaveName(SubFolderName ,'type',param.FOC_type);
+     
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
@@ -102,34 +111,29 @@ end
      %--------------------- saving datas -------------
      switch param.FOC_type
          
+         case 'OF'
+ 
+ MyImage = OF(CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,CurrentExperiement.AOSignal,param.fs_aq,param.c); 
+ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage');  
+ 
          case 'OP'
  
 %              AOSignal = CurrentExperiement.AOSignal ;
 %              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
- save('..\radon inversion\saved images\SimulationTransmission.mat','x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile')
-     if param.Activated_FieldII == 1
-     save('..\radon inversion\saved images\Simulation_field.mat','MyImage','DelayLAWS','ActiveLIST')
-     else
-     save('..\radon inversion\saved images\Simulation.mat','MyImage')
-     end
+save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR');
+
          case 'OS'
 %save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
   MyImage = OS(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
              param.fs_aq,...
-             param.c); 
-             
-     save('..\radon inversion\saved images\SimulationTransmissionOS.mat',...
-          'x_phantom','y_phantom','z_phantom','MyTansmission','R','zR','Field_Profile');
-    save('..\radon inversion\saved images\SimulationOS.mat',...
-                                      'MyImage','DelayLAWS','ActiveLIST');
-     if param.Activated_FieldII == 1
-     save('..\radon inversion\saved images\SimulationOS_field.mat',...
-                                      'MyImage','DelayLAWS','ActiveLIST')
-     end           
+             param.c,[param.X0 , param.X1]); 
+     
+    save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
+                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile')            
              
      end
      %%%%%%%%%%%%%%%%%%%%
@@ -138,5 +142,5 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rmpath('..\radon inversion')
+% rmpath('..\radon inversion')
 field_end;

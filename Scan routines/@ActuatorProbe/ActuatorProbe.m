@@ -135,12 +135,13 @@ classdef ActuatorProbe
 
                case 'focus'
                    % input parameter = angle of focalisation
-               for i = 1:length(obj.ActiveList)
-                  Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:)) ;        
+               Delay = zeros(1,obj.Nactuators) ;
+               for i = 1:obj.Nactuators
+                   %Delay(i) = -(1/c)*norm(Param-obj.center(obj.ActiveList(i),:)) ;  
+                  Delay(i) = -(1/c)*norm(Param-obj.center(i,:)) ;        
                end 
 
-               Delay = Delay - min(Delay);
-               
+               Delay = Delay - min(Delay(obj.ActiveList));
      
                case 'plane'
                    % input parameters = drift angle
@@ -170,7 +171,7 @@ classdef ActuatorProbe
                    Delay(i) = -(1/c)*(obj.center(obj.ActiveList(i),1)*tan(Param)) ;
                    end
                    
-                   Delay = Delay - min(Delay);
+                   Delay = Delay - min(Delay(obj.ActiveList));
                    
                    
                case 'user'
@@ -191,12 +192,12 @@ classdef ActuatorProbe
             
         end
         
-        function [n, xn] = GetIndex(obj,x)
+        function [n, xn] = GetIndex(obj,x0,x1)
            
+            % indexes of position x
             n = 1:length(obj.center(:,1));
-            %n = interp1(obj.center(:,1),1:length(obj.center(:,1)),x,'nearest') ;
             
-            n(obj.center(:,1) < min(x) & obj.center(:,1) > max(x)) = [];
+            n(obj.center(:,1) < x0 | obj.center(:,1) > x1) = [];
             % removing out of range values
             
             %n(isnan(n)) = []; 

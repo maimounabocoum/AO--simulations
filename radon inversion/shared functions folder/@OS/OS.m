@@ -6,12 +6,13 @@ classdef OS < TF2D
         % image parameters
         ct              % time vector in m
         R               % Input signal interpolated on z grid       
-        F_R             % Fourier Transform of R with respect to t direction   
+        F_R             % Fourier Transform of R with respect to t direction
+        Lx              % [min max] : dimension of input image in z direction
+        Lz              % [min max] : dimension of input image in z direction
     end
     
     properties (Access = private)
-        Lx              % [min max] : dimension of input image in z direction
-        Lz              % [min max] : dimension of input image in z direction
+
         theta
         decimation      % n list 
         SamplingRate         % Samplinf frequency in Hz
@@ -60,14 +61,27 @@ classdef OS < TF2D
                 DXsample = obj.c*1/(obj.SamplingRate) ; 
                 obj = obj.Initialize(N,1/DXsample);
                 % interpolated trace on fourier param
+
+                
+                if  size(obj.R,2) == 1
                 obj.R = interp1(t,obj.R,obj.ct,'linear',0);
+                obj.R = obj.R' ;
+                else
+                obj.R = interp1(t,obj.R,obj.ct,'linear',0);   
+                end
             elseif nargin == 3
                 N = varargin{1};
                 Fc = varargin{2};
                 t = obj.ct ;  
-                obj = obj.Initialize(N,Fc);        
+                obj = obj.Initialize(N,Fc);   
+
                 % interpolated trace on fourier param
+                if  size(obj.R,2) == 1
                 obj.R = interp1(t,obj.R,obj.ct,'linear',0);
+                obj.R = obj.R' ;
+                else
+                obj.R = interp1(t,obj.R,obj.ct,'linear',0);   
+                end
                 
             end
         
@@ -191,6 +205,7 @@ classdef OS < TF2D
             % rotation of coordinates :
 
             [Itemp,MMcorner] = RotateTheta(X,Z,Iout(:,:,n_angle),-Angles(n_angle),C(n_angle,:)) ;
+            
             Iout(:,:,n_angle) = Itemp ;
 
             end
@@ -314,7 +329,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
         function Ireconstruct = Retroprojection(obj, I , X_m , z_out , theta , M0 , decimation , df0x )
             
         % function created by maimouna bocoum 13/09/2017
-
+        ScreenResult = 0 ;
         z_out = z_out(:)';
 
         % check consistancy of data dimensions : 
@@ -332,7 +347,9 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
  [X,Z]= meshgrid(X_m,z_out);
  Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
+ if ScreenResult == 1
  figure;
+ end
 %  A = axes ;
 
  
@@ -356,6 +373,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
        % retroprojection:  
         Ireconstruct = Ireconstruct + h0.*projContrib; 
         %%% real time monitoring %%%   
+         if ScreenResult == 1
        imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))%real(Ireconstruct)
        colormap(parula)
        cb = colorbar ;
@@ -363,22 +381,21 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
        ylim(obj.Lz*1e3)
        xlabel('x (mm)')
        ylabel('z (mm)')
-       caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )
-       %caxis( [ min(real(Ireconstruct(:))) , real(max(Ireconstruct(:))) ] )
-       
+       caxis( [ min(real(Ireconstruct(:))) , max(real(Ireconstruct(:))) ] )  
        %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
        drawnow 
+         end
 
   
-      end
+   end
 
 
     
-    %title('Reconstruction')
+     if ScreenResult == 1
     ylabel(cb,'AC tension (mV)')
     colormap(parula)
     set(findall(gcf,'-property','FontSize'),'FontSize',15) 
-
+     end
 
 
  end
@@ -474,13 +491,13 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
            
            % sin-cos sequence
-           %Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+           Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
            
-           Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-                     - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
-                   
+%            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+%                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+%                    
                    
           % Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
             Iout(:,i) = Iout(:,i)/2 ;   

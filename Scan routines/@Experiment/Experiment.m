@@ -70,7 +70,7 @@ methods ( Access = 'public' )
                 
                 case 'OF'
                     % get the center position X for each scan line               
-                       [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.MySimulationBox.x );
+                       [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.param.X0 , obj.param.X1 );
                        Scan(isnan(Scan)) = [] ;  
                        % retreive the total number od scans     
                        obj.Nscan = length(Scan);        
@@ -504,18 +504,20 @@ methods ( Access = 'public' )
             switch obj.param.FOC_type
                 
                 case 'OF'
-            imagesc(obj.ScanParam*1e3,obj.MySimulationBox.z*1e3,obj.AOSignal)
+            imagesc(obj.ScanParam*1e3+20,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('x (mm)')
                 case 'OP'
             imagesc(obj.ScanParam*180/pi,obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('angles (°)')
                 case 'OS'
-            imagesc(1:obj.Nscan,obj.MySimulationBox.z*1e3,obj.AOSignal)
+            imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('scan param')
             end
             ylabel('z = ct (mm) ')
             title('\int_{x,y,z} P(x,y,z,t) dxdydz')
-            colorbar
+            cb = colorbar ;
+            ylabel(cb,'a.u')
+            set(findall(FigHandle,'-property','FontSize'),'FontSize',15) 
 
             
         end

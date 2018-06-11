@@ -20,7 +20,7 @@ end
  [X,Z]= meshgrid(X_m,z_out);
  Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
-figure;
+
 %  A = axes ;
 
  
