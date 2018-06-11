@@ -30,12 +30,12 @@ param.farfield = param.width^2/(4*param.lambda);
 param.FOC_type = 'OS'; 
 
 param.focus       = 10/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.angles      = (-90:90)*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
 param.df0x = (1/(param.N_elements*param.width)) ;
-param.decimation  = [1:20];  % decimation list of active actuators   - only active in OS mode 
+param.decimation  = [20];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
@@ -54,9 +54,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-10 10]/1000;  % in m
+    param.Xrange = [-15 15]/1000;  % in m
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
-    param.Zrange = [2 25]/1000;   % in m
+    param.Zrange = [2 35]/1000;   % in m
 
     param.Nx = 150;
     param.Ny = 1;
@@ -64,17 +64,17 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 % waist of diffuse IR laser beam
-param.w0 = [6 6]/1000 ; % in m 
-param.center = [0 0 13]/1000 ;      
+param.w0 = [9 9]/1000 ; % in m 
+param.center = [0 0 20]/1000 ;      
              % specify the center of the gaussian beam.
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [0 0 13; 1000 0 13]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [1; 1.5*1]/1000;          % dimension in all direction [dim ; dim ; ...]
-    param.phantom.Types = {'gaussian','cilinder'} ;   % available types exemple : { 'square', 'gaussian', ...}
+    param.phantom.Positions = [-1.5 0 20 ; 1.5 0 20]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [0.8 ; 0.8]/1000;          % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'gaussian','gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     
     
 %% Probe defintion :

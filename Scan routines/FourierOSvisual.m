@@ -1,7 +1,7 @@
 % plot the fourier plane scanned using OS angle/ks in polar coordinates:
 clearvars;
 
-theta = -20:20;
+theta = -90:90;
 Nbx   = [5];
 L     = 100e-3;
 Lobj  = 100e-3 ;
@@ -19,10 +19,11 @@ title('Fourier plane')
 Lobj = 50e-3;
 for i = 1:length(fs)
     
-    [FT,THETA] = meshgrid(ft,2*pi*theta/180);
+    [FT,THETA] = meshgrid(ft,pi*theta/180);
     KX = FT.*sin(THETA) + fs(i)*cos(THETA) ;
     KZ = FT.*cos(THETA) - fs(i)*sin(THETA) ;
-    scatter([KX(:);-KX(:)],[KZ(:);-KZ(:)])
+    scatter(KX(:),KZ(:))
+    %scatter([KX(:);-KX(:)],[KZ(:);-KZ(:)])
 
     axis([-4/Lobj 4/Lobj -4/Lobj 4/Lobj])
     axis equal

@@ -68,7 +68,7 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
- Irad = Irad.*Mask0 ;
+ Irad = Irad.*Mask ;
 %Irad = Irad.*Mask ;  
 Field_Profile(:,:,n_scan) = Mask0 ;
 
@@ -103,26 +103,29 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              param.c,[min(X_m) , max(X_m)]);
    
 
-
-
-
-
-%% resolution par iradon
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
- MyImage.F_R = MyImage.fourierz( FTFx ) ; 
- FILTER = MyImage.GetFILTER(0.8e-3,size(MyImage.F_R,2));
- FTFx   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
-
-% FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
 DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
 ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
 [theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , param.c) ;
 
+%% resolution par iradon
+
+ MyImage.F_R = MyImage.fourierz( MyImage.R ) ; 
+%  FILTER = MyImage.GetFILTER(1e-3);
+%  MyImage.R   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
+
+% FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
+DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+
+ c = 1540 ;
+ 
+ [theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
- Ireconstruct = MyImage.iRadon( MyImage.F_R  , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
- %Ireconstruct = MyImage.Retroprojection( FTFx , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+ Ireconstruct = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
 figure
 imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
 xlim(param.Xrange*1000+ mean(X_m)*1000)
@@ -134,7 +137,7 @@ ylim(param.Zrange*1000)
 
 %FTFxz = MyImage.fourierz(FTFx);
 % MyImage.ScatterFourier(FTFxz,decimation , theta);
-[FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
+
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
 OriginIm = sum(FTF,3) ;
  
@@ -172,7 +175,7 @@ colorbar
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  
-%   figure('DefaultAxesFontSize',18);imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+  figure('DefaultAxesFontSize',18);imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
  
  [X,Z] = meshgrid(MyImage.x,MyImage.z) ;
  [Xp,Zp] = meshgrid(x_phantom,z_phantom) ;
