@@ -317,7 +317,79 @@ classdef OS < TF2D
      end
 
 
- end
+        end
+
+        function Ireconstruct = iRadon(obj, Fin , X_m , z_out , theta , M0 , decimation , df0x )
+           
+        % function created by maimouna bocoum 10/06/2018
+        % Fin : matrix with t as line, and fourier as column
+
+        z_out = z_out(:)';
+
+        I0 = find(decimation == 0);
+        F0 = repmat( Fin(:,I0) , 1 , length(unique(decimation)) ); % extract decimation = 0
+       
+        [DEC,FZ] = meshgrid(decimation,obj.fz) ;
+       
+        Hinf = (abs(FZ) < DEC*df0x) ;
+        Hsup = (abs(FZ) >= DEC*df0x) ;
+  
+        Lobject = 1e-3;
+        FILTER = GetFILTER(obj,Lobject,size(Fin,2));
+        Fsup = Fin.*FILTER.*Hsup ;
+        Finf = F0.*FILTER.*Hinf ;
+       
+        Fsup = obj.ifourierz(Fsup);
+        Finf = obj.ifourierz(Finf);
+       
+       
+[X,Z]= meshgrid(X_m,z_out);
+Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
+
+        figure;
+        %  A = axes ;
+       for i= 1:length(theta)
+       
+       % filter properly      
+        
+        T =   (X - M0(i,1)).*sin( theta(i) ) ...
+            + (Z - M0(i,2)).*cos( theta(i) ) ;
+        S =   (X - mean(X_m)  - M0(i,1)).*cos( theta(i) ) ...
+            - (Z - M0(i,2)).*sin( theta(i) ) ;
+      % common interpolation: 
+        %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
+       
+        h0 = exp(1i*2*pi*decimation(i)*df0x*S);
+       
+       
+ 
+        projContrib_sup = interp1(z_out,Fsup(:,i),T(:),'linear',0);
+        projContrib_sup = reshape(projContrib_sup,length(z_out),length(X_m));
+      
+        projContrib_inf = interp1(z_out,Finf(:,i),T(:),'linear',0);
+        projContrib_inf = reshape(projContrib_inf,length(z_out),length(X_m));
+    
+       
+    
+       % retroprojection: 
+        Ireconstruct = Ireconstruct + h0.*projContrib_sup + projContrib_inf ;
+        %%% real time monitoring %%%  
+       imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))
+       colormap(parula)
+       cb = colorbar ;
+       title(['angle(°): ',num2str(theta(i)*180/pi)])
+       ylim(obj.Lz*1e3)
+       xlabel('x (mm)')
+       ylabel('z (mm)')
+       caxis( [ min(real(Ireconstruct(:))) , (1+1e-3)*max(real(Ireconstruct(:)))  ] )
+      
+       %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
+       drawnow
+
+ 
+        end
+        
+        end
 
         function Iout = GetAngles(obj,Iin,decimation,theta)
             
@@ -410,16 +482,14 @@ classdef OS < TF2D
            % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
            
            % sin-cos sequence
-           %Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+           Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
            
-           Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-                     - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
-                   
-                   
-          % Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
-            Iout(:,i) = Iout(:,i)/2 ;   
+%            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+%                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+%                    
+           Iout(:,i) = Iout(:,i)/2 ;   
            end       
            
         end
@@ -429,7 +499,7 @@ classdef OS < TF2D
             Fm = 1/dt; % in m-1
         end
    
-        function FILTER = GetFILTER(obj,Lobject)
+        function FILTER = GetFILTER(obj,Lobject,Ncol)
             
 
 Fc      = 1/Lobject;  % Lobject is the size of the object to detect. Using simple model (sinc function)
@@ -444,7 +514,7 @@ FilterType = 'ram-lak';%'ram-lak'
 
 filt = FilterRadon(obj.fz, obj.N ,FilterType , Fc);
 filt = filt(:);
-FILTER = filt*ones(1,length(obj.theta)) ;
+FILTER = filt*ones(1,Ncol) ;
 %FILTER = filt*(1-2*df0x*(obj.decimation).*sin(obj.theta).*cos(obj.theta))'  ;
 
 

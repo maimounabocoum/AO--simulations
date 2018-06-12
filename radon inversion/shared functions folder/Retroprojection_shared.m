@@ -46,7 +46,7 @@ end
        ylabel('z (mm)')
        caxis( [ min(Ireconstruct(:)) , max(Ireconstruct(:)) ] )
        
-       %saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
+       saveas(gcf,['Q:\AO---softwares-and-developpement\radon inversion\gif folder/image',num2str(i),'.png'])
        drawnow 
 
   end

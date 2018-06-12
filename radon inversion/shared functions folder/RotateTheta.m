@@ -10,6 +10,7 @@ Z = Z - C(2);
 
 % matrix of rotation (0,0) : center of rotation
 M = [cos(theta), sin(theta) ; -sin(theta), cos(theta)];
+% M = [cos(theta), -sin(theta) ; sin(theta), cos(theta)];
 
 % rotation operate on all points
 MM = M*[X(:)';Z(:)'] ;
