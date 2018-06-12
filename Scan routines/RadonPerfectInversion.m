@@ -46,7 +46,7 @@ CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan) ;
 
 ActiveLIST = CurrentExperiement.BoolActiveList ;
 angles = CurrentExperiement.ScanParam(:,1);
-M0 = [];
+
 %% run scan 
 figure ;
 for n_scan = 1:CurrentExperiement.Nscan
@@ -69,8 +69,8 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
- %Irad = Irad.*Mask0 ;
- Irad = Irad.*Mask ;  
+ Irad = Irad.*Mask0 ;
+ %Irad = Irad.*Mask ;  
 Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
@@ -105,11 +105,14 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              param.c,[min(X_m) , max(X_m)]);
 
 %% resolution par iradon
-[ FTFx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
- MyImage.F_R = MyImage.fourierz( FTFx ) ; 
+[ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
+MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
+%F_Rconj = MyImage.fourierz( conj(F_ct_kx) ) ; 
 %  FILTER = MyImage.GetFILTER(0.5e-3,size(MyImage.F_R,2));
 %  Fin   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
  Fin =  MyImage.F_R ;
+ F_Rconj =conj(Fin);
+ 
  df0x =param.df0x;
  
 %  figure;imagesc(MyImage.z,theta*180/pi,abs(Fin))
@@ -119,15 +122,23 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
        
         [DEC,FZ] = meshgrid(decimation,MyImage.fz) ;
        
-        Hinf = (abs(FZ) < DEC*df0x) ;
-        Hsup = (abs(FZ) >= DEC*df0x) ;
- 
+        Hinf = (abs(FZ) <= DEC*df0x & FZ >=0) ;
+        
+        Hsup = (abs(FZ) > DEC*df0x  ) ;
+        Hsup_conj = (abs(FZ) > DEC*df0x & FZ <= 0) ;
+        
         Lobject = 0.8e-3;
         FILTER = MyImage.GetFILTER(Lobject,size(Fin,2));
-        Fsup = Fin.*FILTER.*Hsup ;
+        
+        
         Finf = F0.*FILTER.*Hinf ;
+        
+        Fsup = Fin.*FILTER.*Hsup ;
+        F_Rconj= F_Rconj.*FILTER.*Hsup_conj ;
        
         Fsup = MyImage.ifourierz(Fsup);
+        F_Rconj= MyImage.ifourierz(F_Rconj);
+        
         Finf = MyImage.ifourierz(Finf);
 
                
@@ -142,25 +153,28 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
         
         T =   (X - M(i,1)).*sin( theta(i) ) ...
             + (Z - M(i,2)).*cos( theta(i) ) + M(i,2);
-        S =   (X  - M(i,1)).*cos( theta(i) ) ...
+        S =   (X  - M(i,1)).*cos(theta(i) ) ...
             - (Z - M(i,2)).*sin( theta(i) ) + M(i,1);
       % common interpolation: 
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
        
-        h0 = exp(1i*2*pi*decimation(i)*df0x*S);
-       
+        h0 = exp(1i*2*pi*decimation(i)*df0x*(S-Lprobe/2)); %(S-Lprobe/2)
        
  
         projContrib_sup = interp1(MyImage.z,Fsup(:,i),T(:),'linear',0);
         projContrib_sup = reshape(projContrib_sup,length(z),length(x));
+        projContrib_supConj = interp1(MyImage.z,F_Rconj(:,i),T(:),'linear',0);
+        projContrib_supConj = reshape(projContrib_supConj,length(z),length(x));
+        
+        
       
-        projContrib_inf = interp1(MyImage.z,Finf(:,i-0*181),T(:),'linear',0);
+        projContrib_inf = interp1(MyImage.z,Finf(:,i),T(:),'linear',0);
         projContrib_inf = reshape(projContrib_inf,length(z),length(x));
    
        
     
-       % retroprojection: 
-        Ireconstruct = Ireconstruct + h0.*projContrib_sup + projContrib_inf ;
+       % retroprojection: Conj
+        Ireconstruct = Ireconstruct + h0.*projContrib_sup  - conj(h0).*projContrib_supConj + projContrib_inf ;
         %%% real time monitoring %%%  
        imagesc( x*1e3,z*1e3,real(Ireconstruct))
        colormap(parula)
@@ -175,10 +189,15 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
        drawnow
 
  
-        end
+       end
 
+        %%
 
-
+figure;
+%test : fourier transform of original object
+ x_phantom = CurrentExperiement.MySimulationBox.x ;
+ z_phantom = CurrentExperiement.MySimulationBox.z ;
+ imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
 
 % figure
 % imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))

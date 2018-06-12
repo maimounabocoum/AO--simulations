@@ -42,7 +42,7 @@ if param.Activated_FieldII == 1
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 end
 
- [Nx,Ny,Nz]   = SizeBox(CurrentExperiement.MySimulationBox);
+ [Nx,Ny,Nz]    = SizeBox(CurrentExperiement.MySimulationBox);
  Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
  
  tic

@@ -68,8 +68,8 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
- Irad = Irad.*Mask0 ;
-%Irad = Irad.*Mask ;  
+% Irad = Irad.*Mask0 ;
+Irad = Irad.*Mask ;  
 Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice

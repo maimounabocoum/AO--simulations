@@ -1,7 +1,7 @@
 % plot the fourier plane scanned using OS angle/ks in polar coordinates:
 clearvars;
 
-theta = -90:90;
+theta = [-20];
 Nbx   = [5];
 L     = 100e-3;
 Lobj  = 100e-3 ;
@@ -13,8 +13,8 @@ ft = (-N/2:(N/2-1))*df0t;
 df0s = (1/L) ;
 fs = Nbx*df0s ;
 
-figure('DefaultAxesFontSize',18); 
-title('Fourier plane')
+% figure('DefaultAxesFontSize',18); 
+% title('Fourier plane')
 
 Lobj = 50e-3;
 for i = 1:length(fs)
@@ -32,4 +32,10 @@ for i = 1:length(fs)
     hold on
     drawnow
 end
+
+    axis([-4/Lobj 4/Lobj -4/Lobj 4/Lobj])
+    grid on
+    axis equal
+    xlabel('k_x(mm^{-1})')
+    ylabel('k_z(mm^{-1})')
 
