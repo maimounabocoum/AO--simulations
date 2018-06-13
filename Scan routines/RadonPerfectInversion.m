@@ -49,6 +49,7 @@ ActiveLIST = CurrentExperiement.BoolActiveList ;
 
 M = repmat([Lprobe/2 , 18e-3],CurrentExperiement.Nscan,1);
 angles = CurrentExperiement.ScanParam(:,1);
+Nangles = length(unique(angles)) ; 
 
 %% run scan 
 figure ;
@@ -62,16 +63,25 @@ for n_scan = 1:CurrentExperiement.Nscan
 
 Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1) ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),(X-Lprobe/2));
-           if n_scan ==1
-           Mask = cos(0*X);    
-           else
+%            if n_scan ==1
+%            Mask = cos(0*X);    
+%            else
             
-if mod(n_scan,2) == 0
-Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
-else
-Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
-end
-           end
+                if ( n_scan > Nangles )
+                    
+    if  ( mod( n_scan - Nangles , 2*Nangles )+1  <= Nangles )
+    Mask = cos(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
+    elseif ( mod( n_scan- Nangles , 2*Nangles )+1 > Nangles )
+    Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
+    else
+    Mask = 0;
+     end
+                else
+                    Mask = 1;
+                end
+
+        
+
  Irad = Irad.*Mask ;
  %Irad = Irad.*Mask ;  
 
@@ -109,6 +119,7 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
 
 %% resolution par iradon
 [ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
+% figure;imagesc(real(F_ct_kx(:,182:end)))
 MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
 %  F_Rconj = MyImage.fourierz( conj(F_ct_kx) ) ; 
 %  FILTER = MyImage.GetFILTER(0.5e-3,size(MyImage.F_R,2));
@@ -130,10 +141,10 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
        
         Hinf = (abs(FZ) < DEC*df0x) ;
         
-        Hsup = (abs(FZ) >= DEC*df0x ) ; % & FZ >= 0
+        Hsup = (abs(FZ) >= DEC*df0x & FZ >= 0) ; %   
 %         Hsup_conj = (abs(FZ) >= DEC*df0x & FZ <= 0 ) ;
         
-        Lobject = 0.8e-3;
+        Lobject = 0.2e-3;
         FILTER = MyImage.GetFILTER(Lobject,size(Fin,2));
         
         
@@ -154,7 +165,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 %[H0,~] = RotateTheta( X , Z , h0 , -theta(i) , M(i,:) );
         figure;
         %  A = axes ;
-       for i= 182:length(theta)
+       for i=1:length(theta)
        
        % filter properly      
         
@@ -180,7 +191,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
     
        % retroprojection: Conj
-        Ireconstruct = Ireconstruct + H0.*projContrib_sup + conj(H0.*projContrib_sup) + 0*projContrib_inf ;
+        Ireconstruct = Ireconstruct + H0.*projContrib_sup + conj(H0.*projContrib_sup) + projContrib_inf ;
         %%% real time monitoring %%%  
        imagesc( X_m*1e3,MyImage.z*1e3,real(Ireconstruct))
        hold on

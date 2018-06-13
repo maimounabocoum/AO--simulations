@@ -482,7 +482,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 %                        fxeff   = 1/(Neff*1e-3);
 %                        
 
-           % length(ia) : number of different groups without repetition
+           % start at (length(thetaUniq)+1) to skip the ks = 0 values
            for i = (length(thetaUniq)+1):length(ia)
                
            Isimilardecimate = sort( find(ib == i) ) ;
