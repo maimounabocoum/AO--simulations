@@ -1,5 +1,5 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  main  program  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% maimouna bocoum 11-06-2018
+%%% generation of traces using radon transform for OP - OS parameters
+% maimouna bocoum 24-10-2017
 clearvars ;
 
 addpath('..\Field_II')
@@ -30,21 +30,24 @@ z = CurrentExperiement.MySimulationBox.z ;
 
 
 
-
-
 % radon transform of the image :
 AOSignal = zeros(length(z),CurrentExperiement.Nscan) ;
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
-X_m = (1:param.N_elements)*param.width; 
-M = repmat([mean(X_m) mean(z)] , CurrentExperiement.Nscan , 1);
+
 
  for n_scan = 1:CurrentExperiement.Nscan
 theta = CurrentExperiement.ScanParam(n_scan,1);
 CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan) ;
+DelayLAWS( : ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
  end
  
-
+X_m = (1:param.N_elements)*param.width; 
 ActiveLIST = CurrentExperiement.BoolActiveList ;
+
+% C : point of invariation by rotation of angle theta
+[angles, M0 , ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
+
+M = repmat([Lprobe/2 , 18e-3],CurrentExperiement.Nscan,1);
 angles = CurrentExperiement.ScanParam(:,1);
 
 %% run scan 
@@ -57,8 +60,8 @@ for n_scan = 1:CurrentExperiement.Nscan
 % u = [cos(theta) ; -sin(theta)] ;
 % v = [sin(theta) ; cos(theta)]  ;
 
-Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
-               double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
+Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1) ,...
+               double(CurrentExperiement.BoolActiveList(:,n_scan)),(X-Lprobe/2));
            if n_scan ==1
            Mask = cos(0*X);    
            else
@@ -69,9 +72,9 @@ else
 Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));   
 end
            end
- Irad = Irad.*Mask0 ;
+ Irad = Irad.*Mask ;
  %Irad = Irad.*Mask ;  
-Field_Profile(:,:,n_scan) = Mask0 ;
+
 
 % correction matrice
 imagesc(x*1e3,z*1e3,Irad)
@@ -107,11 +110,14 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
 %% resolution par iradon
 [ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
 MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
-%F_Rconj = MyImage.fourierz( conj(F_ct_kx) ) ; 
+%  F_Rconj = MyImage.fourierz( conj(F_ct_kx) ) ; 
 %  FILTER = MyImage.GetFILTER(0.5e-3,size(MyImage.F_R,2));
 %  Fin   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
  Fin =  MyImage.F_R ;
- F_Rconj =conj(Fin);
+%  F_Rconj = conj(Fin);
+ 
+%  subplot(221);surfc(theta(182:end)*180/pi,MyImage.fz,abs(Fin(:,182:end)))
+%  subplot(221);imagesc(theta(182:end)*180/pi,MyImage.fz,abs(Fin(:,1:182)))
  
  df0x =param.df0x;
  
@@ -122,10 +128,10 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
        
         [DEC,FZ] = meshgrid(decimation,MyImage.fz) ;
        
-        Hinf = (abs(FZ) <= DEC*df0x & FZ >=0) ;
+        Hinf = (abs(FZ) < DEC*df0x) ;
         
-        Hsup = (abs(FZ) > DEC*df0x  ) ;
-        Hsup_conj = (abs(FZ) > DEC*df0x & FZ <= 0) ;
+        Hsup = (abs(FZ) >= DEC*df0x ) ; % & FZ >= 0
+%         Hsup_conj = (abs(FZ) >= DEC*df0x & FZ <= 0 ) ;
         
         Lobject = 0.8e-3;
         FILTER = MyImage.GetFILTER(Lobject,size(Fin,2));
@@ -134,17 +140,18 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
         Finf = F0.*FILTER.*Hinf ;
         
         Fsup = Fin.*FILTER.*Hsup ;
-        F_Rconj= F_Rconj.*FILTER.*Hsup_conj ;
+%         F_Rconj= F_Rconj.*FILTER.*Hsup_conj ;
        
         Fsup = MyImage.ifourierz(Fsup);
-        F_Rconj= MyImage.ifourierz(F_Rconj);
+%         F_Rconj= MyImage.ifourierz(F_Rconj);
         
         Finf = MyImage.ifourierz(Finf);
 
-               
-%[X,Z]= meshgrid(X_m,MyImage.z);
+            
+[X,Z]= meshgrid(X_m,MyImage.z);
 Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
+%[H0,~] = RotateTheta( X , Z , h0 , -theta(i) , M(i,:) );
         figure;
         %  A = axes ;
        for i= 182:length(theta)
@@ -152,35 +159,36 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
        % filter properly      
         
         T =   (X - M(i,1)).*sin( theta(i) ) ...
-            + (Z - M(i,2)).*cos( theta(i) ) + M(i,2);
-        S =   (X  - M(i,1)).*cos(theta(i) ) ...
-            - (Z - M(i,2)).*sin( theta(i) ) + M(i,1);
-      % common interpolation: 
+            + (Z - M(i,2)).*cos( theta(i) ) + M(i,2) ;
+        S =   (X  -  Lprobe/2).*cos(theta(i) ) ...
+            - (Z - M(i,2)).*sin( theta(i) ) ;
+
+        % common interpolation: 
+
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
-       
-        h0 = exp(1i*2*pi*decimation(i)*df0x*(S-Lprobe/2)); %(S-Lprobe/2)
-       
- 
+        H0 = exp(1i*2*pi*decimation(i)*df0x*S);
+
         projContrib_sup = interp1(MyImage.z,Fsup(:,i),T(:),'linear',0);
-        projContrib_sup = reshape(projContrib_sup,length(z),length(x));
-        projContrib_supConj = interp1(MyImage.z,F_Rconj(:,i),T(:),'linear',0);
-        projContrib_supConj = reshape(projContrib_supConj,length(z),length(x));
+        projContrib_sup = reshape(projContrib_sup,length(MyImage.z),length(X_m));
+%         projContrib_supConj = interp1(MyImage.z,F_Rconj(:,i),T(:),'linear',0);
+%         projContrib_supConj = reshape(projContrib_supConj,length(z),length(x));
         
         
       
         projContrib_inf = interp1(MyImage.z,Finf(:,i),T(:),'linear',0);
-        projContrib_inf = reshape(projContrib_inf,length(z),length(x));
-   
-       
+        projContrib_inf = reshape(projContrib_inf,length(MyImage.z),length(X_m));
+
     
        % retroprojection: Conj
-        Ireconstruct = Ireconstruct + h0.*projContrib_sup  - conj(h0).*projContrib_supConj + projContrib_inf ;
+        Ireconstruct = Ireconstruct + H0.*projContrib_sup + conj(H0.*projContrib_sup) + 0*projContrib_inf ;
         %%% real time monitoring %%%  
-       imagesc( x*1e3,z*1e3,real(Ireconstruct))
+       imagesc( X_m*1e3,MyImage.z*1e3,real(Ireconstruct))
+       hold on
+       plot(M(1,1)*1e3,M(1,2)*1e3,'o')
        colormap(parula)
        cb = colorbar ;
        title(['angle(°): ',num2str(theta(i)*180/pi)])
-       %ylim(MyImage.Lz*1e3)
+       ylim(MyImage.Lz*1e3)
        xlabel('x (mm)')
        ylabel('z (mm)')
        caxis( [ min(real(Ireconstruct(:))) , (1+1e-3)*max(real(Ireconstruct(:)))  ] )
@@ -198,7 +206,9 @@ figure;
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-
+       xlabel('x (mm)')
+       ylabel('z (mm)')
+       cb = colorbar ;
 % figure
 % imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
 % xlim(param.Xrange*1000+ mean(X_m)*1000)

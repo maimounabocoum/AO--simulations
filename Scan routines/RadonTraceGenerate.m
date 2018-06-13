@@ -69,7 +69,7 @@ Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
 end
            end
 % Irad = Irad.*Mask0 ;
-Irad = Irad.*Mask ;  
+Irad = Irad.*Mask0 ;  
 Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
@@ -121,8 +121,8 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
- Ireconstruct = MyImage.iRadon( MyImage.F_R  , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
- %Ireconstruct = MyImage.Retroprojection( FTFx , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+ %Ireconstruct = MyImage.iRadon( MyImage.F_R  , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+ Ireconstruct = MyImage.Retroprojection( FTFx , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
 figure
 imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
 xlim(param.Xrange*1000+ mean(X_m)*1000)

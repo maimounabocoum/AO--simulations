@@ -41,7 +41,7 @@ param.decimation  = [10];  % decimation list of active actuators   - only active
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
 param.NbZ         = 10;                  % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = -10:10;               % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbX         = -30:30;               % 20 Nb de composantes de Fourier en X, 'JM'
  
 
 
@@ -65,14 +65,14 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 % waist of diffuse IR laser beam
 param.w0 = [9 9]/1000 ; % in m 
-param.center = [0 0 18.5]/1000 ;      
+param.center = [0 0 18]/1000 ;      
              % specify the center of the gaussian beam.
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-1.5*0 0 18.5 ; 1000 0 18.5]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [-1.5 0 18.5 ; 1.5 0 18.5]/1000; % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [0.8 ; 0.8]/1000;          % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;   % available types exemple : { 'square', 'gaussian', ...}
     

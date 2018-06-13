@@ -358,12 +358,12 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
             + (Z - M0(i,2)).*cos( theta(i) ) ;
-        S =   (X - mean(X_m)  - M0(i,1)).*cos( theta(i) ) ...
+        S =   (X - mean(X_m)  - 0*M0(i,1)).*cos( theta(i) ) ...
             - (Z - M0(i,2)).*sin( theta(i) ) ;
       % common interpolation:  
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
         
-        h0 = exp(-1i*2*pi*decimation(i)*df0x*S);
+        h0 = exp(1i*2*pi*decimation(i)*df0x*S);
  
         projContrib = interp1(z_out,I(:,i),T(:),'linear',0);
         projContrib = reshape(projContrib,length(z_out),length(X_m));
@@ -486,20 +486,16 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
            for i = (length(thetaUniq)+1):length(ia)
                
            Isimilardecimate = sort( find(ib == i) ) ;
-           
-           % cos = Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2))
-           % sin = Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4))
+
            
            % sin-cos sequence
-           Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+            Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
-           
-           Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-                     - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
-                   
-                   
-           Iout(:,i) = hilbert(Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) );    
+%            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+%                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+%                    
+%                    
             Iout(:,i) = Iout(:,i)/2 ;   
            end       
            
