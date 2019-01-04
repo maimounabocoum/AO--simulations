@@ -38,7 +38,7 @@ G=linspace(0,1,256);
 cmap=interp1(F,D,G);
 colormap(hot)
 
- for n_scan = 9%:CurrentExperiement.Nscan
+ for n_scan = 41%:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
@@ -49,7 +49,7 @@ colormap(hot)
            CurrentExperiement.MySimulationBox.time*1e6,Iout*1e12);
                 xlabel('x (mm)')
                 ylabel('t (\mu s)')
-     title(['Nbx = ', num2str(CurrentExperiement.ScanParam(n_scan,2))])           
+     title(['n_s = ', num2str(CurrentExperiement.ScanParam(n_scan,2))])           
      cb = colorbar ;
      ylabel(cb,'a.u')
      ylim([2.5 3.5])

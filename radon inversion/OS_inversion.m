@@ -1,51 +1,44 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%% load experiemental data 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%clearvars;
-% addpath('functions')
-% addpath('..\Scan routines')
-% addpath('shared functions folder')
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% update of the OP structure
-                            % X : theta 
-                            % Y : monotonic t variable in points
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OF analysis %%
+ addpath('..\shared functions folder');
+ addpath('shared functions folder')
 
-%% experiemental input datas :
-% load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
- c = 1540 ; % sound velocity in m/s
-% MyImage = OP(data(:,:,1),X*pi/180,Y*1e-3,Param.SamplingRate*1e6,c); 
+%%
+% figure;
+% imagesc(ScanParam(:,2),z*1e3,1e3*Datas)
+% xlabel('order')
+% ylabel('z(mm)')
+% colormap(parula)
+% cb = colorbar ;
+% ylabel(cb, 'AC tension mV')
+% set(findall(gcf,'-property','FontSize'),'FontSize',15) 
+
+% [cx,cy,c] = improfile;
+% figure;
+% plot(sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c)
 
 %% reconstruction using iradon
-X_m = (1:192)*(0.2*1e-3) ;
+% load : '2018-06-22'
+c = 1540 ;
+ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
+ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
+XMiddle  = mean(ElmtBorns)*(pitch*1e-3);
+
+[ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
+MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 
 
-    MyImage.F_R = MyImage.fourierz(MyImage.R) ;   
-    FILTER = MyImage.GetFILTER(1e-3);
-    %MyImage.R   = MyImage.ifourierz((MyImage.F_R)) ;
-    R   = MyImage.ifourierz((MyImage.F_R).*FILTER) ;
-    
-    [FTFx,~,decimation] = MyImage.AddSinCos(R) ;
-   
-    % resolution par iradon
-    % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
-    % imagesc(MyImage.fx/MyImage.dfx,MyImage.fz/MyImage.dfz,abs(FTF) );
-    
     DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
-    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
-       
+    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;   
     [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
+    OriginIm = MyImage.iRadon( MyImage.F_R, X_m, XMiddle, MyImage.z , theta ,C , decimation , dFx);
 
-    OriginIm = MyImage.Retroprojection( real(FTFx) , X_m, MyImage.z , theta , M0 , decimation ,MyImage.dfx);
-%     OriginIm(1:400,:) = 0;
-%     OriginIm(1000:1024,:) = 0;
     
     Hresconstruct = figure;
-    set(Hresconstruct,'WindowStyle','docked');
+   % set(Hresconstruct,'WindowStyle','docked');
     imagesc(X_m*1e3,MyImage.z*1e3,real(OriginIm));
-    xlim(MyImage.Lx*1e3+20)
-    ylim(MyImage.Lz*1e3)
+    xlim([X0,X1])
+    ylim([0 40])
     xlabel('x(mm)')
     ylabel('z(mm)')
     title('OS reconstruct')
@@ -54,41 +47,27 @@ X_m = (1:192)*(0.2*1e-3) ;
     colormap(parula)
     set(findall(Hresconstruct,'-property','FontSize'),'FontSize',15) 
 
-
-%% inversion through inverse fourier transform:
+     x = X_m*1e3;
+     z = MyImage.z*1e3 ;
+     save('C:\Users\mbocoum\Dropbox\self-written documents\acoustic-structured-illumination\images\datas\OPsimuIradon','x','z','OriginIm')
 
 %% reconstruction using ifourier
-X_m = (1:192)*(0.2*1e-3) ; 
-X_m = X_m - mean(X_m );
-[FTFx,~,decimation] = MyImage.AddSinCos(MyImage.R) ;
-DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
-ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
-[theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m , DelayLAWS_  , ActiveLIST_ , c) ;
+c = 1540 ;
+X_m = (1:NbElemts)*(pitch*1e-3) ;
+[FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
+    DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+       
+    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m-mean(X_m)  , DelayLAWS_  , ActiveLIST_ , c) ;
+
 
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
 
-
-
-    
-OriginIm = 0 ;
-figure; 
-for nplot = 1:size(FTF,3)
-subplot(121)
-imagesc(MyImage.x*1e3,MyImage.z*1e3,real(FTF(:,:,nplot)));
-ylim(MyImage.Lz*1e3)
-% xlim([X0,X1]) 
-OriginIm = OriginIm + FTF(:,:,nplot) ;
-imagesc(MyImage.x*1e3,MyImage.z*1e3,real(OriginIm));   
-T = unique(theta) ;
-title(['theta = ',num2str(180*T(nplot)/pi)])
-drawnow
-pause(1)
-end
-
+OriginIm = sum(FTF,3) ;
 figure;
-imagesc(MyImage.x*1e3+20,MyImage.z*1e3,real(OriginIm))
-%     xlim(MyImage.Lx*1e3+20)
-ylim(MyImage.Lz*1e3)
+imagesc(MyImage.x*1e3 + mean([X0 X1]),MyImage.z*1e3,real(OriginIm))
+ylim([0 30]) 
+xlim([X0,X1]) 
 title('OS fourier')
 xlabel('x(mm)')
 ylabel('z(mm)')
@@ -97,18 +76,7 @@ ylabel(cb,'a.u')
 colormap(parula)
 set(findall(gcf,'-property','FontSize'),'FontSize',15) 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %% plotting the final results and its fourier transform
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% figure
-% imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
-% colorbar
-% title('simulation input phantom')
-% ylim([min(z_out*1e3) max(z_out*1e3)])
-% xlabel('x (mm)')
-% ylabel('y (mm)')
-% drawnow   
-
-
+% save simulation for article
+% x = MyImage.x*1e3 + mean([X0 X1]) ; 
+% z = MyImage.z*1e3 ; 
+% save('C:\Users\mbocoum\Dropbox\self-written documents\acoustic-structured-illumination\images\datas\OSsimuIFourier','FTF','x','z')

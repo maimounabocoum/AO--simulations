@@ -199,9 +199,10 @@ classdef OS < TF2D
             Iout(:,I0,n_angle) = Iout(:,I0,n_angle)/2 ;
             
             % inverse fourier 
+            %trapz( obj.fx, trapz( obj.z, abs(Iout(:,:,n_angle)).^2 ) )
             Iout(:,:,n_angle) = obj.ifourierx(Iout(:,:,n_angle)) ;
             
-            
+            %trapz( obj.x , trapz(obj.z, abs(Iout1(:,:,n_angle)).^2 ) )
             % rotation of coordinates :
 
             [Itemp,MMcorner] = RotateTheta(X,Z,Iout(:,:,n_angle),-Angles(n_angle),C(n_angle,:)) ;
@@ -245,21 +246,21 @@ classdef OS < TF2D
             
         end
         
-        function Ireconstruct = iRadon(obj, Fin , X_m , z_out , theta , M0 , decimation , df0x )
+        function Ireconstruct = iRadon(obj, Fin , X_m , Xc , z_out , theta , M0 , decimation , df0x )
             
         % function created by maimouna bocoum 13/09/2017
 
         z_out = z_out(:)';
 
-        I0 = find(decimation == 0);
+        I0 = decimation == 0;
         F0 = repmat( Fin(:,I0) , 1 , length(unique(decimation)) ); % extract decimation = 0
         
         [DEC,FZ] = meshgrid(decimation,obj.fz) ;
         
         Hinf = (abs(FZ) < DEC*df0x) ;
-        Hsup = (abs(FZ) >= DEC*df0x) ;
+        Hsup = ( FZ >= 0 ) ; %   
    
-        Lobject = 1e-3;
+        Lobject = 0.2e-3;
         FILTER = GetFILTER(obj,Lobject,size(Fin,2));
         Fsup = Fin.*FILTER.*Hsup ; 
         Finf = F0.*FILTER.*Hinf ; 
@@ -273,18 +274,18 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
  figure;
 %  A = axes ; 
-   for i= 1:length(theta)
+   for i= 1:41;%length(theta)
         
        % filter properly       
          
         T =   (X - M0(i,1)).*sin( theta(i) ) ...
-            + (Z - M0(i,2)).*cos( theta(i) ) ;
-        S =   (X - mean(X_m)  - M0(i,1)).*cos( theta(i) ) ...
+            + (Z - M0(i,2)).*cos( theta(i) ) + M0(i,2);
+        S =   (X - Xc).*cos( theta(i) ) ...
             - (Z - M0(i,2)).*sin( theta(i) ) ;
       % common interpolation:  
         %Mask = double( interp1(X_m,ActiveLIST(:,i),X,'linear',0) );
         
-        h0 = exp(-1i*2*pi*decimation(i)*df0x*S);
+        h0 = exp(1i*2*pi*decimation(i)*df0x*S);
         
         
  
@@ -297,7 +298,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
         
      
        % retroprojection:  
-        Ireconstruct = Ireconstruct + h0.*real(projContrib_sup) ; % + real(projContrib_inf); 
+        Ireconstruct = Ireconstruct + 2*h0.*projContrib_sup  + projContrib_inf ; 
         %%% real time monitoring %%%   
        imagesc( X_m*1e3,z_out*1e3,real(Ireconstruct))%real(Ireconstruct)
        colormap(parula)

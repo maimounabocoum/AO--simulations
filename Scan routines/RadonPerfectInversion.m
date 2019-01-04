@@ -1,5 +1,15 @@
 %%% generation of traces using radon transform for OP - OS parameters
 % maimouna bocoum 24-10-2017
+
+
+
+%% ============== parameters used in article structured-UOT for cross-like inversion:
+    param.phantom.Positions = [-2 0 19.5 ; 10000 0 19.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [0.5 ; 1.5*0.9]/1000;             % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'cross','gaussian'} ;                % available types exemple : { 'square', 'gaussian', ...}
+    
+%%
+
 clearvars ;
 
 addpath('..\Field_II')
@@ -83,18 +93,16 @@ Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1) ,...
         
 
  Irad = Irad.*Mask ;
- %Irad = Irad.*Mask ;  
 
 
-% correction matrice
-imagesc(x*1e3,z*1e3,Irad)
-xlabel('x(mm)')
-ylabel('ct(mm)')
-AOSignal(:,n_scan) = trapz(x,Irad,2) ;
-% AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
-%                             (1:size(Irad,1))-d_offset,'linear',0) ;
-drawnow
-axis equal
+% plot image of signal
+        imagesc(x*1e3,z*1e3,Irad)
+        xlabel('x(mm)')
+        ylabel('ct(mm)')
+        AOSignal(:,n_scan) = trapz(x,Irad,2) ;
+        drawnow
+        axis equal
+
 end
  
 AOSignal = AOSignal + 0*1e-3*rand(size(AOSignal)) ;
@@ -118,54 +126,32 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
              param.c,[min(X_m) , max(X_m)]);
 
 %% resolution par iradon
-[ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
-% figure;imagesc(real(F_ct_kx(:,182:end)))
-MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
-%  F_Rconj = MyImage.fourierz( conj(F_ct_kx) ) ; 
-%  FILTER = MyImage.GetFILTER(0.5e-3,size(MyImage.F_R,2));
-%  Fin   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
+ [ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
+ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
  Fin =  MyImage.F_R ;
-%  F_Rconj = conj(Fin);
- 
-%  subplot(221);surfc(theta(182:end)*180/pi,MyImage.fz,abs(Fin(:,182:end)))
-%  subplot(221);imagesc(theta(182:end)*180/pi,MyImage.fz,abs(Fin(:,1:182)))
- 
  df0x =param.df0x;
- 
-%  figure;imagesc(MyImage.z,theta*180/pi,abs(Fin))
 
         I0 = find(decimation == 0);
         F0 = repmat( Fin(:,I0) , 1 , length(unique(decimation)) ); % extract decimation = 0
        
         [DEC,FZ] = meshgrid(decimation,MyImage.fz) ;
        
-        Hinf = (abs(FZ) < DEC*df0x) ;
-        
-        Hsup = (abs(FZ) >= DEC*df0x & FZ >= 0) ; %   
-%         Hsup_conj = (abs(FZ) >= DEC*df0x & FZ <= 0 ) ;
-        
+        Hinf = (abs(FZ) < DEC*df0x) ;      
+        Hsup = ( FZ >= 0 ) ; %          
         Lobject = 0.2e-3;
         FILTER = MyImage.GetFILTER(Lobject,size(Fin,2));
-        
-        
-        Finf = F0.*FILTER.*Hinf ;
-        
-        Fsup = Fin.*FILTER.*Hsup ;
-%         F_Rconj= F_Rconj.*FILTER.*Hsup_conj ;
-       
-        Fsup = MyImage.ifourierz(Fsup);
-%         F_Rconj= MyImage.ifourierz(F_Rconj);
-        
-        Finf = MyImage.ifourierz(Finf);
 
+        Finf = F0.*FILTER.*Hinf ;     
+        Fsup = Fin.*FILTER.*Hsup ;     
+        Fsup = MyImage.ifourierz(Fsup);
+        Finf = MyImage.ifourierz(Finf);
             
 [X,Z]= meshgrid(X_m,MyImage.z);
 Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
-%[H0,~] = RotateTheta( X , Z , h0 , -theta(i) , M(i,:) );
         figure;
         %  A = axes ;
-       for i=1:length(theta)
+       for i=182:length(theta)
        
        % filter properly      
         
@@ -191,11 +177,11 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
     
        % retroprojection: Conj
-        Ireconstruct = Ireconstruct + H0.*projContrib_sup + conj(H0.*projContrib_sup) + projContrib_inf ;
+        Ireconstruct = Ireconstruct + 0.0175*2*H0.*projContrib_sup + 0.0175*projContrib_inf ; 
         %%% real time monitoring %%%  
        imagesc( X_m*1e3,MyImage.z*1e3,real(Ireconstruct))
-       hold on
-       plot(M(1,1)*1e3,M(1,2)*1e3,'o')
+%        hold on
+%        plot(M(1,1)*1e3,M(1,2)*1e3,'o')
        colormap(parula)
        cb = colorbar ;
        title(['angle(°): ',num2str(theta(i)*180/pi)])
@@ -210,18 +196,18 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
  
        end
 
-        %%
 
-figure;
+       
+
+%% Original image
+
+% figure;
 %test : fourier transform of original object
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
- imagesc(x_phantom*1e3,z_phantom*1e3,MyTansmission)
+ figure
+ imagesc(x_phantom*1e3+19.5,z_phantom*1e3,MyTansmission)
        xlabel('x (mm)')
        ylabel('z (mm)')
        cb = colorbar ;
-% figure
-% imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
-% xlim(param.Xrange*1000+ mean(X_m)*1000)
-% ylim(param.Zrange*1000) 
 

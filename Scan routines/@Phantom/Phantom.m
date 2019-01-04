@@ -41,13 +41,18 @@ classdef Phantom
                    sizeTumor = obj.SizeTumors(i_tumor);
                        switch obj.Types{i_tumor}
                            case 'gaussian'
-                               I_abs = -exp(-((X-x_c).^2+(Y-y_c).^2+(Z-z_c).^2)/sizeTumor^2) + I_abs ;
+                               I_abs = -0.8*exp(-((X-x_c).^2+(Y-y_c).^2+(Z-z_c).^2)/sizeTumor^2) + I_abs ;
                            case 'square'
                                I_abs = -(abs(X-x_c)<= sizeTumor & (abs(Y-y_c) <= sizeTumor) & (abs(Z-z_c) <= sizeTumor)  ) + I_abs ;
                            case 'cilinder'
                                I_abs = -0.5*((X-x_c).^2 + (Z-z_c).^2 <= (sizeTumor/2)^2) + I_abs ;
                            case 'fringes'
                                I_abs = I_abs.*sin((pi/sizeTumor).*(x_c*X + y_c*Y + z_c*Z)/norm(obj.Positions(i_tumor,:))).^2 ;
+                           case 'cross'
+                               alpha = 28.95*pi/180 ;
+                                I_cross =  abs( (X-x_c) - tan(alpha/2)*(Z-z_c) ) < (sizeTumor/(2*cos(alpha/2))) ...
+                                         | abs( -(X-x_c) - tan(alpha/2)*(Z-z_c) ) < (sizeTumor/(2*cos(alpha/2))) ; 
+                                I_abs(I_cross) = 0.2*I_abs(I_cross) ; 
                        end
                end
                

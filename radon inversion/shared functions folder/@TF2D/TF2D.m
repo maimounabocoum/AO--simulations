@@ -54,25 +54,25 @@ classdef TF2D
          
         function Exz = ifourierz(obj, Exkz)
             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Exz = ifft(fftshift(Exkz,1),obj.N,1)*(obj.zRange/obj.N) ;
+            Exz = ifft(fftshift(Exkz,1),obj.N,1)*(obj.N/obj.zRange) ;
             Exz = ifftshift(Exz,1);
         end
         
         function Ekxz = fourierx(obj, Exz)
             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Ekxz = fft(ifftshift(Exz,2),obj.N,2)*(obj.zRange/obj.N) ;
+            Ekxz = fft(ifftshift(Exz,2),obj.N,2)*(obj.xRange/obj.N) ;
             Ekxz = fftshift(Ekxz,2);
         end
         
         function Ekxz = ifourierx(obj, Exz)
             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Ekxz = ifft(fftshift(Exz,2),obj.N,2)*(obj.xRange/obj.N) ;
+            Ekxz = ifft(fftshift(Exz,2),obj.N,2)*(obj.N/obj.xRange)  ;
             Ekxz = ifftshift(Ekxz,2);
         end
         
         function Exz = ifourier(obj, Ekxkz)
             %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Exz=ifft2(ifftshift(Ekxkz))*(obj.xRange/obj.N)*(obj.zRange/obj.N) ;
+            Exz=ifft2(ifftshift(Ekxkz))*(obj.N/obj.zRange)*(obj.N/obj.xRange)  ;
             Exz=fftshift(Exz);
         end
         

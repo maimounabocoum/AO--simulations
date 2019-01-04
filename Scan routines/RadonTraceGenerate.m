@@ -69,7 +69,7 @@ Mask = sin(2*pi*param.df0x*CurrentExperiement.ScanParam(n_scan,2)*(X-Lprobe/2));
 end
            end
 % Irad = Irad.*Mask0 ;
-Irad = Irad.*Mask0 ;  
+Irad = Irad.*Mask ;  
 Field_Profile(:,:,n_scan) = Mask0 ;
 
 % correction matrice
@@ -108,10 +108,8 @@ MyImage = OS(AOSignal,CurrentExperiement.ScanParam(:,1),...
 
 
 %% resolution par iradon
-[FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
- MyImage.F_R = MyImage.fourierz( FTFx ) ; 
- FILTER = MyImage.GetFILTER(0.8e-3,size(MyImage.F_R,2));
- FTFx   = MyImage.ifourierz(MyImage.F_R.*FILTER) ;
+[ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
+MyImage.F_R = MyImage.fourierz( F_ct_kx ) ; 
 
 % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
 DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
@@ -121,14 +119,15 @@ ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
  % Hf = figure;
  % X_m : interpolation vector for reconstruction
  % z :
- %Ireconstruct = MyImage.iRadon( MyImage.F_R  , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
- Ireconstruct = MyImage.Retroprojection( FTFx , X_m, MyImage.z , theta , M0 , decimation , param.df0x);
+ Ireconstruct = MyImage.iRadon( MyImage.F_R  , X_m , Lprobe/2, MyImage.z , theta , C , decimation , param.df0x);
+
+ 
 figure
 imagesc(X_m*1e3, MyImage.z*1e3,real(Ireconstruct))
 xlim(param.Xrange*1000+ mean(X_m)*1000)
 ylim(param.Zrange*1000) 
  
- %%
+ %% iFourier
 % FTFx : matrix with fourier composant : first cols = first decimation,
 % vaying angle , second lines : second decimate, varying angle...
 
@@ -137,6 +136,8 @@ ylim(param.Zrange*1000)
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;
 OriginIm = sum(FTF,3) ;
+
+
  
 % OriginIm = 0 ;
 % figure('DefaultAxesFontSize',18); 

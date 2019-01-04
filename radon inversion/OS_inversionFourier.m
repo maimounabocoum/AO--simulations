@@ -21,7 +21,7 @@ addpath('shared functions folder')
 %  load('saved images\SimulationTransmissionOS.mat');
   load('saved images\SimulationOS_field.mat');
   load('saved images\SimulationTransmissionOS.mat');
-   load('saved images\Field_Profile.mat');
+  load('saved images\Field_Profile.mat');
  %% test reconstruction
 %  
 %  Iref = sum(Field_Profile,3);

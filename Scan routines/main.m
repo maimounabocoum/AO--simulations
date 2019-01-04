@@ -81,7 +81,17 @@ end
  
  toc
  CurrentExperiement.ShowAcquisitionLine();
- 
+% 
+%  figure
+%  imagesc(CurrentExperiement.ScanParam*1e3+20,...
+%           CurrentExperiement.MySimulationBox.z*1e3,...
+%           CurrentExperiement.AOSignal)
+%       
+%   x = CurrentExperiement.ScanParam*1e3+20 ;
+%   z = CurrentExperiement.MySimulationBox.z*1e3 ;
+%   I = CurrentExperiement.AOSignal ;
+%   save('C:\Users\mbocoum\Dropbox\self-written documents\acoustic-structured-illumination\images\datas\SimuOF','x','z','I')
+
 % [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
 % Transmission = squeeze( reshape(CurrentExperiement.DiffuseLightTransmission',[Ny,Nx,Nz]) );
 % plot(CurrentExperiement.MySimulationBox.z*1e3,Transmission(75,:))
@@ -108,6 +118,12 @@ end
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
  
+ % same variable as in experiment:
+ NbElemts = param.N_elements ;
+ pitch = param.width*1e3 ;
+ X0 = param.X0*1e3 + (NbElemts*pitch)/2;
+ X1 = param.X1*1e3  + (NbElemts*pitch)/2;
+ dFx = param.df0x ;
      %--------------------- saving datas -------------
      switch param.FOC_type
          
@@ -133,7 +149,7 @@ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R',
              param.c,[param.X0 , param.X1]); 
      
     save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
-                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile')            
+                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile','NbElemts','pitch','X0','X1','dFx')            
              
      end
      %%%%%%%%%%%%%%%%%%%%

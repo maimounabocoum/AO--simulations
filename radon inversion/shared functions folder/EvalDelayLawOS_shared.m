@@ -65,6 +65,7 @@ end
        if ScreenResult ==1
        plot( X0(:)*1e3 , Z0(:)*1e3 ,'linewidth',3,'color',cc(i,:)) 
        end
+       
        if ~(Z0(end)-Z0(1)) == 0
 
 %        a = (Z0(end)-Z0(1))/(X0(end)-X0(1));
