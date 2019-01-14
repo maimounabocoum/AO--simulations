@@ -1,4 +1,4 @@
-function [angle, M0 , X0 , Z0 , C] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
+function [angle, X0 , Z0 , C] = EvalDelayLawOS_shared( X_m , DelayLAWS , ActiveLIST , c )
 %creation of function 11/09/2017 for delay law retreival using sequence
 %parameters. 
 
@@ -45,7 +45,8 @@ end
        
  
        angle(i) = asin( (ct(Nmax,i)-ct(Nmin,i))/(X_m(Nmax) - X_m(Nmin))  );
-       % truncation of angle by 6 unit decimate
+       % truncation of angle by 6 unit decimate to prevent macthcing
+       % errors:
        angle(i) = round(angle(i)*100000)/100000 ;
        
        % definition ut vector orthogonal to initial (linear) wavefront:
@@ -60,8 +61,11 @@ end
        % (X_m,0) - ct*ut
        X0   = X_m - u(1)*DelayLAWS(:,i)'*c ;
        Z0   = 0   - u(2)*DelayLAWS(:,i)'*c;
-       M0(i,1) = 0 - u(1)*DelayLAWS(1,i)'*c; 
-       M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
+       % the initial values z = 0 always correspond to position of probe
+       
+%        M0(i,1) = 0   - u(1)*DelayLAWS(1,i)'*c; 
+%        M0(i,2) = 0   - u(2)*DelayLAWS(1,i)'*c;
+       
        if ScreenResult ==1
        plot( X0(:)*1e3 , Z0(:)*1e3 ,'linewidth',3,'color',cc(i,:)) 
        end

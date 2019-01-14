@@ -31,7 +31,7 @@ z = CurrentExperiement.MySimulationBox.z ;
 
 
 % radon transform of the image :
-AOSignal = zeros(length(z),CurrentExperiement.Nscan) ;
+AOSignal  = zeros(length(z),CurrentExperiement.Nscan) ;
 DelayLAWS = zeros(param.N_elements,CurrentExperiement.Nscan);
 
 
@@ -45,16 +45,19 @@ X_m = (1:param.N_elements)*param.width;
 ActiveLIST = CurrentExperiement.BoolActiveList ;
 
 % C : point of invariation by rotation of angle theta
-[angles, M0 , ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c);
+[angles, ~ , ~ ,C] = EvalDelayLawOS_shared( X_m , DelayLAWS, ActiveLIST, param.c );
+
+
+
 %% run scan 
 figure ;
 for n_scan = 1:CurrentExperiement.Nscan
 % theta = angle(n_scan);
-% C : center of rotation = [mean(X_m),0]
+% C : center of rotation
 [Irad,MMcorner] = RotateTheta( X , Z , MyTansmission , angles(n_scan) , C(n_scan,:) );
 
-u = [cos(theta) ; -sin(theta)] ;
-v = [sin(theta) ; cos(theta)]  ;
+% u = [cos(theta) ; -sin(theta)] ;
+% v = [sin(theta) ; cos(theta)]  ;
 
 Mask0 = interp1(CurrentExperiement.MyProbe.center(:,1,1)+ Lprobe/2 ,...
                double(CurrentExperiement.BoolActiveList(:,n_scan)),X);
@@ -77,8 +80,7 @@ imagesc(x*1e3,z*1e3,Irad)
 xlabel('x(mm)')
 ylabel('ct(mm)')
 AOSignal(:,n_scan) = trapz(x,Irad,2) ;
-% AOSignal(:,n_scan) = interp1(1:size(Irad,1),trapz(x,Irad,2),...
-%                             (1:size(Irad,1))-d_offset,'linear',0) ;
+
 drawnow
 axis equal
 end
@@ -114,7 +116,7 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 % FTF = MyImage.GetAngles(MyImage.R , decimation , theta ) ;
 DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
 ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
-[theta,M0,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , param.c) ;
+[theta,~,~,C]    = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , param.c) ;
 
  % Hf = figure;
  % X_m : interpolation vector for reconstruction

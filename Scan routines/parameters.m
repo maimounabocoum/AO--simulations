@@ -14,8 +14,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;            % 192; % Number of elements
-param.X0 = -20/1000  ;               % prosition min of effective probe shooting
-param.X1 =  20/1000 ;                % prosition min of effective probe shooting
+param.X0 = -5/1000  ;               % prosition min of effective probe shooting
+param.X1 =  5/1000 ;                % prosition min of effective probe shooting
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -29,13 +29,13 @@ param.farfield = param.width^2/(4*param.lambda);
 % OS : 'Structured Waves ' 
 param.FOC_type = 'OS'; 
 
-param.focus       = 20/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = (-90:90)*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.focus       = 19.5/1000;              % Initial electronic focus [m,m,m]      - only active in OF mode
+param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
-param.df0x = 24.39; %(1/(param.N_elements*param.width)) ;
-param.decimation  = [10];  % decimation list of active actuators   - only active in OS mode 
+param.df0x = (1/(param.N_elements*param.width)) ; %24.39; %
+param.decimation  = [1:30];  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
@@ -73,8 +73,8 @@ param.center = [0 0 19.5]/1000 ;
     %% abosbers positions :
     % fringes : modulation of intensity in direction given by Position
     param.phantom.Positions = [-2 0 19.5 ; 10000 0 19.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [0.5 ; 1.5*0.9]/1000;             % dimension in all direction [dim ; dim ; ...]
-    param.phantom.Types = {'cross','gaussian'} ;                % available types exemple : { 'square', 'gaussian', ...}
+    param.phantom.Sizes     = [0.2 ; 0.2]/1000;             % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'gaussian','cross'} ;                % available types exemple : { 'square', 'gaussian', ...}
     
 
     % parameters used in article

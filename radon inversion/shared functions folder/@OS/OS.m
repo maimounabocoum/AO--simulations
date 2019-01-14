@@ -252,7 +252,7 @@ classdef OS < TF2D
 
         z_out = z_out(:)';
 
-        I0 = decimation == 0;
+        I0 = (decimation == 0) ;
         F0 = repmat( Fin(:,I0) , 1 , length(unique(decimation)) ); % extract decimation = 0
         
         [DEC,FZ] = meshgrid(decimation,obj.fz) ;
@@ -274,7 +274,7 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
  figure;
 %  A = axes ; 
-   for i= 1:41;%length(theta)
+   for i= 1:length(theta)
         
        % filter properly       
          
@@ -490,11 +490,11 @@ Ireconstruct = zeros(size(X,1),size(X,2),'like',X);
 
            
            % sin-cos sequence
-            Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
+ %           Iout(:,i) = Iin(:,Isimilardecimate(1)) - 1i*Iin(:,Isimilardecimate(2)) ;
                    
            % own sequence
-%            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
-%                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
+            Iout(:,i) = ( Iin(:,Isimilardecimate(1)) - Iin(:,Isimilardecimate(2)) )...
+                      - 1i*( Iin(:,Isimilardecimate(3)) - Iin(:,Isimilardecimate(4)) );
 %                    
 %                    
             Iout(:,i) = Iout(:,i)/2 ;   

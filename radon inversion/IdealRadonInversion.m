@@ -7,8 +7,8 @@ addpath('functions')
 addpath('..\Scan routines')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% simulation traces 
-load('saved images\Simulation.mat');
-load('saved images\SimulationTransmission.mat');
+% load('saved images\Simulation.mat');
+% load('saved images\SimulationTransmission.mat');
 
 N = 2^12;
 Lobject = 1e-3;          % object wavelength
