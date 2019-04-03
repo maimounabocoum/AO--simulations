@@ -3,11 +3,13 @@
 clearvars ;
 
 addpath('..\Field_II')
+addpath('..\radon inversion')
+addpath('subscripts')
 addpath('..\radon inversion\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 1 ;
+IsSaved = 0 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

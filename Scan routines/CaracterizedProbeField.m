@@ -11,8 +11,8 @@ parameters;
 % overwrite Simulation box initialization : 
 
     param.Xrange = [-30 30]/1000;  % in m
-    param.Yrange = 0/1000;        % [-0.1 0.1]/1000;
-    param.Zrange = [4 5]/1000;   % in m
+    param.Yrange = 0/1000;         % [-0.1 0.1]/1000;
+    param.Zrange = [4 5]/1000;     % in m
 
     param.Nx = 150;
     param.Ny = 1;
@@ -20,13 +20,11 @@ parameters;
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 
-% define caracterization box
-% x = 0;
-% y = 0;
-% z = 0;
 
 % initialize parameters
 CurrentExperiement = Experiment(param);
+
+% initial excitation field :
 t_excitation = (0:1/param.fs:param.Noc*1.5/param.f0);
 excitation   =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
 
@@ -38,7 +36,7 @@ G=linspace(0,1,256);
 cmap=interp1(F,D,G);
 colormap(hot)
 
- for n_scan = 41%:CurrentExperiement.Nscan
+ for n_scan = 1:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);

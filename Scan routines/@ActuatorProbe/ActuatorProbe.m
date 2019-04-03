@@ -3,21 +3,27 @@ classdef ActuatorProbe
     %   Detailed explanation goes here
     
     properties   
-        rect;
-        rectActive;
-        center; 
-        ActiveList
-        DelayLaw;
+        rect;      %% all points of sampled actuator defined according to FIELDII requirement (p.38 user_guide)
+        % 1. index of element tranducer (always=1 here)
+        % 2-4.  First corner coordinates
+        % 5-7.  Second corner coordinates
+        % 8-10. Third corner coordinates
+        % 11 apodisation of the element( here always 0)
+        
+        rectActive;% all active points defined according to FIELDII requirement (p.38 user_guide)
+        center;    % list of actuator center coordinates (x,y,z)
+        ActiveList % index of active elements.
+        DelayLaw;  % emission time of active elements
     end
     
    properties (Access = private)
    Nactuators
-   no_sub_x
-   no_sub_y
-   Height
-   Width
-   kerf
-   Rfocus
+   no_sub_x % number of sub division for single actuator along x
+   no_sub_y % number of sub division for single actuator along y
+   Height   % single actuator height
+   Width    % single actuator width
+   kerf     % actuator inter-spacing
+   Rfocus   % fixed actuator elevation
    end
 
         
@@ -47,10 +53,10 @@ classdef ActuatorProbe
                   Element = Element_TranslationX(Element,(ActiveList(i)-1)*(kerf+Width));
                   Element = Element_TranslationY(Element,-Height/2);
 
-                  rect([1:no_sub_x*no_sub_y] + no_sub_x*no_sub_y*(i-1),:) = Element;
+                  rect((1:no_sub_x*no_sub_y) + no_sub_x*no_sub_y*(i-1),:) = Element;
                 end
                   
-               %% recentering all elements to (0,0,0):
+               %% recentering element coordinate origin to (0,0,0):
                        
                rect = Element_TranslationX(rect,-Xc);
                rect = Element_ElevationZ(rect,Rfocus);
@@ -66,30 +72,7 @@ classdef ActuatorProbe
                 
         end
         
-        function [] = ShowProbe(obj)
-            
-            %% absolute center of the probe:
-             %  Xc = (Width + (Nactuators-1)*(kerf+Width))/2;
-            
-            h = figure;
-            ha = axes ;
-                
-            % X = [obj.rect(i,2),obj.rect(i,5);obj.rect(i,11),obj.rect(i,8)];
-            % Y = [obj.rect(i,3),obj.rect(i,6);obj.rect(i,12),obj.rect(i,9)] ;
-            % Z = [obj.rect(i,4),obj.rect(i,7);obj.rect(i,13),obj.rect(i,10)];
-             X = obj.rect(:,17)*1e3;
-             Y = obj.rect(:,18)*1e3;
-            %hold on
-            plot(X,Y,'o')
-            grid on
-             set(ha,'XTick',sort(unique(X)))
-             set(ha,'YTick',sort(unique(Y)))
-             xlim([-obj.rect(1,15)*1e3*obj.Nactuators/2 obj.rect(1,15)*1e3*obj.Nactuators/2])
-            xlabel('x(mm)')
-            ylabel('y(mm)')
-         
-            
-        end
+
         
         function obj = Set_ActiveList(obj,ActiveList)
             % check that value are well into 1 and Nelement :
@@ -183,15 +166,6 @@ classdef ActuatorProbe
 
         end
  
-        %% screening functions %%
-        function [] = ShowDelay(obj)
-            figure;
-            plot(obj.center(obj.ActiveList,1)*1e3,obj.DelayLaw*1e6,'o')
-            xlabel('Actuator position z(mm)')
-            ylabel('Delay ( \mu s )')
-            
-        end
-        
         function [n, xn] = GetIndex(obj,x0,x1)
            
             % indexes of position x
@@ -206,11 +180,52 @@ classdef ActuatorProbe
  
         end
         
+        %% screening functions %%
+        function [] = ShowDelay(obj)
+            figure;
+            plot(obj.center(:,1)*1e3,obj.DelayLaw*1e6,'o')
+            xlabel('Actuator position z(mm)')
+            ylabel('Delay ( \mu s )')
+            
+        end
+   
         function [] = ShowActuatorCenter(obj)
+            
             figure;
             plot(obj.center(:,1)*1e3,'o')
             xlabel('Actuator Index')
             ylabel('position (mm)')
+            
+        end
+        
+        function [] = ShowProbe(obj)
+            
+            % absolute center of the probe:
+             %  Xc = (Width + (Nactuators-1)*(kerf+Width))/2;
+            
+            h = figure;
+            ha = axes ;
+                
+             X = [obj.rect(:,2),obj.rect(:,5),obj.rect(:,8),obj.rect(:,11),obj.rect(:,17)];
+             Y = [obj.rect(:,3),obj.rect(:,6),obj.rect(:,9),obj.rect(:,12),obj.rect(:,18)] ;
+             Z = [obj.rect(:,4),obj.rect(:,7),obj.rect(:,10),obj.rect(:,13),obj.rect(:,19)];
+             %X = obj.rect(:,17)*1e3;
+             %Y = obj.rect(:,18)*1e3;
+             s = ones(1,length(Z(:)));
+             s(obj.ActiveList) = 7;
+             scatter3(X(:),Y(:),Z(:),s,Z(:));
+             %surfc(X,Y,Z);
+             shading interp
+             axis equal
+            %hold on
+%             plot(X,Y,'o')
+%             grid on
+%              set(ha,'XTick',sort(unique(X)))
+%              set(ha,'YTick',sort(unique(Y)))
+%              xlim([-obj.rect(1,15)*1e3*obj.Nactuators/2 obj.rect(1,15)*1e3*obj.Nactuators/2])
+%             xlabel('x(mm)')
+%             ylabel('y(mm)')
+         
             
         end
         
@@ -221,14 +236,7 @@ classdef ActuatorProbe
     
 end  
         
-
-
-%         function CenterPosition = Get_ElementCenter(Element)
-%         
-%         CenterPosition  = mean(Element(:,17:19));
-%   
-%         end
-%         
+         
         function Element = SingleElement(Height,Width,no_sub_x,no_sub_y,elemNum)
             
         Height = Height/no_sub_y;
@@ -294,7 +302,7 @@ end
         
         % Eq circle in cartesian coordinate : Y^2 + (Z - Rfocus)^2 = R
         % Therfore, if M belongs to circle with coord Y , we have :
-        % Z = R + sqrt(R-Y^2)
+        % Z = R +/- sqrt(R-Y^2)
              
         Element(:,[4,7,10,13,19]) = Rfocus - sqrt(Rfocus^2 - Element(:,[3,6,9,12,18]).^2);
         % somehow this is how FIELD II defines the probe, if commented, the

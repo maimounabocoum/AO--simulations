@@ -14,18 +14,20 @@ IsSaved = 0 ;
 
 CurrentExperiement = Experiment(param);
 
-% set active profile 
-CurrentExperiement.MyProbe = ...
-CurrentExperiement.MyProbe.Set_ActiveList(40:100);
+% Example : set active elements
 
-% set delay law
+%CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActiveList(1:300);
+
+%% view active elements
+CurrentExperiement.MyProbe.ShowProbe
+
+%% set delay law
 CurrentExperiement.MyProbe = ...
 CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',-50*pi/180,param.c);
 
  
-% MyField = ExcitationField( CurrentExperiement.MyProbe , param.f0 , param.fs , param.Noc );
-% MyField = MyField.Propagate((1:100)*1e-3,1540);
-
+% view active elements
+% CurrentExperiement.MyProbe.ShowDelay
 
 
 

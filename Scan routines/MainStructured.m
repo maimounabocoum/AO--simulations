@@ -25,7 +25,8 @@ end
 
 Hf = figure(1);
 for n_scan = 1:CurrentExperiement.Nscan
-
+     
+     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
