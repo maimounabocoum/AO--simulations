@@ -16,8 +16,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
-param.X0 = -5/1000  ;               % position min of effective probe shooting (center probe = 0mm)
-param.X1 =  5/1000 ;                % position max of effective probe shooting (center probe = 0mm)
+param.X0 = -15/1000  ;               % position min of effective probe shooting (center probe = 0mm)
+param.X1 =  15/1000 ;                % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -34,8 +34,10 @@ param.farfield = param.width^2/(4*param.lambda);
 
 param.FOC_type = 'OS'; 
 
-param.focus       = 38.5/1000;   % Initial electronic focus [m,m,m]      - only active in OF mode
-param.angles      = 0*pi/180;    % Angular scan [m,m,m]                  - only active in OP and OS mode 
+param.focus       = 38.5/1000;   % Initial electronic focus              - only active in OF mode
+param.angles      = 20*pi/180;    % Line Vector Angular scan              - only active in OP and OS mode 
+
+
 % k0 = (1/1e-3) is the smapling frequence for the decimation
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
