@@ -122,8 +122,8 @@ classdef AO_FieldBox
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');
-            output = envelope(obj.Field,300) ;
-            %output = obj.Field;
+            %output = envelope(obj.Field,300) ;
+            output = real(obj.Field);
             Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
@@ -137,9 +137,10 @@ classdef AO_FieldBox
                 colorbar
                 caxis([0.1*min(Field_max(:)) 0.9*max(Field_max(:))])
                 drawnow
-                %caxis('auto')
+               
+               % caxis('auto')
                 
-               %saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
+               % saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
             end
                   
                

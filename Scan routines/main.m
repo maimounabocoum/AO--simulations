@@ -47,6 +47,7 @@ end
  [Nx,Ny,Nz]    = SizeBox(CurrentExperiement.MySimulationBox);
  Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
  
+ %% run acquision loop over Nscan
  tic
  Hf = gcf;
  h = waitbar(0,'Please wait...');
@@ -77,13 +78,18 @@ end
     
  end
 
+
  ActiveLIST = CurrentExperiement.BoolActiveList ;
  
  close(h) 
  
  toc
+ 
+ %% show acquisition loop results
+ 
+ 
  CurrentExperiement.ShowAcquisitionLine();
-% 
+ 
 %  figure
 %  imagesc(CurrentExperiement.ScanParam*1e3+20,...
 %           CurrentExperiement.MySimulationBox.z*1e3,...
@@ -161,4 +167,4 @@ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R',
 %% End Program - Free memory
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % rmpath('..\radon inversion')
-field_end;
+% field_end;

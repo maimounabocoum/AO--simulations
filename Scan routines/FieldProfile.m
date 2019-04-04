@@ -52,13 +52,13 @@ end
  [Nx,Ny,Nz]   = SizeBox(CurrentExperiement.MySimulationBox);
  Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
  
- for n_scan = 1:CurrentExperiement.Nscan
+ for n_scan = 1%:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
      % % option for screening : XY, Xt , XZt
 
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
+     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
     %  CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
 
             [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
@@ -67,9 +67,9 @@ end
             Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
 
             
-    % retreive delay law for cuurent scan
+    % retreive delay law for current scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
-     DelayLAWS( CurrentExperiement.MyProbe.ActiveList ,n_scan) = ...
+     DelayLAWS( :  ,n_scan) = ...
                 CurrentExperiement.MyProbe.DelayLaw ;
     end
           
@@ -78,12 +78,12 @@ end
  end
  
  %% screening loop
- for n_scan = 1:CurrentExperiement.Nscan
-    imagesc(Field_Profile(:,:,n_scan))
-    caxis([min(min(Field_Profile(:,:,n_scan)))...
-           max(max(Field_Profile(:,:,n_scan))) ])
-       drawnow
-       pause(0.5)
- end
- 
+%  for n_scan = 1:CurrentExperiement.Nscan
+%     imagesc(Field_Profile(:,:,n_scan))
+%     caxis([min(min(Field_Profile(:,:,n_scan)))...
+%            max(max(Field_Profile(:,:,n_scan))) ])
+%        drawnow
+%        pause(0.5)
+%  end
+%  
  

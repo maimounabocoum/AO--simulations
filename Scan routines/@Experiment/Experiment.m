@@ -69,7 +69,7 @@ methods ( Access = 'public' )
             switch obj.param.FOC_type
                 
                 case 'OF'
-                    % get the center position X for each scan line               
+                    % get the piezo center positions X between X0 and X1, used for each scan line               
                        [Scan, obj.ScanParam] = obj.MyProbe.GetIndex( obj.param.X0 , obj.param.X1 );
                        Scan(isnan(Scan)) = [] ;  
                        % retreive the total number od scans     
@@ -256,6 +256,28 @@ methods ( Access = 'public' )
 
                     % Initialize home-made probe  :
                     % focus [0 0 0] will be overwritten by the delay law
+                    % 
+                    
+                    % check for empty field :
+                    
+                    if isempty(obj.MyProbe.rectActive)
+                    
+                    % set field to zero when no piezo is active
+                    % if not - xdc_rectangles generates error
+                    z_min = min(obj.MySimulationBox.z) ;
+                    z_max = max(obj.MySimulationBox.z) ;
+                    c = obj.param.c ;
+                    
+                    tmin = z_min/c - max(t_excitation)/2; 
+                    tmax = z_max/c + max(t_excitation)/2; 
+                    
+                    h = zeros( floor((obj.param.fs)*(tmax-tmin))  , size(obj.MySimulationBox.Points,1));
+                    obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
+
+                    else
+                    
+                    % generate pointer "Probe" to transducer aperture:
+                    % xdc_rectangles doesnt allow empty rectActive List
                     Probe = xdc_rectangles(obj.MyProbe.rectActive,[10 10 10], [11 0 0]);   
 
                     % calculate impulse response in FIELD II
@@ -267,13 +289,21 @@ methods ( Access = 'public' )
                     xdc_excitation (Probe, excitation);
                     % set delay law in FIELD II: 
                     xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
+                    
                     % calculate field on MySimulationBox.Points() with FIELD II: 
+                    % h : returned field evaluated on [x,y,z] as fucntion
+                    % line : time coordinate
+                    % column : number of point ( list obj.MySimulationBox.Points() )
+                    % t : simulation start time (single value)
+                  
                     [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
-   
+                    
                     % write field results to the current box
                     tmin = t - max(t_excitation)/2;
                     obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
                     xdc_free(Probe);
+                    end
+                    
         else
            
          %%================= implementation without use of FILEDII=====================

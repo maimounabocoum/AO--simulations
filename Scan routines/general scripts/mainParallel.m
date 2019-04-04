@@ -1,5 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  main  program  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% maimouna bocoum 04-01-2017
+
+% implementation remains to be done
+
 clearvars ;
 
 addpath('..\Field_II')
