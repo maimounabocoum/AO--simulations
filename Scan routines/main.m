@@ -19,7 +19,7 @@ CurrentExperiement = Experiment(param);
 % initial excitation field :
 
     t_excitation = (0:1/param.fs:param.Noc*1.5/param.f0);
-    excitation   =  sin(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
+    excitation   =  cos(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
     
 %     excitation_env = hilbert(excitation);
 %     excitation_env= abs(excitation_env);
@@ -59,7 +59,7 @@ end
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
+     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
     
     % field profile

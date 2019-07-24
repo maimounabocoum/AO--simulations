@@ -124,8 +124,13 @@ methods ( Access = 'public' )
                     end
                     
                        % retreive the total number of scans     
-                       obj.Nscan = length(obj.param.NbX*obj.param.NbZ); 
+                       nuZ0 = 1/( (obj.param.c)*20*1e-6 ); % Pas fréquence spatiale en Z (en mm-1)
+                       nuX0 = 1/(obj.param.N_elements*obj.param.width);   % Pas fréquence spatiale en X (en mm-1)
+
                        [NBX, NBZ] = meshgrid( obj.param.NbX , obj.param.NbZ ) ;
+                       obj.Nscan = length(NBX(:)); 
+                       
+                       
                        obj.ScanParam = [NBX(:), NBZ(:)];
                        % reindexation of X0, X1 for 0 to Lmax of the probe
                        X0 = obj.param.X0 + (1/2)*obj.param.N_elements*obj.param.width;
@@ -239,7 +244,7 @@ methods ( Access = 'public' )
                  case 'OS'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
                   case 'JM'
-                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:),obj.param.c);
+                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:)*0,obj.param.c);
               end
               
               
