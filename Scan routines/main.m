@@ -18,9 +18,6 @@ CurrentExperiement = Experiment(param);
 
 % initial excitation field :
 
-    t_excitation = (0:1/param.fs:param.Noc*1.5/param.f0);
-    excitation   =  cos(2*pi*param.f0*t_excitation).*hanning(length(t_excitation)).^2';
-    
 %     excitation_env = hilbert(excitation);
 %     excitation_env= abs(excitation_env);
 % 
@@ -55,7 +52,7 @@ end
  for n_scan = 1:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
-     CurrentExperiement = CurrentExperiement.CalculateUSfield(t_excitation,excitation,n_scan);
+     CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 

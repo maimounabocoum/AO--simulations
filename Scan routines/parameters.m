@@ -16,8 +16,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
-param.X0 = -0.1/1000  ;               % position min of effective probe shooting (center probe = 0mm)
-param.X1 =  0.1/1000 ;                % position max of effective probe shooting (center probe = 0mm)
+param.X0 = -15/1000  ;               % position min of effective probe shooting (center probe = 0mm)
+param.X1 =  15/1000 ;                % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -32,7 +32,7 @@ param.farfield = param.width^2/(4*param.lambda);
 % JM : 'Jean-Michel continuoous waves' (not implemented yet)
 % OS : 'Structured Waves ' 
 
-param.FOC_type = 'OP'; 
+param.FOC_type = 'OF'; 
 
 param.focus       = 38.5/1000;   % Initial electronic focus              - only active in OF mode
 param.angles      = 0*pi/180;    % Line Vector Angular scan              - only active in OP and OS mode 
@@ -42,14 +42,15 @@ param.angles      = 0*pi/180;    % Line Vector Angular scan              - only 
 % k0 = (1/(param.N_elements*param.width)) is the smapling frequence for the decimation
 
 param.df0x = (1/(param.N_elements*param.width)) ; %24.39; %
-param.decimation  = 1;  % decimation list of active actuators   - only active in OS mode 
+param.decimation  = 20;  % decimation list of active actuators   - only active in OS mode 
 % decimation definition : 
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 10;               % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = 10;               % 20 Nb de composantes de Fourier en X, 'JM'
- 
+param.NbZ         = 1;               % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = -5;               % 20 Nb de composantes de Fourier en X, 'JM'
+param.nuZ0 = 1/( (param.c)*1*1e-6 ); % Pas fréquence spatiale en Z (en mm-1)
+param.nuX0 = 1/(param.N_elements*param.width);   % Pas fréquence spatiale en X (en mm-1) 
 
 
 
@@ -61,9 +62,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-30 30]/1000;  % in m [-15 15]
+    param.Xrange = [-15 15]/1000;  % in m [-15 15]
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [0 60]/1000;   % in m
+    param.Zrange = [0 5]/1000;   % in m
 
     param.Nx = 150; % number of interpolating points along Xrange
     param.Ny = 1;   % number of interpolating points along Yrange

@@ -124,8 +124,7 @@ methods ( Access = 'public' )
                     end
                     
                        % retreive the total number of scans     
-                       nuZ0 = 1/( (obj.param.c)*20*1e-6 ); % Pas fréquence spatiale en Z (en mm-1)
-                       nuX0 = 1/(obj.param.N_elements*obj.param.width);   % Pas fréquence spatiale en X (en mm-1)
+
 
                        [NBX, NBZ] = meshgrid( obj.param.NbX , obj.param.NbZ ) ;
                        obj.Nscan = length(NBX(:)); 
@@ -243,8 +242,6 @@ methods ( Access = 'public' )
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan),obj.param.c);
                  case 'OS'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
-                  case 'JM'
-                    obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,:)*0,obj.param.c);
               end
               
               
@@ -254,7 +251,24 @@ methods ( Access = 'public' )
             
         end
             
-        function obj = CalculateUSfield(obj,t_excitation,excitation,n_scan)
+        function obj = CalculateUSfield(obj,n_scan)
+            
+            % generate emission array
+            Nactive = sum(obj.BoolActiveList(:,n_scan));
+            switch obj.param.FOC_type
+             
+                case {'OF','OP','OS'} 
+                t_excitation = (0:1/obj.param.fs:obj.param.Noc*1.5/obj.param.f0);
+                excitation   =  sin(2*pi*obj.param.f0*t_excitation).*hanning(length(t_excitation)).^2'; 
+                EXCITATION = repmat(excitation,Nactive,1) ;
+                case 'JM'
+             Xs        = (0:Nactive-1)*obj.param.width;             % Echelle de graduation en X
+            [~,~,~,EXCITATION] = CalcMatHole(obj.param.f0*1e-6,obj.ScanParam(n_scan,1),obj.ScanParam(n_scan,2),...
+                                               obj.param.nuX0*1e-3,obj.param.nuZ0*1e-3,Xs*1e3,...
+                                               obj.param.fs*1e-6,obj.param.c); % Calculer la matrice
+            EXCITATION = EXCITATION';
+            end
+            
 
         if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
@@ -291,22 +305,34 @@ methods ( Access = 'public' )
                         impulse           = impulse.*hanning(length(impulse))'; 
                         xdc_impulse (Probe, impulse);
                     % set excitation in FIELD II:  
-                    xdc_excitation (Probe, excitation);
-                    % set delay law in FIELD II: 
-                    xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
+                    % xdc_excitation (Probe, excitation);
                     
+                    ele_waveform(Probe,(1:Nactive)',EXCITATION)
+                    % set delay law in FIELD II: 
+%                     switch obj.param.FOC_type
+%                         case {'OF','OP','OS'}
+%                      xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
+%                         case 'JM'
+%                     end
                     % calculate field on MySimulationBox.Points() with FIELD II: 
                     % h : returned field evaluated on [x,y,z] as fucntion
                     % line : time coordinate
                     % column : number of point ( list obj.MySimulationBox.Points() )
                     % t : simulation start time (single value)
                   
-                    [h,t] = calc_hp(Probe,obj.MySimulationBox.Points());
+                    [h,t] = calc_hp( Probe , obj.MySimulationBox.Points() );
                     
                     % write field results to the current box
+                    switch obj.param.FOC_type
+                    case {'OF','OP','OS'}
                     tmin = t - max(t_excitation)/2;
+                    case 'JM'
+                    tmin = t - max(t_excitation)/2;    
+                    end
+                    
                     obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);
                     xdc_free(Probe);
+                    
                     end
                     
         else
