@@ -309,11 +309,13 @@ methods ( Access = 'public' )
                     
                     ele_waveform(Probe,(1:Nactive)',EXCITATION)
                     % set delay law in FIELD II: 
-%                     switch obj.param.FOC_type
-%                         case {'OF','OP','OS'}
-%                      xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
-%                         case 'JM'
-%                     end
+                     switch obj.param.FOC_type
+                         case {'OF','OP','OS'}
+                      xdc_focus_times(Probe,-1,obj.MyProbe.DelayLaw(obj.BoolActiveList(:,n_scan)));
+                         case 'JM'
+                      xdc_focus_times(Probe,-1, 0*(1:Nactive) );
+                     end
+
                     % calculate field on MySimulationBox.Points() with FIELD II: 
                     % h : returned field evaluated on [x,y,z] as fucntion
                     % line : time coordinate
@@ -327,7 +329,7 @@ methods ( Access = 'public' )
                     case {'OF','OP','OS'}
                     tmin = t - max(t_excitation)/2;
                     case 'JM'
-                    tmin = t - max(t_excitation)/2;    
+                    tmin = t ;    
                     end
                     
                     obj.MySimulationBox = obj.MySimulationBox.Get_SimulationResults(tmin,h,obj.param.fs);

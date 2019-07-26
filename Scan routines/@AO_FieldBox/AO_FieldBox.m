@@ -140,7 +140,7 @@ classdef AO_FieldBox
                
                % caxis('auto')
                 
-               % saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
+                saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
             end
                   
                
