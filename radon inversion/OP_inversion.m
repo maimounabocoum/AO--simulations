@@ -12,7 +12,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% experiemental input datas :
-% load('experiement images - JB - test\OP0deg-2016-02-01_13-11.mat');
+%% ================ load datas ==============
+ clearvars
+ load('datas\500micronsHole_type_OP_18h05_54')
+ 
  c = 1540 ; % sound velocity in m/s
 
     R_FT = MyImage.fourier(MyImage.R) ;

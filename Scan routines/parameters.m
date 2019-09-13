@@ -9,15 +9,15 @@
 param.f0 = 3e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency of the photodiode [Hz]
-param.Noc = 2 ;                     % Number of optical cycles
+param.Noc = 1 ;                     % Number of optical cycles
 param.c = 1540;                     % Speed of sound [m/s]
 param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
-param.X0 = -15/1000  ;               % position min of effective probe shooting (center probe = 0mm)
-param.X1 =  15/1000 ;                % position max of effective probe shooting (center probe = 0mm)
+param.X0 = -40/1000  ;               % position min of effective probe shooting (center probe = 0mm)
+param.X1 =  40/1000 ;                % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -34,8 +34,8 @@ param.farfield = param.width^2/(4*param.lambda);
 
 param.FOC_type = 'JM'; 
 
-param.focus       = 38.5/1000;   % Initial electronic focus              - only active in OF mode
-param.angles      = 0*pi/180;    % Line Vector Angular scan              - only active in OP and OS mode 
+param.focus       = 19/1000;   % Initial electronic focus              - only active in OF mode
+param.angles      = (-20:20)*pi/180;    % Line Vector Angular scan     - only active in OP and OS mode 
 
 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
@@ -47,8 +47,8 @@ param.decimation  = 20;  % decimation list of active actuators   - only active i
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 20;               % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = -10;               % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbZ         = 8;                % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = 10;               % 20 Nb de composantes de Fourier en X, 'JM'
 param.nuZ0 = 1/( (param.c)*20*1e-6 ); % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);   % Pas fréquence spatiale en X (en mm-1) 
 
@@ -64,28 +64,27 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
     param.Xrange = [-15 15]/1000;  % in m [-15 15]
     param.Yrange = 0/1000;        % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [5 40]/1000;   % in m
+    param.Zrange = [5 40]/1000;   % OF = [1 30] in m
 
-    param.Nx = 100; % number of interpolating points along Xrange
+    param.Nx = 150; % number of interpolating points along Xrange
     param.Ny = 1;   % number of interpolating points along Yrange
     
     % in order to match fs_aq(Hz) along Zrange , and 
     % unshures Nz >=1
     param.Nz = max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
-    param.Nz = 500;
 %% definition of laser beam
     
 % waist of diffuse IR laser beam
-param.w0 = [9 9]/1000 ; % specify the center of the gaussian beam.
-param.center = [0 0 19.5]/1000 ;  % specify the center of the gaussian beam.    
+param.w0 = [8 8]/1000 ; % specify the center of the gaussian beam.
+param.center = [0 0 20]/1000 ;  % specify the center of the gaussian beam.    
              
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
 %% absorbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-2 0 19.5 ; 10000 0 19.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [0.2 ; 0.2]/1000;                 % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Positions = [0 0 20 ; 10000 0 19.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [0.5 ; 0.2]/1000;                 % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','cross'} ;                % available types exemple : { 'square', 'gaussian', ...}
     
 

@@ -122,8 +122,8 @@ classdef AO_FieldBox
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');
-            %output = envelope(obj.Field,300) ;
-            output = real(obj.Field);
+            %output = envelope(obj.Field,300).^2 ;
+            output = obj.Field;
             Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;

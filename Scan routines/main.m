@@ -9,7 +9,7 @@ addpath('..\radon inversion\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 0 ;
+IsSaved = 1 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,7 +80,7 @@ end
  
  close(h) 
  
- toc
+ t_simulation = toc
  
  %% show acquisition loop results
  
@@ -116,26 +116,41 @@ end
      
      % saving folder name with todays date
      SubFolderName = generateSubFolderName('..\radon inversion\saved images') ;
-     FileName   = generateSaveName(SubFolderName ,'type',param.FOC_type);
+     FileName   = generateSaveName(SubFolderName ,'name','500micronsHole_Foc19mm','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
  z_phantom = CurrentExperiement.MySimulationBox.z ;
  [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
  
- % same variable as in experiment:
- NbElemts = param.N_elements ;
- pitch = param.width*1e3 ;
- X0 = param.X0*1e3 + (NbElemts*pitch)/2;
- X1 = param.X1*1e3  + (NbElemts*pitch)/2;
- dFx = param.df0x ;
-     %--------------------- saving datas -------------
+%-- saving parameters same as in experiment---------%
+
+FreqSonde       = param.f0 ;
+NbHemicycle     = 2*param.Noc ;
+Foc             = param.focus ;
+X0              = param.X0 ; 
+X1              = param.X1 ;
+pitch           = param.width ;
+Prof            = max( z_phantom ) ;
+ScanParam       = CurrentExperiement.ScanParam ;
+NbElemts        = param.N_elements ;
+SampleRate      = param.fs_aq ;
+TypeOfSequence  = param.FOC_type ;
+NbX             = param.NbX ;        % ondes JM
+NbZ             = param.NbZ ;        % ondes JM
+decimation      = param.decimation ; % ondes OS
+dFx             = param.df0x;        % ondes OS
+c               = param.c ;
+
+
+%--------------------- saving datas -------------%
      switch param.FOC_type
          
          case 'OF'
  
  MyImage = OF(CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,CurrentExperiement.AOSignal,param.fs_aq,param.c); 
- save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage');  
+ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage',...
+               'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param');  
  
          case 'OP'
  
@@ -143,7 +158,8 @@ end
 %              ScanParam = CurrentExperiement.ScanParam;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
-save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR');
+save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR',...
+              'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param');
 
          case 'OS'
 %save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
@@ -154,7 +170,7 @@ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R',
              param.c,[param.X0 , param.X1]); 
      
     save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
-                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile','NbElemts','pitch','X0','X1','dFx')            
+                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param')            
              
      end
      %%%%%%%%%%%%%%%%%%%%
