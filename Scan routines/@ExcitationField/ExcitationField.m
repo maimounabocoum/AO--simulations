@@ -1,30 +1,50 @@
-classdef ExcitationField
+classdef ExcitationField 
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (Access = private)
-        Probe
-    end
-    
     properties
-        t % time
-        omega0
-        Excitation % Field for each actuator (1 actuator = 1 line)   
-        F0
+        t_excitation % time
+        EXCITATION % Field for each actuator (1 actuator = 1 line)   
     end
     
     methods
         
         %f0 : defines the central frequency of the accoustique wave:
-        function obj =  ExcitationField(Probe,f0,fs,Noc)
-            % input probe intit
-            obj.Probe       = Probe ;
-            obj.omega0      = 2*pi*f0 ;
-            obj.t           = (0:1/fs:Noc*1.5/f0);
-            obj.Excitation  =  exp(1i*obj.omega0*obj.t).*( hanning(length(obj.t))'.^2 ) ;  
+        function obj =  ExcitationField(varargin)
             
+            % Nactive : number of active elements
+            % Nactive = sum(obj.BoolActiveList(:,n_scan));
+            
+            Nactive = varargin{1};       
+            FOC_type = varargin{2};
+            
+               switch FOC_type
+             
+                case {'OF','OP','OS'} 
+                    
+                Noc = varargin{3} ;
+                f0 = varargin{4} ;
+                fs = varargin{5} ;
+                
+                    % extract OF parameters : 
+                obj.t_excitation = (0:1/fs:Noc*1.5/f0);
+                excitation   =  sin(2*pi*f0*obj.t_excitation).*hanning(length(obj.t_excitation)).^2'; 
+                obj.EXCITATION = repmat(excitation,Nactive,1) ;
+                
+                case 'JM'
+                    
+                width = varargin{3} ;
+                f0 = varargin{4} ;
+                fs = varargin{5} ;
+             Xs        = (0:Nactive-1)*width;             % Echelle de graduation en X
+            [~,~,~,EXCITATION] = CalcMatHole(f0*1e-6,ScanParam(n_scan,1),ScanParam(n_scan,2),...
+                                               nuX0*1e-3,nuZ0*1e-3,Xs*1e3,...
+                                               fs*1e-6,c); % Calculer la matrice
+            obj.EXCITATION = EXCITATION';
+                end         
 
         end
+        
         
         function Field_out = Propagate(obj,x_in,y_in,z_in,c)
             

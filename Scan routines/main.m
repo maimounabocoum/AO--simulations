@@ -5,11 +5,11 @@ clearvars ;
 addpath('..\Field_II')
 addpath('..\radon inversion')
 addpath('subscripts')
-addpath('..\radon inversion\shared functions folder')
+addpath('..\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 1 ;
+IsSaved = 0 ;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Start an experiment
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,6 +32,7 @@ CurrentExperiement = Experiment(param);
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
+%CurrentExperiement.ShowExcitationField();
 CurrentExperiement.ShowPhantom();
 %use param.angles has an input to additionally show Radon transform
 
@@ -49,14 +50,14 @@ end
  Hf = gcf;
  h = waitbar(0,'Please wait...');
 
- for n_scan = 1:CurrentExperiement.Nscan
+ for n_scan = 1%:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
      % % option for screening : XY, Xt , XZt
 
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
     
     % field profile

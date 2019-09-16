@@ -65,7 +65,8 @@ methods ( Access = 'public' )
         end   
       
         function obj = ConfigureProbeSequence(obj)
-            
+                        
+            % configure activated list:
             switch obj.param.FOC_type
                 
                 case 'OF'
@@ -226,6 +227,7 @@ methods ( Access = 'public' )
             % characteristics : 
            FullElementList = 1:obj.param.N_elements ;
            ActiveList =  FullElementList(obj.BoolActiveList(:,n_scan)) ;
+           Nactive = length(ActiveList);
             % probe strcuture initialization :
             
            obj.MyProbe = obj.MyProbe.Set_ActiveList(ActiveList) ;
@@ -238,7 +240,9 @@ methods ( Access = 'public' )
                 
                  case 'OF' 
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('focus',[obj.ScanParam(n_scan) 0 obj.param.focus],obj.param.c);
-                 case 'OP'
+                                % configure temporal profile excitation :
+                    obj.MyExcitation = ExcitationField(Nactive,obj.param.FOC_type,obj.param.Noc,obj.param.f0,obj.param.fs);
+                  case 'OP'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan),obj.param.c);
                  case 'OS'
                     obj.MyProbe = obj.MyProbe.Set_ActuatorDelayLaw('plane',obj.ScanParam(n_scan,1),obj.param.c);
@@ -246,8 +250,7 @@ methods ( Access = 'public' )
               
               
               
-              
-              
+
             
         end
             
@@ -304,10 +307,12 @@ methods ( Access = 'public' )
                         impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
                         impulse           = impulse.*hanning(length(impulse))'; 
                         xdc_impulse (Probe, impulse);
+                        
                     % set excitation in FIELD II:  
                     % xdc_excitation (Probe, excitation);
+                    %obj.MyExcitation.EXCITATION
+                     ele_waveform(Probe,(1:Nactive)',EXCITATION)
                     
-                    ele_waveform(Probe,(1:Nactive)',EXCITATION)
                     % set delay law in FIELD II: 
                      switch obj.param.FOC_type
                          case {'OF','OP','OS'}
