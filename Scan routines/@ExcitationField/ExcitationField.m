@@ -1,4 +1,4 @@
-classdef ExcitationField 
+classdef ExcitationField < TF_t
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -26,6 +26,9 @@ classdef ExcitationField
                 f0 = varargin{4} ;
                 fs = varargin{5} ;
                 
+                % creation of fourier structure
+            
+                
                     % extract OF parameters : 
                 obj.t_excitation = (0:1/fs:Noc*1.5/f0);
                 excitation   =  sin(2*pi*f0*obj.t_excitation).*hanning(length(obj.t_excitation)).^2'; 
@@ -43,6 +46,14 @@ classdef ExcitationField
             obj.EXCITATION = EXCITATION';
                 end         
 
+        end
+        
+        function [] = ShowField(obj)
+           figure;
+           imagesc(obj.t_excitation*1e6,1:size(obj.EXCITATION,2),obj.EXCITATION')
+           xlabel('element')
+           ylabel('time (\mu s)')
+           colorbar
         end
         
         

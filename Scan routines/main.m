@@ -32,7 +32,7 @@ CurrentExperiement = Experiment(param);
     
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
-%CurrentExperiement.ShowExcitationField();
+
 CurrentExperiement.ShowPhantom();
 %use param.angles has an input to additionally show Radon transform
 
@@ -55,6 +55,7 @@ end
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
      CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan);
      CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
+     
      % % option for screening : XY, Xt , XZt
 
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    

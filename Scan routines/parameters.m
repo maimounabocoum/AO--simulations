@@ -9,7 +9,7 @@
 param.f0 = 3e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency of the photodiode [Hz]
-param.Noc = 1 ;                     % Number of optical cycles
+param.Noc = 10 ;                     % Number of optical cycles
 param.c = 1540;                     % Speed of sound [m/s]
 param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6

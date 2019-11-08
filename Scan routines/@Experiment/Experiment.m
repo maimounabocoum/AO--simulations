@@ -256,23 +256,41 @@ methods ( Access = 'public' )
             
         function obj = CalculateUSfield(obj,n_scan)
             
-            % generate emission array
+            %% generate emission array
             Nactive = sum(obj.BoolActiveList(:,n_scan));
             switch obj.param.FOC_type
              
                 case {'OF','OP','OS'} 
                 t_excitation = (0:1/obj.param.fs:obj.param.Noc*1.5/obj.param.f0);
-                excitation   =  sin(2*pi*obj.param.f0*t_excitation).*hanning(length(t_excitation)).^2'; 
+                excitation   =  sin(2*pi*obj.param.f0*t_excitation);%.*hanning(length(t_excitation)).^2'; 
                 EXCITATION = repmat(excitation,Nactive,1) ;
                 case 'JM'
              Xs        = (0:Nactive-1)*obj.param.width;             % Echelle de graduation en X
             [~,~,~,EXCITATION] = CalcMatHole(obj.param.f0*1e-6,obj.ScanParam(n_scan,1),obj.ScanParam(n_scan,2),...
                                                obj.param.nuX0*1e-3,obj.param.nuZ0*1e-3,Xs*1e3,...
                                                obj.param.fs*1e-6,obj.param.c); % Calculer la matrice
-            EXCITATION = EXCITATION';
+            
+             EXCITATION = EXCITATION';                              
+             %EXCITATION = repmat(EXCITATION',1,6);
+
+            % test study FFT
+            
+            
             end
             
-
+%            MyFFT = TF_t(2^(3+nextpow2(size(EXCITATION,2))),obj.param.fs);
+%            PaddedField = padarray(EXCITATION',MyFFT.N - size(EXCITATION',1)  ,0);
+%            Result = MyFFT.fourier(PaddedField);
+%            
+%            figure(8);
+%            subplot(211)
+%            imagesc(EXCITATION')
+%            subplot(212)
+%            plot(MyFFT.f*1e-6 , abs(Result(:,90)),'-o')
+%            xlabel('frequency (MHz)')
+%            title('profile on first column')
+            
+%%
         if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
 

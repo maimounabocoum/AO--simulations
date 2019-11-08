@@ -5,7 +5,7 @@ Nfiles_ = length(Filename);
 if Nfiles_==1
    Filename = {Filename};
 end
-Nfiles = 24;
+
 %% unfolder average
 
 load('LogFile.mat');
