@@ -127,9 +127,9 @@ classdef AO_FieldBox
             Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
-            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            for i = 1500;%1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
-                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
+                imagesc(obj.x*1e3,obj.z*1e3,(squeeze(Field_max(1,:,:,i))').^2);
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])

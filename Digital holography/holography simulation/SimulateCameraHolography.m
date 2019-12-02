@@ -1,4 +1,4 @@
-addpath('functions')
+addpath('Q:\AO--commons\common subfunctions')
 % clearvars  -except SIG
 
 isRef  = 0;     % = 0 : signal , = 1 noise
@@ -23,6 +23,7 @@ ReadoutNoise        = 0 ;
 DarkNoise           = 0 ;
 DigitalizedNoise    = 0 ;
 MinusBG             = 1 ; % remove backgroung
+
 for i_loop = 1:length(param)
 
 
@@ -235,10 +236,10 @@ fy_c = 0;
 fr = 2500 ; % 2400
 [FX,FY]     = meshgrid(G.fx,G.fy);
 Filter0     = ((FX-fx_c).^2 + (FY-fy_c).^2 <= (fr)^2);
-%Filter1     = ((FX).^2 + (FY).^2 <= (fr)^2);
-Ncom            = G.ifourier( Ncom_fft.*Filter0 );
-Ncom_bg         = G.ifourier( Ncom_fft_bg.*Filter0 );
-%Ntagged     = G.ifourier(Ntagged_fft.*Filter1);
+%Filter1    = ((FX).^2 + (FY).^2 <= (fr)^2);
+Ncom        = G.ifourier( Ncom_fft.*Filter0 );
+Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
+%Ntagged    = G.ifourier(Ntagged_fft.*Filter1);
 % Ncom = 2*Ncom ; % normalize positive portion of fourier domaine
 
 
