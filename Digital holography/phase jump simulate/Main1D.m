@@ -1,100 +1,90 @@
 clearvars
-addpath('..\functions');
-addpath('..\');
+addpath('..\..\..\AO--commons\shared functions folder');
+addpath('..\..\..\AO--commons\common subfunctions');
 %% generate 1D phase profile
-Fe = 50e6; % sampling frequency
-dt = 1/Fe;
-N = 2^14;
-t = (-N/2:N/2-1)*dt;
-t0 = min(t) ; % zero for screening
-f0 = 6e6;  % US frequency in Hz
 
-Tmax = max(t) - min(t);
+Type = 'JM'; % 'chirp','periodic'
+Parameters;
 
-F = TF1D(N,Fe);
-
-% structuring frequency 
-Tjump = 1e-6 ;
-N = floor(Tmax/Tjump);
-Np = floor(Tjump*Fe) ;
-nu = 5/(max(F.t)-min(F.t));
-t_r = round(rand(1,N));
-
-%% AO tagged photons
-
-%% bascules de phase aléatoires
-phi = pi + 0*F.t;
-As  = 1 + 0*F.t;
-for i=0:(N-1)
-phi( (i*Np+1):((i+1)*Np)) = phi( (i*Np+1):((i+1)*Np))*t_r(i+1) ;
-end
-%phi = phi + 2*pi*f0*F.t ;
-
-
- %% frequency ramps
-Trep = 10e-6;
-Nrep = 10 ;
-tau_c = 2*Nrep*Trep;   % camera integration time
-PHI2 = 0*(0.9e6)/tau_c; % 0.185
-
-% phi = 2*pi*f0*F.t + df*(F.t).^2;
- 
-% periodic ramp
-
-% phi = 2*pi*f0*Trep*sawtooth(2*pi*t/Trep) ;
-% phi = 2*pi*f0*Trep*sawtooth(2*pi*t/Trep) + 2*pi*df*(Trep*sawtooth(2*pi*t/Trep)).^2;
-phi = 2*pi*0*t + 2*pi*PHI2*( Trep*( sawtooth(2*pi*t/Trep) + 1 )/2 ).^2 ;
-
-
-figure(1); 
-hold on
-%plot(F.t/Trep, phi)
-plot(F.t/Trep, phi )
-xlabel('t( \mu s )')
-title('\phi(t)')
+%             figure(1); 
+%             hold on
+%             plot(F.t/T0, phi )
+%             xlabel('t( \mu s )')
+%             title('\phi(t)')
 
 %% modulation d'amplitude
-As = (1+cos(2*pi*t/Trep))/2;
-Bs = (1+cos(2*pi*t/Trep+pi))/2; 
+nu0 = 1/T0; % fundamental modulation frequency
+Ar  = 0.5*( 1 + cos( 2*pi*n*nu0*F.t) )  ;
+%Ar  = cos( 0.5*2*pi*n*nu0*F.t)  ;
 
 %% command AO
-Es = As.*exp(1i*( phi ) );
-Es_fft = F.fourier(Es);
 
-delay = (10e-3)/1540 ; % delay = z/v_us 
-Er = (abs(F.t) < tau_c/2 ).*interp1(t,Es,F.t-delay,'linear',0);
+par = [0,0.25,0.5,0.75];
+
+for loop = 1:length(par)
+
+Er = sqrt(Ar).*exp(1i*( phi ) );
+fEr = sign(imag(Er));
+
+z     = 0e-3;  % z point of main tagged photon position
+c     = 1540;   % sound velocity in water
+delay =  par(loop)*T0/n;     % delayed reference
+
+H  = ( F.t > - tau_c/2  & F.t < tau_c/2  ); % integration window
+
+Es =  interp1( F.t , H.*fEr , F.t -delay + z/c ,'linear',0); % tagged photon at position z / delay [s] = z/v_us 
+% 
+figure(100);
+plot(imag(Es)); hold on;
+plot(imag(Er),'r');
+figure(2); hold on ; plot(F.t/T0,real(Er))
 
 % figure(2)
-% subplot(211)
-% plot(F.t*1e6,real(Es))
-% hold on
-% plot(F.t*1e6,real(Er))
-% xlabel('t( \mu s )')
-% hold off
-% subplot(212)
-% plot(F.f/f0,abs(Es_fft))
-% xlim([0 2])
+% [h,~,~] = plotyy( F.t/T0 , Ar , F.t/T0 , phi );
+% title('reference profile of emission')
+% xlabel('time (t/T_0)')
+% ylabel(h(1),'amplitude (a.u)')
+% ylabel(h(2),'phase (Rad)')
 
-%% autocorrelation
-[acor,lag] = xcorr(Er,Bs);
+% figure(2);plot(F.t/T0,H);hold on ; plot(F.t/T0,Ar)
+
+% autocorrelation
+[acor,lag] = xcorr(Er,Es,'coeff'); % ,
 [~,I] = max(abs(acor));
 lagDiff = lag(I);
 timeDiff = lagDiff/Fe ;
 tau = lag/Fe;
 
-%% manual evaluation
+% manual evaluation
 
-T_fwhm = FWHM( abs(acor)/max(abs(acor)) , 1e6*tau );
+% T_fwhm = FWHM( abs(acor)/max(abs(acor)) , 1e6*tau );
 
 figure(3);
 hold on
-plot( 1e6*tau,abs(acor)/max(abs(acor)) )
-title(['xCorr maximum at ',num2str(1e6*timeDiff),'\mu s'])
-xlabel('time(\mu s)')
-ylabel('xcorr (a.u)')
-xlim([-50 50])
-legend(['fwhm = ',num2str(T_fwhm),'\mu s'])
+plot( tau/T0, abs(acor).^2 )
+set(gca,'xtick',[ceil(min(tau/T0)):1:floor(max(tau/T0))])
+title('normalized xCorr')
+xlabel('\tau / T_0')
+ylabel('coefficient')
+grid on
 
+
+
+
+RR(:,loop) =  abs(acor).^2 ;
+
+end
+
+figure(5); hold on ; plot(abs( 1*RR(:,1) + 1i*RR(:,2) - RR(:,3)- 1i*RR(:,4) ) )
+% legend(['fwhm = ',num2str(T_fwhm),'\mu s'])
+
+%% imported from mathematica:
+%Ith = T0*( 2+cos(2*pi*tau/T0) )/2;
+
+% Ith = T0*( 8*N_c*pi + 4*N_c*pi*cos(2*pi*tau/T0) + 8*sin(N_c*pi) + 4*sin(pi*(N_c-2*tau/T0)) +  sin(2*pi*(N_c + 2*tau/T0)) + 4*sin(pi*(N_c+2*tau/T0))   )/(8*pi);
+% hold on
+% plot( tau/T0, Ith/(F.dt) )
+% legend({'xcorr','mathematica'})
 
 %  hold on
 %  Ith = exp(2*1i*pi*PHI2*Trep*(tau-Trep)).*tau.*sinc(2*PHI2*tau.*(tau-Trep)) ...
