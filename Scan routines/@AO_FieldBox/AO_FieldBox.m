@@ -86,38 +86,41 @@ classdef AO_FieldBox
             obj.time = t + (0:(size(h,1)-1))/fs;
             
         end
-                
+        
+         
         function Iout = ShowMaxField(obj,plane,FigHandle)
             
-%             if ~ishandle(FigHandle)
-%                 FigHandle = figure ;
-%             end
-%             
-%             set(FigHandle,'WindowStyle','docked');      
-%             set(FigHandle,'NextPlot', 'replace');        
-            
+            if ~ishandle(FigHandle)
+                FigHandle = figure ;
+            end            
+            % set(FigHandle,'WindowStyle','docked');      
+            % set(FigHandle,'NextPlot', 'replace') ;           
             
             [Nx,Ny,Nz]       = SizeBox(obj);
             % Field : column = time (Npoint) same as obj.time
             %         line = number of point
-            [Field_max,Tmax] = max(obj.Field,[],1);
+            [Field_max,Tmax] = max(abs(obj.Field),[],1);
             % max(obj.Field,[],1) : returns for each colulm
             % the maximum field pressure.
             Field_max = reshape(Field_max,[Ny,Nx,Nz]);
-            Tmax = reshape(Tmax,[Ny,Nx,Nz]);
+            Tmax = reshape(obj.time(Tmax),[Ny,Nx,Nz]);
             
             switch plane
                 
                 case 'Xt'
             %set(FigHandle,'name','(XT) field values for fixed z');
+            
             output = obj.Field;
-            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);  
-            subplot(212)
-            Iout = squeeze(Field_max(1,:,2,:))' ;
-%             imagesc(obj.x*1e3+19.2,obj.time*1e6,Iout);
-%                 xlabel('x (mm)')
-%                 ylabel('t (\mu s)')
-%                 title(['P(t), z(t)= ',num2str((obj.z(2))*1e3),'mm']) 
+            % size(output,1) = number of temporal points
+            % size(output,2) = number of spatial points
+            % creation of a 3D matrix
+            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
+            Iout = squeeze(Field_max(1,:,1,:))';
+            
+                imagesc(obj.x*1e3,obj.time*1e6,Iout)
+                xlabel('x (mm)')
+                ylabel('t (\mu s)')
+                title(['P(t), z(t)= ',num2str((obj.z(2))*1e3),'mm']);
   
                 case 'XZt'
 
@@ -127,9 +130,9 @@ classdef AO_FieldBox
             Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
-            for i = 1500;%1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
-                imagesc(obj.x*1e3,obj.z*1e3,(squeeze(Field_max(1,:,:,i))').^2);
+                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
@@ -138,9 +141,8 @@ classdef AO_FieldBox
                 caxis([0.1*min(Field_max(:)) 0.9*max(Field_max(:))])
                 drawnow
                
-               % caxis('auto')
-                
-                saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
+               % caxis('auto')                
+               % saveas(gcf,['gif folder\image',num2str(i),'.png'],'png')
             end
                   
                
@@ -157,17 +159,27 @@ classdef AO_FieldBox
                     I_plane = Closest(V_plane,obj.y); 
                 end
  
-            set(FigHandle,'name','(XZ) maximum field values') ;
-
-            imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
-            %view([0,90])
-            shading interp
-            xlabel('x (mm)')
-            ylabel('z (mm)')
-            title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
-            colorbar
-            drawnow
-            
+                    set(FigHandle,'name','(XZ) maximum field values') ;
+                    subplot(121)
+                    imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(I_plane,:,:))');
+                    %view([0,90])
+                    shading interp
+                    xlabel('x (mm)')
+                    ylabel('z (mm)')
+                    title(['Maximum Field in plane Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
+                    colorbar
+                    drawnow
+                    subplot(122)
+                    imagesc(obj.x*1e3,obj.z*1e3,1e6*squeeze(Tmax(I_plane,:,:))');
+                    %view([0,90])
+                    shading interp
+                    xlabel('x (mm)')
+                    ylabel('z (mm)')
+                    title(['Time at Maximum Y = ',num2str(obj.y(I_plane)*1e3),'mm'])
+                    cb = colorbar ;
+                    ylabel(cb,'arrival time (\mu s)')
+                    
+                    drawnow
            
                case 'YZ'
                    if (Nx == 1)
@@ -181,14 +193,14 @@ classdef AO_FieldBox
                     I_plane = Closest(V_plane,obj.x); 
                    end
 
-            set(FigHandle,'name','(YZ) maximum field values')
-            size(squeeze(Field_max(:,I_plane,:))')
-            imagesc(obj.y*1e3,obj.z*1e3,squeeze(Field_max(:,I_plane,:))');
-            shading interp
-            xlabel('y (mm)')
-            ylabel('z (mm)')
-            title(['Maximum Field in plane X = ',num2str(obj.x(I_plane)*1e3),'mm'])
-            colorbar
+                    set(FigHandle,'name','(YZ) maximum field values')
+                    size(squeeze(Field_max(:,I_plane,:))')
+                    imagesc(obj.y*1e3,obj.z*1e3,squeeze(Field_max(:,I_plane,:))');
+                    shading interp
+                    xlabel('y (mm)')
+                    ylabel('z (mm)')
+                    title(['Maximum Field in plane X = ',num2str(obj.x(I_plane)*1e3),'mm'])
+                    colorbar
 
             end
         

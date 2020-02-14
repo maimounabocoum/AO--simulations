@@ -55,8 +55,7 @@ classdef ExcitationField < TF_t
            ylabel('time (\mu s)')
            colorbar
         end
-        
-        
+               
         function Field_out = Propagate(obj,x_in,y_in,z_in,c)
             
             Field_out = zeros(length(x_in),length(y_in),length(z_in)) ;

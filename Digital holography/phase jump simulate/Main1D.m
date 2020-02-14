@@ -3,7 +3,7 @@ addpath('..\..\..\AO--commons\shared functions folder');
 addpath('..\..\..\AO--commons\common subfunctions');
 %% generate 1D phase profile
 
-Type = 'JM'; % 'chirp','periodic'
+Type = 'phasejump'; % 'chirp','periodic'
 Parameters;
 
 %             figure(1); 
@@ -14,21 +14,21 @@ Parameters;
 
 %% modulation d'amplitude
 nu0 = 1/T0; % fundamental modulation frequency
-Ar  = 0.5*( 1 + cos( 2*pi*n*nu0*F.t) )  ;
+Ar  = 0.5*( 1 + 0*cos( 2*pi*n*nu0*F.t) )  ;
 %Ar  = cos( 0.5*2*pi*n*nu0*F.t)  ;
 
 %% command AO
 
 par = [0,0.25,0.5,0.75];
 
-for loop = 1:length(par)
+%for loop = 1:length(par)
 
-Er = sqrt(Ar).*exp(1i*( phi ) );
+Er = Ar.*exp(1i*( phi ) );
 fEr = sign(imag(Er));
 
 z     = 0e-3;  % z point of main tagged photon position
 c     = 1540;   % sound velocity in water
-delay =  par(loop)*T0/n;     % delayed reference
+delay =  10e-6;     % delayed reference
 
 H  = ( F.t > - tau_c/2  & F.t < tau_c/2  ); % integration window
 
@@ -71,11 +71,11 @@ grid on
 
 
 
-RR(:,loop) =  abs(acor).^2 ;
 
-end
 
-figure(5); hold on ; plot(abs( 1*RR(:,1) + 1i*RR(:,2) - RR(:,3)- 1i*RR(:,4) ) )
+% end
+
+% figure(5); hold on ; plot(abs( 1*RR(:,1) + 1i*RR(:,2) - RR(:,3)- 1i*RR(:,4) ) )
 % legend(['fwhm = ',num2str(T_fwhm),'\mu s'])
 
 %% imported from mathematica:

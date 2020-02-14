@@ -6,9 +6,9 @@ classdef Experiment
         
         MyPhantom ;
         MyProbe ;
-        MyLaser ;
-        MyExcitation ;
-        MySimulationBox;
+        MyLaser ;         % LaserBeam
+        MySimulationBox;  % AO_FieldBox
+        MyAO;             % AOmodulator type
         
         % phantom on simulation bow transmission profile
         DiffuseLightTransmission
@@ -42,7 +42,7 @@ methods ( Access = 'public' )
             % param = structure containing all the simulation parameters
                        % for excitation : sparse probe, use with rectangle
             obj.MyPhantom = Phantom( param.phantom.Positions, param.phantom.Sizes, param.phantom.Types );            
-            obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
+            
 
             % IR laser :
             % if no center is specified, the beam center is the 
@@ -57,7 +57,11 @@ methods ( Access = 'public' )
                       
             % initialization for self-defined field (propagation using FFT)
             % obj.MyExcitation = ExcitationField(obj.MyProbe,param.f0,param.fs,param.Noc);
-                      
+               
+            obj.MySimulationBox = AO_FieldBox(param.Xrange,param.Yrange,param.Zrange,param.Nx,param.Ny,param.Nz);
+        
+            obj.MyAO  = AOmodulator(param.tau_c,param.fs);
+               
             obj.param = param;
             
             obj = ConfigureProbeSequence(obj) ;
@@ -141,7 +145,9 @@ methods ( Access = 'public' )
                        MedElmtList = ElmtBorns(1):ElmtBorns(2);  
                        obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan);   
                        obj.BoolActiveList(MedElmtList,:) = true ;                   
-                    
+                   
+                       % update the AO reference beam
+                       obj.MyAO  = obj.MyAO.AOsequenceGenerate(obj.param,obj.ScanParam);
                     
                 case 'OS'
                     
@@ -207,8 +213,7 @@ methods ( Access = 'public' )
                     end
  
                     obj = SetShootingLim(obj) ;
-                    
-                
+
      
             end
             
@@ -268,7 +273,7 @@ methods ( Access = 'public' )
              Xs        = (0:Nactive-1)*obj.param.width;             % Echelle de graduation en X
             [~,~,~,EXCITATION] = CalcMatHole(obj.param.f0*1e-6,obj.ScanParam(n_scan,1),obj.ScanParam(n_scan,2),...
                                                obj.param.nuX0*1e-3,obj.param.nuZ0*1e-3,Xs*1e3,...
-                                               obj.param.fs*1e-6,obj.param.c); % Calculer la matrice
+                                               obj.param.fs*1e-6,obj.param.c, obj.param.Bascule ); % Calculer la matrice
             
              EXCITATION = EXCITATION';                              
              %EXCITATION = repmat(EXCITATION',1,6);
@@ -585,8 +590,8 @@ methods ( Access = 'public' )
         
         function [] = ShowAcquisitionLine(obj)
             FigHandle = figure;
-            set(FigHandle,'WindowStyle','docked'); 
-            
+            %set(FigHandle,'WindowStyle','docked'); 
+            obj.param.FOC_type
             switch obj.param.FOC_type
                 
                 case 'OF'
@@ -598,6 +603,9 @@ methods ( Access = 'public' )
                 case 'OS'
             imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('scan param')
+                case 'JM'
+            imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
+            xlabel('scan param')
             end
             ylabel('z = ct (mm) ')
             title('\int_{x,y,z} P(x,y,z,t) dxdydz')
@@ -607,6 +615,75 @@ methods ( Access = 'public' )
 
             
         end
+        
+        function Iout = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,nscan)
+            
+            [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
+            
+            
+            
+            if ~ishandle(FigHandle)
+                FigHandle = figure ;
+            end     
+            
+            switch plane
+                
+                
+                case 'XZ'
+                    
+                if (Ny == 1)
+                    I_plane = 1;
+                else
+                    prompt = {'Enter Y coordinate (program will look for closest value):'};
+                    dlg_title = 'Y plane select (mm)';
+                    num_lines = 1;
+                    answer = inputdlg(prompt,dlg_title,num_lines,{'0'});
+                    V_plane = str2double(answer{1})*1e-3;                    
+                    I_plane = Closest(V_plane,obj.y); 
+               end
+                
+                set(FigHandle,'name','(XZ) maximum field (t) values');
+                %% define field correlator
+                output      = obj.MySimulationBox.Field;
+                t           = obj.MySimulationBox.time(:);
+                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( output , 2 )  );  
+                E_tagged    = hilbert(output);
+
+                
+                %TrigDelay = obj.param.TrigDelay;
+                % change size of Eref depending on parameter
+                E_tagged(~(t>TrigDelay),:) = []; 
+                
+                Nref = size(Eref,1);
+                Ntagged = size(E_tagged,1);
+                if( Nref > Ntagged )
+                Eref(Nref+1:end,:) = [];    
+                elseif( Nref < Ntagged )
+                    %find index of point greater then delay      
+                E_tagged((Nref+1):end,:) = [];    
+                end
+                
+                
+                myField = E_tagged.*Eref  ; % correlation on each column
+                                
+                myField = abs(sum(myField,1));
+                myField = reshape(myField ,[Ny,Nx,Nz]);     
+                myField = squeeze( myField(I_plane,:,:) ) ; 
+                
+                        imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myField' );
+                        xlabel('x (mm)')
+                        ylabel('z (mm)')
+                        ylim([min(obj.MySimulationBox.z*1e3) max(obj.MySimulationBox.z*1e3)])
+                        title(['P(t) on XZ, \tau_c =',num2str(1e6*obj.param.tau_c ),'\mu s']) 
+                        cb = colorbar ;
+                        ylabel(cb,'a.u')
+                        drawnow
+
+            end
+            
+            
+        end
+       
        
     end
     

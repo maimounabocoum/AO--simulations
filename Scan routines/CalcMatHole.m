@@ -1,4 +1,4 @@
-function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c)
+function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c,Bascule)
 % c input in m/s
 % f0  (en MHz) est la fréquence de porteuse
 % nuZ (en mm-1)
@@ -10,11 +10,11 @@ function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c)
 % objectif : n'envoyer qu'une seule période de modulation en z
 
 % conversion of all input to SI units : 
-Fe = Fe*1e6 ;   %MHz->Hz
-f0 = f0*1e6;    %MHz->Hz
-nuZ = 1e3*(nbZ*nuZ0) ; %mm-1->m-1
-nuX = 1e3*(nbX*nuX0); %mm-1->m-1
-x = x*1e-3;     %mm->m
+Fe = Fe*1e6 ;           % MHz->Hz
+f0 = f0*1e6;            % MHz->Hz
+nuZ = 1e3*(nbZ*nuZ0) ;  % mm-1->m-1
+nuX = 1e3*(nbX*nuX0);   % mm-1->m-1
+x = x*1e-3;             % mm->m
 
 % conversion to temporal frequency along z
 fz = c*nuZ ; %Hz
@@ -41,16 +41,12 @@ N = nbZ*(Fe/fz);
 
 Tot = N*dt;        % durée totale de la séquence
 
-%   if (Tz ~= Tot/Nrep)
-%       d = 999 ; %??
-%   end
-
 Tz = Tot/Nrep;    % ré-ajustement de la période ??
 fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
 nuZ = fz/c ;
 
 k = round(Tot/T0); % nombre de cycles porteuse
-f0 = k/Tot % ré-ajustement de la fréquence porteuse
+f0 = k/Tot; % ré-ajustement de la fréquence porteuse
 
 t = (0:N-1)*dt;  % time in us
 
@@ -59,17 +55,22 @@ t = (0:N-1)*dt;  % time in us
 alpha = nuX/fz;
 carrier = sin(2*pi*f0*T);
 
-% Mat = carrier.*(sin( 2*pi*fz*(T-alpha*X) )> 0 );
-% Am = mod(ceil(2*fz*(T-alpha*X)),4);
-% Am(Am==2)=0;
-% Am(Am==3)=-1;
-% Mat = carrier.*Am;
-
-Am = mod(ceil(fz*(T-alpha*X)),2);
-Am(Am==0)=-1;
-Am(Am==3)=-1;
-Mat = carrier.*Am;
-
+if strcmp(Bascule,'on')
+    
+        Am          =  mod(ceil(2*fz*(T-alpha*X)),4);
+        Am(Am==2)   =  0;
+        Am(Am==3)   =  -1;
+        Mat = sign(carrier).*Am;
+        
+else
+    
+        if nbZ==0
+           Mat = sign(carrier) ;
+        else
+           Mat = sign(carrier).*( sin( 2*pi*fz*(T-alpha*X) )> 0 );   
+        end    
+        
+end
 % convert m-1->mm-1
 nuZ = 1e-3*nuZ;
 nuX = 1e-3*nuX;

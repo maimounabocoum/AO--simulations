@@ -5,7 +5,7 @@ clearvars ;
 addpath('..\Field_II')
 addpath('..\radon inversion')
 addpath('subscripts')
-addpath('..\shared functions folder')
+addpath('..\..\AO--commons\shared functions folder')
 field_init(0);
 
 parameters;
@@ -33,7 +33,7 @@ CurrentExperiement = Experiment(param);
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 
-CurrentExperiement.ShowPhantom();
+%CurrentExperiement.ShowPhantom();
 %use param.angles has an input to additionally show Radon transform
 
 
@@ -46,31 +46,42 @@ end
  Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
  
  %% run acquision loop over Nscan
+ 
+% figure(1);plot(real(CurrentExperiement.MyAO.Event)); 
+
  tic
  Hf = gcf;
  h = waitbar(0,'Please wait...');
 
- for n_scan = 1%:CurrentExperiement.Nscan
  
-     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan);
-     CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan);
-     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;
-     
-     % % option for screening : XY, Xt , XZt
 
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf)    
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf)
+ 
+ for n_scan = 1:CurrentExperiement.Nscan
+ 
+     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ; % Initializes the Probe
+     CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ; % Calculate the Field Over input BOX
+     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ; % Calculate current AO signal - Photorefractive
+     %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
+     % Calculate current AO signal - Holographie
+
+     
+
+    % % option for screening : XY, Xt , XZt
+    % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
+    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 23.5e-6 , 1);
+    % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
     
     % field profile
     [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
     % max(obj.Field,[],1) : returns for each colulm
     % the maximum field pressure.
-    Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
+    % Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
    
     % retreive delay law for cuurent scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
-     DelayLAWS( :  ,n_scan) = ...
-                CurrentExperiement.MyProbe.DelayLaw ;
+     DelayLAWS( :  ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
           
     waitbar(n_scan/CurrentExperiement.Nscan)
