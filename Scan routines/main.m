@@ -9,10 +9,17 @@ addpath('..\..\AO--commons\shared functions folder')
 field_init(0);
 
 parameters;
-IsSaved = 0 ;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%% Start an experiment
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+IsSaved = 1 ;
+
+%%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
+SimuPathFolder = 'Q:\datas\simulated datas';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%
+%%%%%%%%%%%%%%%%%%%% Initialize Experiement  %%%%%%%%%%%%%%%%%%%%%%%
+
 
 CurrentExperiement = Experiment(param);
 
@@ -33,9 +40,9 @@ CurrentExperiement = Experiment(param);
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 
-%CurrentExperiement.ShowPhantom();
-%use param.angles has an input to additionally show Radon transform
-
+% use param.angles has an input to additionally show Radon transform
+% CurrentExperiement.ShowPhantom(param.angles);
+CurrentExperiement.ShowPhantom();
 
 % creating memory to save probe delay law
 if param.Activated_FieldII == 1 
@@ -64,8 +71,6 @@ end
      %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
      % Calculate current AO signal - Holographie
 
-     
-
     % % option for screening : XY, Xt , XZt
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
@@ -74,12 +79,12 @@ end
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
     
     % field profile
-    [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
+    % [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
     % max(obj.Field,[],1) : returns for each colulm
     % the maximum field pressure.
     % Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
    
-    % retreive delay law for cuurent scan
+    % retreive delay law for current scan
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
      DelayLAWS( :  ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
@@ -128,8 +133,8 @@ end
  if (IsSaved == 1)
      
      % saving folder name with todays date
-     SubFolderName = generateSubFolderName('..\radon inversion\saved images') ;
-     FileName   = generateSaveName(SubFolderName ,'name','500micronsHole_Foc19mm','type',param.FOC_type);
+     SubFolderName = generateSubFolderName(SimuPathFolder) ;
+     FileName   = generateSaveName(SubFolderName ,'name','1mmInclusions','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
@@ -169,7 +174,9 @@ c               = param.c ;
  
 %              AOSignal = CurrentExperiement.AOSignal ;
 %              ScanParam = CurrentExperiement.ScanParam;
- MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
+
+ MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,...
+              CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
 save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR',...
               'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param');

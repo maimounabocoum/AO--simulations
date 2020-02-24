@@ -6,18 +6,18 @@
 
 % set_field('show_time',1);
 
-param.f0 = 3e6;                     % Transducer center frequency [Hz]
+param.f0 = 6e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency of the photodiode [Hz]
-param.Noc = 10 ;                     % Number of optical cycles
+param.Noc = 1 ;                     % Number of optical cycles
 param.c = 1540;                     % Speed of sound [m/s]
 param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
-param.X0 = -40/1000  ;               % position min of effective probe shooting (center probe = 0mm)
-param.X1 =  40/1000 ;                % position max of effective probe shooting (center probe = 0mm)
+param.X0 = -40/1000  ;              % position min of effective probe shooting (center probe = 0mm)
+param.X1 =  40/1000 ;               % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -33,10 +33,10 @@ param.TrigDelay = 10e-6;
 % JM : 'Jean-Michel continuoous waves' (not implemented yet)
 % OS : 'Structured Waves ' 
 
-param.FOC_type    = 'JM'; 
+param.FOC_type    = 'OP'; 
 param.Bascule     = 'on';              % parameter for JM with / without Talbot Effect
 param.focus       = 30/1000;            % Initial electronic focus     - only active in OF mode
-param.angles      = (-20:20)*pi/180;    % Line Vector Angular scan     - only active in OP and OS mode 
+param.angles      = (-20:1:20)*pi/180;    % Line Vector Angular scan     - only active in OP and OS mode 
 
 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
@@ -67,7 +67,7 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
     param.Yrange = 0/1000;          % [-0.1 0.1]/1000 ; (not implemented yet)
     param.Zrange = [5 40]/1000;     % simulation JM : [5 40]/1000;
 
-    param.Nx = 50; % number of interpolating points along Xrange
+    param.Nx = 150; % number of interpolating points along Xrange
     param.Ny = 1;   % number of interpolating points along Yrange
     
     % in order to match fs_aq(Hz) along Zrange , and 
@@ -76,7 +76,7 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 %% definition of laser beam
     
 % waist of diffuse IR laser beam
-param.w0 = [8 8]/1000 ;             % specify the center of the gaussian beam.
+param.w0 = [10 10]/1000 ;             % specify the center of the gaussian beam.
 param.center = [0 0 20]/1000 ;      % specify the center of the gaussian beam.    
              
                                     % if this value is commented, 
