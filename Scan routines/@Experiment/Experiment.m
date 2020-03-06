@@ -8,6 +8,7 @@ classdef Experiment
         MyProbe ;
         MyLaser ;         % LaserBeam
         MySimulationBox;  % AO_FieldBox
+        MyExcitation
         MyAO;             % AOmodulator type
         
         % phantom on simulation bow transmission profile
@@ -574,11 +575,13 @@ methods ( Access = 'public' )
         
         function obj = GetAcquisitionLine(obj,n)
 
+
+
             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             % full profile calculated here to optimize loop Scan calulation :     
             
             LightTransmission = repmat(obj.DiffuseLightTransmission,length(obj.MySimulationBox.time),1)  ;
-            Enveloppe = envelope(obj.MySimulationBox.Field,300);
+            Enveloppe = envelope(obj.MySimulationBox.Field,300).^2;
             MarkedPhotons = Enveloppe.^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );

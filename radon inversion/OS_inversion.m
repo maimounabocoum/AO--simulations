@@ -1,6 +1,6 @@
 %% OF analysis %%
- addpath('..\shared functions folder');
- addpath('shared functions folder')
+ addpath('..\..\AO--commons\shared functions folder');
+ 
 
 %%
 % figure;
@@ -26,11 +26,12 @@ XMiddle  = mean(ElmtBorns)*(pitch*1e-3);
 [ F_ct_kx , theta , decimation ] = MyImage.AddSinCos( MyImage.R ) ;
 MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 
-
+    X_m = (1:param.N_elements)*(param.width) ;
     DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
     ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;   
-    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+    [theta,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
+    
     OriginIm = MyImage.iRadon( MyImage.F_R, X_m, XMiddle, MyImage.z , theta ,C , decimation , dFx);
 
     
@@ -55,10 +56,10 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 c = 1540 ;
 X_m = (1:NbElemts)*(pitch*1e-3) ;
 [FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
-    DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
-    ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
+DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
+ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
        
-    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m-mean(X_m)  , DelayLAWS_  , ActiveLIST_ , c) ;
+[theta,~,~,C] = EvalDelayLawOS_shared( X_m-mean(X_m)  , DelayLAWS_  , ActiveLIST_ , c) ;
 
 
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;

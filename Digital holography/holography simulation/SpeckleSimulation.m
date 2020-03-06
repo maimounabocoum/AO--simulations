@@ -1,3 +1,5 @@
+%%
+addpath('..\..\..\AO--commons\shared functions folder')
 %% influence des onde US
 clear all
 
@@ -10,14 +12,14 @@ Fmaxt = 1/(10e-9);
 
 
 %% US field temporal profile
-P = TF1D(Nus,Fmaxt);
+P = TF_t(Nus,Fmaxt);
 Profil = exp(-(P.t).^2/(10e-6)^2).*exp(-1i*wus.*P.t);
 % figure; plot(P.t*1e6,real(Profil))
 
 %% generate fourier structure
-F = TF2D(N,Fmax,Fmax);
-[X,Y] = meshgrid(F.x,F.y);
-[FX,FY] = meshgrid(F.fx,F.fy);
+F = TF2D(N,N, Fmax,Fmax);
+[X,Y] = meshgrid(F.x,F.z);
+[FX,FY] = meshgrid(F.fx,F.fz);
 
 %% initial gaussian field in (x,y) plane + plane wave tilted
 S0 = exp(-(X.^2+Y.^2)/(2e-6)^2); 
@@ -27,7 +29,6 @@ IS0 = F.ifourier(S0);
 PHASE = 1000*pi*rand(size(X)) ;
 IS0 = IS0.*exp(1i*PHASE) ;
 S1 = F.fourier(IS0);
-
 Stest = F.fourier(abs(S1+Sref));
 
 
@@ -41,7 +42,7 @@ S1 = F.fourier(IS0);
 I = abs(S1).^2;
 figure(1)
 subplot(121)
-imagesc(F.x*1e6,F.y*1e6,I)
+imagesc(F.x*1e6,F.z*1e6,I)
 title(['time = ',num2str(1e6*P.t(1)),'\mu s'])
 subplot(122)
 hist(I)
@@ -57,7 +58,7 @@ hist(I)
 % w0 = (3e8)/(1500e-9);
 % Fmax = 1/(100e-9);
 % F = TF2D(N,Fmax);
-% [X,Y] = meshgrid(F.x,F.y);
+% [X,Y] = meshgrid(F.x,F.z);
 % [FX,FY] = meshgrid(F.fx,F.fy);
 % 
 % % initial pulse spatial mode
@@ -69,7 +70,7 @@ hist(I)
 % 
 % IS0 = IS0.*exp(1i*PHASE);
 % S1 = F.fourier(IS0);
-% imagesc(F.x*1e6,F.y*1e6,abs(S1+Sref).^2)
+% imagesc(F.x*1e6,F.z*1e6,abs(S1+Sref).^2)
 % 
 % colormap(hot)
 

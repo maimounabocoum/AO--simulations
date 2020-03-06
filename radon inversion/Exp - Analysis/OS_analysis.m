@@ -1,8 +1,10 @@
-%% OF analysis %%
-% addpath('..\shared functions folder');
-%  MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
-%                 dFx,z,SampleRate*1e6,c,[X0 X1]*1e-3) ; 
-% addpath('shared functions folder')
+%% OS analysis %%
+clearvars
+load('E:\sauvegarde ordi ACOUSTO OPTIC\Data\Mai\2018-05-31\NewGel_TypeOfSequence_OS_13h48_58.mat');
+addpath('..\..\AO--commons\shared functions folder');
+MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
+             dFx,z,SampleRate*1e6,c,[X0 X1]*1e-3) ; 
+% 
 
 %%
 figure;
@@ -19,6 +21,8 @@ set(findall(gcf,'-property','FontSize'),'FontSize',15)
 % plot(sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c)
 
 %% reconstruction using iradon
+NbElemts = 192;
+pitch = 0.2;
 X_m = (1:NbElemts)*(pitch*1e-3) ;
 ElmtBorns   = [min(NbElemts,max(1,round(X0/pitch))),max(1,min(NbElemts,round(X1/pitch)))];
 ElmtBorns   = sort(ElmtBorns) ; % in case X0 and X1 are mixed up
@@ -30,7 +34,7 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 
     DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
     ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;   
-    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+    [theta,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
     OriginIm = MyImage.iRadon( MyImage.F_R, X_m, XMiddle, MyImage.z , theta ,C , decimation , dFx);
 
@@ -52,11 +56,11 @@ MyImage.F_R = MyImage.fourierz( F_ct_kx ) ;
 %% reconstruction using ifourier
 X_m = (1:192)*(0.2*1e-3) ;
 %X_m = (1:128)*(0.11*1e-3) ;
-[FTFx, theta , decimation ] = MyImage.AddSinCos(smooth(MyImage.R)) ;
+[FTFx, theta , decimation ] = MyImage.AddSinCos(MyImage.R) ;
     DelayLAWS_  = MyImage.SqueezeRepeat( DelayLAWS  ) ;
     ActiveLIST_ = MyImage.SqueezeRepeat( ActiveLIST ) ;
        
-    [theta,M0,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
+    [theta,~,~,C] = EvalDelayLawOS_shared( X_m  , DelayLAWS_  , ActiveLIST_ , c) ;
 
 
 FTF = MyImage.InverseFourierX( FTFx  , decimation , theta , C ) ;

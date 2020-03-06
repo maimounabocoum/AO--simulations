@@ -9,7 +9,7 @@
 param.f0 = 6e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency of the photodiode [Hz]
-param.Noc = 1 ;                     % Number of optical cycles
+param.Noc = 4 ;                     % Number of optical cycles
 param.c = 1540;                     % Speed of sound [m/s]
 param.lambda = param.c/param.f0;    % Wavelength [m]
 param.element_height= 6/1000;       % Height of element [m] 6
@@ -33,10 +33,10 @@ param.TrigDelay = 10e-6;
 % JM : 'Jean-Michel continuoous waves' (not implemented yet)
 % OS : 'Structured Waves ' 
 
-param.FOC_type    = 'OP'; 
+param.FOC_type    = 'OS'; 
 param.Bascule     = 'on';              % parameter for JM with / without Talbot Effect
-param.focus       = 30/1000;            % Initial electronic focus     - only active in OF mode
-param.angles      = (-20:1:20)*pi/180;    % Line Vector Angular scan     - only active in OP and OS mode 
+param.focus       = 23/1000;            % Initial electronic focus     - only active in OF mode
+param.angles      = 0*pi/180;    % Line Vector Angular scan     - only active in OP and OS mode 
 
 
 % k0 = (1/1e-3) is the smapling frequence for the decimation
@@ -63,9 +63,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-15 15]/1000;     % in m [-15 15]
+    param.Xrange = [-10 10]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;          % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [5 40]/1000;     % simulation JM : [5 40]/1000;
+    param.Zrange = [0 40]/1000;     % simulation JM : [5 40]/1000;
 
     param.Nx = 150; % number of interpolating points along Xrange
     param.Ny = 1;   % number of interpolating points along Yrange
@@ -77,20 +77,20 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
     
 % waist of diffuse IR laser beam
 param.w0 = [10 10]/1000 ;             % specify the center of the gaussian beam.
-param.center = [0 0 20]/1000 ;      % specify the center of the gaussian beam.    
+param.center = [0 0 23]/1000 ;      % specify the center of the gaussian beam.    
              
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
 %% absorbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [0 0 20 ; 10000 0 19.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [1 ; 1]/1000;                  % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Positions = [0 0 23 ; 10000 0 23]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [1.5 ; 1.5]/1000;                  % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;          % available types exemple : { 'square', 'gaussian', ...}
     
 
     % parameters used in article
-      param.phantom.Positions = [-4 0 19.5 ; 0 0 19.5]/1000;   % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+      param.phantom.Positions = [-4 0 23 ; 0 0 23]/1000;   % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
 %     param.phantom.Sizes     = [0.9 ; 1.5*0.9]/1000;          % dimension in all direction [dim ; dim ; ...]
 %     param.phantom.Types = {'gaussian','gaussian'} ;          % available types exemple : { 'square', 'gaussian', ...}
      

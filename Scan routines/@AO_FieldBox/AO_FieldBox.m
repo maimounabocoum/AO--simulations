@@ -110,11 +110,14 @@ classdef AO_FieldBox
                 case 'Xt'
             %set(FigHandle,'name','(XT) field values for fixed z');
             
-            output = obj.Field;
+            output = envelope(obj.Field,300).^2;
+            %Enveloppe = envelope(obj.MySimulationBox.Field,300).^2;
+            
             % size(output,1) = number of temporal points
             % size(output,2) = number of spatial points
             % creation of a 3D matrix
-            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
+            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);    
+            
             Iout = squeeze(Field_max(1,:,1,:))';
             
                 imagesc(obj.x*1e3,obj.time*1e6,Iout)
@@ -125,20 +128,27 @@ classdef AO_FieldBox
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');
+            D=[1 1 1;0 0 1;0 1 0;1 1 0;1 0 0;];
+            F=[0 0.25 0.5 0.75 1];
+            G=linspace(0,1,256);
+            cmap = interp1(F,D,G);
+            
             %output = envelope(obj.Field,300).^2 ;
             output = obj.Field;
             Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
+            m = max(abs( squeeze(Field_max(:))'));
             for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
-                imagesc(obj.x*1e3,obj.z*1e3,squeeze(Field_max(1,:,:,i))');
+                surfc(obj.x*1e3,obj.z*1e3,abs( squeeze(Field_max(1,:,:,i))')/m );
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
-                title(['P(t) on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
+                % title(['P(t) on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
+                colormap(cmap)
                 colorbar
-                caxis([0.1*min(Field_max(:)) 0.9*max(Field_max(:))])
+                %caxis([0.2*min(Field_max(:)) 0.7*max(Field_max(:))])
                 drawnow
                
                % caxis('auto')                
