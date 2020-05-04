@@ -34,9 +34,7 @@ switch Rod
         lambda_p = 630e-9; % pump wavelength        
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
-        % small gain coefficient 4-20 /m
-        % inversion density 6e24 /m3
-        % 
+        % small gain coefficient 4-20
         
     case 'Nd:YAG'
         tau   = 230e-6;         % fluorescent time
