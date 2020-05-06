@@ -34,7 +34,10 @@ switch Rod
         lambda_p = 630e-9; % pump wavelength        
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
-        % small gain coefficient 4-20
+        % small gain coefficient 4-20 /m
+        % inversion density 6e24 /m3
+        % N0 = 3.52e19 ; /cm3
+    case 'Nd:YV'
         
     case 'Nd:YAG'
         tau   = 230e-6;         % fluorescent time
@@ -48,6 +51,7 @@ switch Rod
         Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
         Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
         % pumpin at 946nm
+        N0 = 1.38e20 ; % doping concentration cm^{-1}
         eta = 0.32; % absorption slope
         lambda_p = 808e-9; % pump wavelength        
         nu_p = c/lambda_p;

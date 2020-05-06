@@ -12,9 +12,14 @@ ptau_fwhm = 120e-6; % seed beam
 Pulse_in = exp(-log(2)*(2*F.t/stau_fwhm).^6); % seed profile
 Pump_in  = exp(-log(2)*(2*F.t/ptau_fwhm).^6); % pup profile
 % normalization of input pulse
-Pulse_in = E0s_in*Pulse_in/trapz(F.t,Pulse_in); % in W/m^2
+Pulse_in = E0s_in*Pulse_in/trapz(F.t,Pulse_in); % in W
 Pump_in  = E0p_in*Pump_in/trapz(F.t,Pump_in); % in W
-RP = eta*Pump_in/(pi*L*w0^2*Ep) ; % pumping rate nbre/m3/s
+%RP = eta*Pump_in/(pi*L*w0^2*Ep) ; % pumping rate nbre/m3/s
+RP = sigma_a*Pump_in/(pi*w0^2*Ep) ; % pumping rate s^{-1}
+
+
+
+% sigma_a*tau/(pi*w0^2*Ep)
 
 figure(1)
 hold off
@@ -25,13 +30,14 @@ xlabel('time(\mu s)')
 ylabel('seed peak intensity(W/cm^{2})')
 title(['Total energy = ',num2str(1e3*trapz(F.t,Pulse_in)),' mJ'])
 
-g0 = 4 ;
+g0 = sigma_e*max(RP)*tau*N0 ;
+g0*1e-2
 
 figure(2)
-plot(1e6*F.t,Pump_in)
+plot(1e6*F.t,1e-4*Pump_in/(pi*w0^2))
 xlabel('time(\mu s)')
-ylabel('pump peak power(W)')
-title(['g0 = ',num2str(1e-2*g0),'cm^{-1}'])
+ylabel('pump intensity(W/cm^2)')
+title(['g0 = ',num2str(1e-2*g0),' cm^{-1}'])
 %% definition of z grid for CW simulation
 switch Regime
     case 'CW'
@@ -48,7 +54,7 @@ DeltaN = 0*Igrid;
 
 for loop = 2:length(z_grid)
     
-     DeltaN(:,loop) = RP(:).*(tau-0.1e-12)./(1 + Igrid(:,loop-1)/Is);
+     DeltaN(:,loop) = N0*RP(:).*(tau-0.1e-12)./(1 + tau*RP(:) + Igrid(:,loop-1)/Is);
      
      Igrid(:,loop) = Igrid(:,loop-1) + dzgrid*sigma_e*Igrid(:,loop-1).*DeltaN(:,loop) ;
                              
@@ -63,8 +69,10 @@ ylabel('time')
 colorbar
 subplot(212)
 plot(z_grid*1e3,Igrid(F.N/2+1 , :)/Igrid(F.N/2+1 , 1))
-hold on
-plot(z_grid*1e3,exp(20*z_grid))
+% hold on
+% plot(z_grid*1e3,exp(g0*z_grid),'red')
+% hold on
+% yline(Is/Igrid(F.N/2+1 , 1),'-.b');
 xlabel('z(mm)')
 ylabel('I_{out}/I_{In}')
 

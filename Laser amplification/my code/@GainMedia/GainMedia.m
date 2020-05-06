@@ -1,25 +1,37 @@
-%% constants
-h = 6.62e-34;% J.s
-c = 3e8;
-%% parameters sheet
-Rod = 'Nd:YAG';
-Regime = 'CW';
-L  = 1e-2;     % crystal length in m
-w0  = 100e-6;  % active surface 
-
+classdef GainMedia
+    %GAINMEDIA Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        % rod caracteristics
+        Rod
+        L  = 10e-2;     % crystal length in m
+        w0  = 100e-6;   % active surface 
+        
+        tau % lasing fluorescent lifetime
+        N0  % laser density
+    end
+    
+    methods
+        
+        
+        function obj = GainMedia(Rod)
+            %GAINMEDIA Construct an instance of this class
+            %   Detailed explanation goes here
+            obj.Rod = Rod ;
 switch Rod
     case 'Ruby'
-        tau   = 3e-3;         % fluorescent time
-        lambda_e = 694.4e-9;
+        obj.tau   = 3e-3;         % fluorescent time
+        obj.lambda_e = 694.4e-9;
         nu_e = c/lambda_e ;
         sigma_e = 475e-9*1e-4; % emission cross section m2 at 750nm
-        Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
+        obj.Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
         % pumpinp with flashlamp
-        eta = 0.4; % absorption slope
-        lambda_p = 475e-9; % pump wavelength        
+        obj.eta = 0.4; % absorption slope
+        obj.lambda_p = 475e-9; % pump wavelength        
         nu_p = c/lambda_p;
-        Ep = h*nu_p ;
-        N0 = 1.58e19*1e6 ; % Cr3+ concentration in cm^{-3}
+        obj.Ep = h*nu_p ;
+        obj.N0 = 1.58e19*1e6 ; % Cr3+ concentration in cm^{-3}
         
     case 'Alexandrite'
         tau   = 260e-6;         % fluorescent time at 298K
@@ -41,8 +53,7 @@ switch Rod
     case 'Nd:YVO4'
         N0 = 1.25e20 ; % doping concentration cm^{-3}
     case 'Nd:YAG'
-        tau   = 230e-6;         % fluorescent time
-        gamma = 1;              % degenerency ratio
+        obj.tau   = 230e-6;         % fluorescent time
         lambda_e = 1064e-9;
         nu_e = c/lambda_e ;
         Ee = h*nu_e ;           % photon energy
@@ -51,10 +62,11 @@ switch Rod
         GainBW = 0.6e-9; % gain Bandwith m
         Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
         Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
-        % pumpin at 946nm
-        N0 = 1.38e20*1e6 ; % 1%-doping concentration in cm^{-3}
-        eta = 0.32; % absorption slope
+        
+        % pumpinp at 808nm
+        N0 = 1.38e20*1e6 ;      % 1%-doping concentration in cm^{-3}
         sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
+        % eta = 0.32; % absorption slope
         lambda_p = 808e-9; % pump wavelength        
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
@@ -78,16 +90,19 @@ switch Rod
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
         N0 = 4.56e19*1e6 ; % Cr3+ concentration in cm^{-3} -> m^{-3}
-        sigma_a = 5.3e-20*1e-4; % absorption cross section m2 at 532nm-pi 
+
+       
 
 end
 
 
-
-
-
-
-
-
-
+        end
+        
+        function outputArg = method1(obj,inputArg)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            outputArg = obj.Property1 + inputArg;
+        end
+    end
+end
 
