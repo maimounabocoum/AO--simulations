@@ -2,10 +2,11 @@
 h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
-Rod = 'Nd:YAG';
+Rod = 'TiSa';
 Regime = 'CW';
-L  = 1e-2;     % crystal length in m
-w0  = 100e-6;  % active surface 
+
+w0  = 70e-6;  % active surface 
+L  = pi*w0^2/(800e-9);     % crystal length in m
 
 switch Rod
     case 'Ruby'
@@ -37,9 +38,10 @@ switch Rod
         Ep = h*nu_p ;
         % small gain coefficient 4-20 /m
         % inversion density 6e24 /m3
-        N0 = 3.52e19*1e6 ; % 0.1%-doping concentration in cm^{-3}
+        sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
+        N0 = 3.52e19*1e6 ;      % 0.1%-doping concentration in cm^{-3}
     case 'Nd:YVO4'
-        N0 = 1.25e20 ; % doping concentration cm^{-3}
+        N0 = 1.25e20 ;          % doping concentration cm^{-3}
     case 'Nd:YAG'
         tau   = 230e-6;         % fluorescent time
         gamma = 1;              % degenerency ratio
@@ -81,6 +83,8 @@ switch Rod
         sigma_a = 5.3e-20*1e-4; % absorption cross section m2 at 532nm-pi 
 
 end
+
+%%
 
 
 

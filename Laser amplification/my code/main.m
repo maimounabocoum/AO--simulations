@@ -6,7 +6,7 @@ parameters;
 %% simultion variables
 F = TF_t(1024,4e6);
 E0s_in    = 0.1e-3; % seed input energy in J
-E0p_in    = 10e-3; % pump input energy in J
+E0p_in    = 3e-3; % pump input energy in J
 stau_fwhm = 100e-6; % seed beam
 ptau_fwhm = 120e-6; % seed beam
 Pulse_in = exp(-log(2)*(2*F.t/stau_fwhm).^6); % seed profile
@@ -14,8 +14,11 @@ Pump_in  = exp(-log(2)*(2*F.t/ptau_fwhm).^6); % pup profile
 % normalization of input pulse
 Pulse_in = E0s_in*Pulse_in/trapz(F.t,Pulse_in); % in W
 Pump_in  = E0p_in*Pump_in/trapz(F.t,Pump_in); % in W
-%RP = eta*Pump_in/(pi*L*w0^2*Ep) ; % pumping rate nbre/m3/s
-RP = sigma_a*Pump_in/(pi*w0^2*Ep) ; % pumping rate s^{-1}
+Ipump     = Pump_in/(pi*w0^2);
+Ipulse    = Pulse_in/(pi*w0^2);
+
+% Rp = eta*Pump_in/(pi*w0^2*c*Ep) ;       % pumping rate nbre/m3/s
+% RP = N0*sigma_a*Pump_in/(pi*w0^2*Ep) ; % pumping rate s^{-1}
 
 
 
@@ -30,13 +33,17 @@ xlabel('time(\mu s)')
 ylabel('seed peak intensity(W/cm^{2})')
 title(['Total energy = ',num2str(1e3*trapz(F.t,Pulse_in)),' mJ'])
 
-g0 = sigma_e*max(RP)*tau*N0 ;
-g0*1e-2
+g0 = sigma_e*sigma_a*tau*N0*max(Ipump)/Ep ;
+
 
 figure(2)
-plot(1e6*F.t,1e-4*Pump_in/(pi*w0^2))
+hold off
+plot(1e6*F.t,Pump_in)
+hold on
+plot(1e6*F.t,Pulse_in)
+legend('pump(W)','seed(W)')
 xlabel('time(\mu s)')
-ylabel('pump intensity(W/cm^2)')
+ylabel('pump intensity(W)')
 title(['g0 = ',num2str(1e-2*g0),' cm^{-1}'])
 %% definition of z grid for CW simulation
 switch Regime
@@ -44,39 +51,49 @@ switch Regime
 z_grid = linspace(0,L,5000);
 dzgrid = z_grid(2) - z_grid(1);
 
-Igrid = repmat(Pulse_in(:)/w0^2,1,length(z_grid));
-figure(3)
-imagesc(z_grid*1e3,F.t*1e6,Igrid)
-xlabel('mm')
-ylabel('\mu s')
-
-DeltaN = 0*Igrid;
+IPULSE = repmat(Ipulse(:),1,length(z_grid));
+IPUMP  = repmat(Ipump(:),1,length(z_grid));
+DeltaN = 0*IPULSE;
+DeltaN0 = 0*IPULSE;
 
 for loop = 2:length(z_grid)
     
-     DeltaN(:,loop) = N0*RP(:).*(tau-0.1e-12)./(1 + tau*RP(:) + Igrid(:,loop-1)/Is);
+    DeltaN0(:,loop) = N0*sigma_a*tau*IPUMP(:,loop-1)./( Ep +sigma_a*tau*IPUMP(:,loop-1) ) ;
+    
+    Is = Ee*(1+Ep +sigma_a*tau*IPUMP(:,loop-1)/Ep)/(tau*sigma_e);
+    
+    DeltaN(:,loop) = DeltaN0(:,loop)./(1 + IPULSE(:,loop-1)./Is);
+         
+     IPULSE(:,loop) = IPULSE(:,loop-1) +...
+         dzgrid*sigma_e*IPULSE(:,loop-1).*DeltaN(:,loop) ;
      
-     Igrid(:,loop) = Igrid(:,loop-1) + dzgrid*sigma_e*Igrid(:,loop-1).*DeltaN(:,loop) ;
-                             
+     IPUMP(:,loop) = IPUMP(:,loop-1) -...
+         dzgrid*sigma_a*IPUMP(:,loop-1).*(N0-DeltaN(:,loop)) ;
+     
 end
 
 figure(4)
 hold off
 subplot(211)
-imagesc(z_grid*1e3,F.t*1e6,Igrid./Igrid(:,1))
+imagesc(z_grid*1e3,F.t*1e6,IPULSE*1e-4)
+%imagesc(z_grid*1e3,F.t*1e6,DeltaN)
 xlabel('z(mm)')
 ylabel('time')
-colorbar
+cb = colorbar ;
+ylabel(cb,'[W/cm^2]')
 subplot(212)
-plot(z_grid*1e3,Igrid(F.N/2+1 , :)/Igrid(F.N/2+1 , 1))
-% hold on
-% plot(z_grid*1e3,exp(g0*z_grid),'red')
-% hold on
-% yline(Is/Igrid(F.N/2+1 , 1),'-.b');
+plot(z_grid*1e3,100*(IPULSE(F.N/2+1 , :)/max(Ipump)))
 xlabel('z(mm)')
-ylabel('I_{out}/I_{In}')
+ylabel('I_{out}/I_{In}[%]')
 
+figure(1)
+hold on
+plot(1e6*F.t,1e-4*IPULSE(:,end))
 
+figure(2)
+hold on
+plot(1e6*F.t,pi*w0^2*IPULSE(:,end))
+legend('pump(W)','seed(W)','amplified(W)')
 
     case 'pulsed'
 z_grid = linspace(0,L,5000);
