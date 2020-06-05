@@ -1,4 +1,6 @@
-addpath('Q:\AO--commons\common subfunctions')
+%% addpath
+Include;
+
 % clearvars  -except SIG
 
 isRef  = 0;     % = 0 : signal , = 1 noise
@@ -78,7 +80,7 @@ end
 np = 1 ;
 N = 2^(nextpow2( np*max(Nx_cam,Ny_cam) )); % number of point in Fourier
 % frequency = 0 corresponds to point of coordinate N/2+1
-F       = TF2D( N , np/(dpixel), np/(dpixel));
+F       = TF2D( N ,N , np/(dpixel), np/(dpixel));
 
 % zero of camera : inf( length(.)/2 + 1 )
 % renetering pixels to zero:
@@ -143,10 +145,10 @@ I_bg =  Tint.*( abs(Eref).^2 ); % in J/m^2
 
 %% ====================== Visualization of CCD camera
 % Icam : Energy on each pixels in J
-Icam    = SumCamera( x_cam , y_cam  , F.x , F.y , I1 , np ); % in J
-Icam_bg = SumCamera( x_cam , y_cam  , F.x , F.y , I_bg , np ); % in J 
+Icam    = SumCamera( x_cam , y_cam  , F.x , F.z , I1 , np ); % in J
+Icam_bg = SumCamera( x_cam , y_cam  , F.x , F.z , I_bg , np ); % in J 
 % size of Icam is still Nx_cam * Ny_cam
-Icam_tagged = SumCamera( x_cam , y_cam  , F.x , F.y , Tint*abs(E0_tag).*abs(E0_tag) , np ); % in J
+Icam_tagged = SumCamera( x_cam , y_cam  , F.x , F.z , Tint*abs(E0_tag).*abs(E0_tag) , np ); % in J
 
 
 % add Poisson shot noise to the image
@@ -210,14 +212,15 @@ Ncount_bg = min(Ncount_bg,2^bit);
 
 
 %% Fourier transform analysis
-G = TF2D( 2^( nextpow2( max(Nx_cam,Ny_cam) ) ) ,1/dpixel,1/dpixel);
+Ng = 2^( nextpow2( max(Nx_cam,Ny_cam) ) );
+G = TF2D( Ng , Ng ,1/dpixel,1/dpixel);
 % [Xg,Yg] = meshgrid(G.x,G.y);
 
 % usefull if image pixel dimension is not of size 2^n
- Ncount = PadImage(Ncount,G.N,G.N);
+ Ncount = PadImage(Ncount,G.Nx,G.Nz);
 
 
- Icam_tagged    = PadImage(Icam_tagged,G.N,G.N);
+ Icam_tagged    = PadImage(Icam_tagged,G.Nx,G.Nz);
  Ntagged        = Icam_tagged/Ephoton;
  
 % sumNcount = trapz(G.x,trapz(G.y,abs(Ncount).^2))
@@ -232,10 +235,10 @@ Ncom_fft_bg     = G.fourier(Ncount_bg);
 % mean( abs(Ncom_fft(:)) )
 
 fx_c = 1.5*15920;
-fy_c = 0;
+fz_c = 0;
 fr = 2500 ; % 2400
-[FX,FY]     = meshgrid(G.fx,G.fy);
-Filter0     = ((FX-fx_c).^2 + (FY-fy_c).^2 <= (fr)^2);
+[FX,FZ]     = meshgrid(G.fx,G.fz);
+Filter0     = ((FX-fx_c).^2 + (FZ-fz_c).^2 <= (fr)^2);
 %Filter1    = ((FX).^2 + (FY).^2 <= (fr)^2);
 Ncom        = G.ifourier( Ncom_fft.*Filter0 );
 Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
@@ -248,14 +251,14 @@ Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
 
 if isIm == 1
 figure(1);
-subplot(222) ; imagesc(G.x*1e3,G.y*1e3,Ncount); cb = colorbar ; ylabel(cb,'Photo-electron count')
+subplot(222) ; imagesc(G.x*1e3,G.z*1e3,Ncount); cb = colorbar ; ylabel(cb,'Photo-electron count')
 title('Nphoton on camera')
 
 % mean(Ncount(:))
 % sqrt(var(Ncount(:)))
 
 figure(1);
-subplot(224) ; imagesc(G.fx,G.fy,log( abs(Ncom_fft))); cb = colorbar ; ylabel(cb,'TF-log')
+subplot(224) ; imagesc(G.fx,G.fz,log( abs(Ncom_fft))); cb = colorbar ; ylabel(cb,'TF-log')
 %subplot(224) ; imagesc(G.fx,G.fy,UnwrapPHASE(angle(Ncom_fft),G.N/2,510)); cb = colorbar ; ylabel(cb,'TF-log')
 title('FFT Photo-electron')
 axis([-50000 50000 -50000 50000])
@@ -268,13 +271,13 @@ plot(pline_x, pline_y, 'r-', 'LineWidth', 3);
 
 
 figure(1);
-subplot(221) ;imagesc(G.x*1e3,G.y*1e3,abs(Ntagged)) ; colorbar
+subplot(221) ;imagesc(G.x*1e3,G.z*1e3,abs(Ntagged)) ; colorbar
 axis(1e3*[min(x_cam) max(x_cam) min(y_cam) max(y_cam)])
 title('Nphoton tagged')
 
  
 figure(1);
-subplot(223) ; imagesc(G.x*1e3,G.y*1e3,(abs(Ncom)-abs(Ncom_bg))*AD/QE);  cb = colorbar ;
+subplot(223) ; imagesc(G.x*1e3,G.z*1e3,(abs(Ncom)-abs(Ncom_bg))*AD/QE);  cb = colorbar ;
 axis(1e3*[min(x_cam) max(x_cam) min(y_cam) max(y_cam)])
 title('inverse FFT - Nphoton Tagged')
 
@@ -283,8 +286,8 @@ end
 %% reconstruction error
 
 if isRef == 0
-SIG(i_loop) =  trapz(G.fx,trapz(G.fy,abs(Ncom_fft.*Filter0).^2))...
-             - trapz(G.fx,trapz(G.fy,abs(Ncom_fft_bg.*Filter0).^2));
+SIG(i_loop) =  trapz(G.fx,trapz(G.fz,abs(Ncom_fft.*Filter0).^2))...
+             - trapz(G.fx,trapz(G.fz,abs(Ncom_fft_bg.*Filter0).^2));
 %SIG(i_loop) = sum( abs( Ncom_fft(:).*Filter0(:) ).^2 )
 else
 NOISE(i_loop) = trapz(G.fx,trapz(G.fy,abs(Ncom_fft.*Filter0).^2))...

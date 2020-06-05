@@ -11,9 +11,9 @@ N = 2^(nextpow2( np*length(x_cam) )+ 1); % number of point in Fourier
 clearvars np
 %% =========================== generate fourier structure
 
-F       = TF2D(N,Fmax,Fmax);
-[X,Y]   = meshgrid(F.x,F.y);
-[FX,FY] = meshgrid(F.fx,F.fy);
+F       = TF2D(N,N,Fmax,Fmax);
+[X,Y]   = meshgrid(F.x,F.z);
+[FX,FY] = meshgrid(F.fx,F.fz);
 
 clearvars N Fmax
 
@@ -68,7 +68,7 @@ IS1_untag = F.fourier(S1_untag);
 %% ============================  inverse fourier transform
 alpha = max(abs(S2_tag(:)));
 
-Icam = 0*( real(S2_untag).^2 + real((S2_tag + 0.3*alpha*Sref)).^2 ) + 0e-20*rand(size(X)) ;
+Icam = ( real(S2_untag).^2 + real((S2_tag + 0.3*alpha*Sref)).^2 ) + 0e-20*rand(size(X)) ;
 
 Ifour0 =  F.fourier(Icam)  ;
 
@@ -80,21 +80,21 @@ Ifour =  Ifour0.*Filter0;
 
 figure(2)
 subplot(221)
-imagesc(F.x*1e3,F.y*1e3,Icam)
+imagesc(F.x*1e3,F.z*1e3,Icam)
 colorbar
 xlabel('x(mm)')
 ylabel('y(mm)')
 title('tagged photon profile')
 
 subplot(223)
-imagesc(F.x*1e3,F.y*1e3,real(S2_tag).^2)
+imagesc(F.x*1e3,F.z*1e3,real(S2_tag).^2)
 colorbar
 xlabel('x(mm)')
 ylabel('y(mm)')
 title('tagged photon profile')
 
 subplot(222)
-imagesc(F.fx*1e-3,F.fy*1e-3, abs(Ifour) )
+imagesc(F.fx*1e-3,F.fz*1e-3, abs(Ifour) )
 axis([-100 100 -100 100])
 caxis([0 max(abs(Ifour(:)))/100])
 colorbar
@@ -107,7 +107,7 @@ Icam1 = F.ifourier(Ifour);
 Icam1 = Icam1.*exp(-1i*2*pi*fx_c.*X).*exp(-1i*2*pi*fy_c.*Y);
 
 subplot(224)
-imagesc(F.x*1e3,F.y*1e3, abs(Icam1) )
+imagesc(F.x*1e3,F.z*1e3, abs(Icam1) )
 caxis([0 max(abs(Icam1(:)))/1])
 colorbar
 xlabel('f_x(mm^{-1})')

@@ -4,18 +4,18 @@ parameters;
 
 
 %% simultion variables
-F = TF_t(1024,4e6);
-E0s_in    = 0.1e-3; % seed input energy in J
-E0p_in    = 3e-3; % pump input energy in J
-stau_fwhm = 100e-6; % seed beam
-ptau_fwhm = 120e-6; % seed beam
+F = TF_t(1024,0.2e6);
+E0s_in    = 0.3e-3; % seed input energy in J
+E0p_in    = 50e-3;   % pump input energy in J
+stau_fwhm = 3000e-6; % seed beam
+ptau_fwhm = 1000e-6; % pump beam
 Pulse_in = exp(-log(2)*(2*F.t/stau_fwhm).^6); % seed profile
 Pump_in  = exp(-log(2)*(2*F.t/ptau_fwhm).^6); % pup profile
 % normalization of input pulse
 Pulse_in = E0s_in*Pulse_in/trapz(F.t,Pulse_in); % in W
 Pump_in  = E0p_in*Pump_in/trapz(F.t,Pump_in); % in W
-Ipump     = Pump_in/(pi*w0^2);
-Ipulse    = Pulse_in/(pi*w0^2);
+Ipump     = Pump_in/(pi*w0_pump^2);
+Ipulse    = Pulse_in/(pi*w0_main^2);
 
 % Rp = eta*Pump_in/(pi*w0^2*c*Ep) ;       % pumping rate nbre/m3/s
 % RP = N0*sigma_a*Pump_in/(pi*w0^2*Ep) ; % pumping rate s^{-1}
@@ -26,7 +26,7 @@ Ipulse    = Pulse_in/(pi*w0^2);
 
 figure(1)
 hold off
-plot(1e6*F.t,1e-4*Pulse_in/(pi*w0^2))
+plot(1e6*F.t,1e-4*Pulse_in/(pi*w0_main^2))
 hold on
 yline(1e-4*Is,'-.b');
 xlabel('time(\mu s)')
@@ -46,6 +46,7 @@ xlabel('time(\mu s)')
 ylabel('pump intensity(W)')
 title(['g0 = ',num2str(1e-2*g0),' cm^{-1}'])
 %% definition of z grid for CW simulation
+
 switch Regime
     case 'CW'
 z_grid = linspace(0,L,5000);
@@ -74,7 +75,7 @@ end
 
 figure(4)
 hold off
-subplot(211)
+subplot(2,2,(1:2))
 imagesc(z_grid*1e3,F.t*1e6,IPUMP*1e-4)
 %imagesc(z_grid*1e3,F.t*1e6,DeltaN)
 title('I_{pump} evolution')
@@ -82,19 +83,25 @@ xlabel('crystal length (mm)')
 ylabel('time (\mu s)')
 cb = colorbar ;
 ylabel(cb,'[W/cm^2]')
-subplot(212)
-plot(z_grid*1e3,100*(IPULSE(F.N/2+1 , :)/max(Ipulse)))
+subplot(2,2,3)
+plot( z_grid*1e3, 100*(w0_main^2/w0_pump^2)*IPULSE(F.N/2+1 , :)/IPUMP(F.N/2+1,1) )
 title('Rod amplification')
 xlabel('crystal length (mm)')
-ylabel('I_{out}/I_{In}[%]')
+ylabel('I_{out}/I_{pump}[%]')
+subplot(2,2,4)
+plot( z_grid*1e3, IPULSE(F.N/2+1 , :)/IPULSE(F.N/2+1 , 1) )
+title('Rod amplification')
+xlabel('crystal length (mm)')
+ylabel('I_{out}/I_{in}')
 
 figure(1)
 hold on
 plot(1e6*F.t,1e-4*IPULSE(:,end))
+legend('I_{pulse in}(W/cm^2)','I_{sat}','I_{pulse out}(W/cm^2)')
 
 figure(2)
 hold on
-plot(1e6*F.t,pi*w0^2*IPULSE(:,end))
+plot(1e6*F.t,pi*w0_main^2*IPULSE(:,end))
 legend('pump(W)','seed(W)','amplified(W)')
 
     case 'pulsed'
@@ -127,6 +134,7 @@ imagesc(z_grid*1e3,F.t*1e6,DeltaN)
 xlabel('z(mm)')
 ylabel('time')
 colorbar
+
 end
 
 

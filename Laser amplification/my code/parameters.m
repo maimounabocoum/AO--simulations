@@ -2,11 +2,14 @@
 h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
-Rod = 'TiSa';
+Rod = 'Nd:YAG';
 Regime = 'CW';
 
-w0  = 100e-6;  % active surface 
-L  = pi*w0^2/(800e-9);     % crystal length in m
+w0_pump  = 150e-6;         % active surface 
+w0_main  = 100e-6;         % active surface 
+
+L   = 1e-2;
+%L  = pi*w0^2/(800e-9);     % crystal length in m
 
 switch Rod
     case 'Ruby'
