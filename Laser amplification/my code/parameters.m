@@ -5,7 +5,7 @@ c = 3e8;
 Rod = 'TiSa';
 Regime = 'CW';
 
-w0  = 70e-6;  % active surface 
+w0  = 100e-6;  % active surface 
 L  = pi*w0^2/(800e-9);     % crystal length in m
 
 switch Rod

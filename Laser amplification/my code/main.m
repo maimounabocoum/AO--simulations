@@ -75,15 +75,17 @@ end
 figure(4)
 hold off
 subplot(211)
-imagesc(z_grid*1e3,F.t*1e6,IPULSE*1e-4)
+imagesc(z_grid*1e3,F.t*1e6,IPUMP*1e-4)
 %imagesc(z_grid*1e3,F.t*1e6,DeltaN)
-xlabel('z(mm)')
-ylabel('time')
+title('I_{pump} evolution')
+xlabel('crystal length (mm)')
+ylabel('time (\mu s)')
 cb = colorbar ;
 ylabel(cb,'[W/cm^2]')
 subplot(212)
-plot(z_grid*1e3,100*(IPULSE(F.N/2+1 , :)/max(Ipump)))
-xlabel('z(mm)')
+plot(z_grid*1e3,100*(IPULSE(F.N/2+1 , :)/max(Ipulse)))
+title('Rod amplification')
+xlabel('crystal length (mm)')
 ylabel('I_{out}/I_{In}[%]')
 
 figure(1)
