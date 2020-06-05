@@ -1,7 +1,7 @@
 %% OS analysis %%
 clearvars
 load('E:\sauvegarde ordi ACOUSTO OPTIC\Data\Mai\2018-05-31\NewGel_TypeOfSequence_OS_13h48_58.mat');
-addpath('..\..\AO--commons\shared functions folder');
+ addpath('..\..\..\AO--commons\shared functions folder');
 MyImage = OS(Datas,ScanParam(:,1),ScanParam(:,2),...
              dFx,z,SampleRate*1e6,c,[X0 X1]*1e-3) ; 
 % 
