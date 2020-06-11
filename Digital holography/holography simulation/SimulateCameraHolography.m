@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 addpath('..\..\..\AO--commons\shared functions folder')
+=======
+%% addpath
+Include;
+
+>>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
 % clearvars  -except SIG
 
 isRef  = 0;     % = 0 : signal , = 1 noise
@@ -78,7 +84,11 @@ end
 np = 1 ;
 N = 2^(nextpow2( np*max(Nx_cam,Ny_cam) )); % number of point in Fourier
 % frequency = 0 corresponds to point of coordinate N/2+1
+<<<<<<< HEAD
 F       = TF2D( N ,N, np/(dpixel), np/(dpixel));
+=======
+F       = TF2D( N ,N , np/(dpixel), np/(dpixel));
+>>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
 
 % zero of camera : inf( length(.)/2 + 1 )
 % renetering pixels to zero:
@@ -210,7 +220,12 @@ Ncount_bg = min(Ncount_bg,2^bit);
 
 
 %% Fourier transform analysis
+<<<<<<< HEAD
 G = TF2D( 2^( nextpow2( max(Nx_cam,Ny_cam) ) ),2^( nextpow2( max(Nx_cam,Ny_cam) ) ) ,1/dpixel,1/dpixel);
+=======
+Ng = 2^( nextpow2( max(Nx_cam,Ny_cam) ) );
+G = TF2D( Ng , Ng ,1/dpixel,1/dpixel);
+>>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
 % [Xg,Yg] = meshgrid(G.x,G.y);
 
 % usefull if image pixel dimension is not of size 2^n
@@ -232,10 +247,15 @@ Ncom_fft_bg     = G.fourier(Ncount_bg);
 % mean( abs(Ncom_fft(:)) )
 
 fx_c = 1.5*15920;
-fy_c = 0;
+fz_c = 0;
 fr = 2500 ; % 2400
+<<<<<<< HEAD
 [FX,FY]     = meshgrid(G.fx,G.fz);
 Filter0     = ((FX-fx_c).^2 + (FY-fy_c).^2 <= (fr)^2);
+=======
+[FX,FZ]     = meshgrid(G.fx,G.fz);
+Filter0     = ((FX-fx_c).^2 + (FZ-fz_c).^2 <= (fr)^2);
+>>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
 %Filter1    = ((FX).^2 + (FY).^2 <= (fr)^2);
 Ncom        = G.ifourier( Ncom_fft.*Filter0 );
 Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
@@ -283,8 +303,8 @@ end
 %% reconstruction error
 
 if isRef == 0
-SIG(i_loop) =  trapz(G.fx,trapz(G.fy,abs(Ncom_fft.*Filter0).^2))...
-             - trapz(G.fx,trapz(G.fy,abs(Ncom_fft_bg.*Filter0).^2));
+SIG(i_loop) =  trapz(G.fx,trapz(G.fz,abs(Ncom_fft.*Filter0).^2))...
+             - trapz(G.fx,trapz(G.fz,abs(Ncom_fft_bg.*Filter0).^2));
 %SIG(i_loop) = sum( abs( Ncom_fft(:).*Filter0(:) ).^2 )
 else
 NOISE(i_loop) = trapz(G.fx,trapz(G.fy,abs(Ncom_fft.*Filter0).^2))...

@@ -1,5 +1,5 @@
 %%=============  add path 
-addpath('Q:\AO--commons\common subfunctions')
+Include;
 
 %% ============= simulation parameters ===%%
 
