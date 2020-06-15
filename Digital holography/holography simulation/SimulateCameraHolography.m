@@ -1,10 +1,9 @@
-<<<<<<< HEAD
-addpath('..\..\..\AO--commons\shared functions folder')
-=======
-%% addpath
-Include;
+addpath('..\..\..\AO--commons\shared functions folder');
+addpath('..\..\..\AO--commons\common subfunctions');
 
->>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
+%% addpath
+%Include;
+
 % clearvars  -except SIG
 
 isRef  = 0;     % = 0 : signal , = 1 noise
@@ -12,7 +11,7 @@ isPlot = 0 ;    % = 1 : plot S/N on graph (first run isRef=0 then isRef=1)
 isIm   = 1;     % screen out images 
 
 % here : param is the Ref intensity W/cm^2
- param = 10e-4*ones(1,10);
+ param = 1e-4;%10e-4*ones(1,10);
 % param = 5e-6;%500e-6;
  
 % 1024px: SIG  9.1778e-09 , NOISE 5.9459e-11  = > S/N : 154.3550
@@ -84,11 +83,10 @@ end
 np = 1 ;
 N = 2^(nextpow2( np*max(Nx_cam,Ny_cam) )); % number of point in Fourier
 % frequency = 0 corresponds to point of coordinate N/2+1
-<<<<<<< HEAD
+
 F       = TF2D( N ,N, np/(dpixel), np/(dpixel));
-=======
-F       = TF2D( N ,N , np/(dpixel), np/(dpixel));
->>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
+
+
 
 % zero of camera : inf( length(.)/2 + 1 )
 % renetering pixels to zero:
@@ -110,11 +108,11 @@ c           = 3e8;         % m/s
 nu          = c/lambda0;   % Hz
 h           = 6.626*1e-34; % J.s
 Ephoton     = h*nu ;       % J
-P0          = 5e-9*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 );          % Power of Main pulse in W*(Scam/(1cm^2))
+P0          = 200e-9*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 );          % Power of Main pulse in W*(Scam/(1cm^2))
 Pref        = param(i_loop)*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 ); % Power of Ref pulse in W*(Scam/(1cm^2))
 Tint        = 100e-6;       % integration time of the camera in s
 ModeWidth   = 0.2e4 ;         % reducing it the will affect final speckle size
-eta         = 1 ;        % tagging efficiency (all photons are tagged when eta = 1)
+eta         = 0 ;        % tagging efficiency (all photons are tagged when eta = 1)
 
 % following function returns :
 % E_tag   : field of tagged photon in sqrt(W/m^2)
@@ -220,12 +218,9 @@ Ncount_bg = min(Ncount_bg,2^bit);
 
 
 %% Fourier transform analysis
-<<<<<<< HEAD
-G = TF2D( 2^( nextpow2( max(Nx_cam,Ny_cam) ) ),2^( nextpow2( max(Nx_cam,Ny_cam) ) ) ,1/dpixel,1/dpixel);
-=======
 Ng = 2^( nextpow2( max(Nx_cam,Ny_cam) ) );
 G = TF2D( Ng , Ng ,1/dpixel,1/dpixel);
->>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
+
 % [Xg,Yg] = meshgrid(G.x,G.y);
 
 % usefull if image pixel dimension is not of size 2^n
@@ -248,14 +243,11 @@ Ncom_fft_bg     = G.fourier(Ncount_bg);
 
 fx_c = 1.5*15920;
 fz_c = 0;
-fr = 2500 ; % 2400
-<<<<<<< HEAD
-[FX,FY]     = meshgrid(G.fx,G.fz);
-Filter0     = ((FX-fx_c).^2 + (FY-fy_c).^2 <= (fr)^2);
-=======
+fr = 4500 ; % 2400
+
 [FX,FZ]     = meshgrid(G.fx,G.fz);
 Filter0     = ((FX-fx_c).^2 + (FZ-fz_c).^2 <= (fr)^2);
->>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
+
 %Filter1    = ((FX).^2 + (FY).^2 <= (fr)^2);
 Ncom        = G.ifourier( Ncom_fft.*Filter0 );
 Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
@@ -282,9 +274,9 @@ axis([-50000 50000 -50000 50000])
 
 theta = 0 : (2 * pi / 10000) : (2 * pi);
 pline_x = fr * cos(theta) + fx_c;
-pline_y = fr * sin(theta) + fy_c;
+pline_z = fr * sin(theta) + fz_c;
 hold on;
-plot(pline_x, pline_y, 'r-', 'LineWidth', 3);
+plot(pline_x, pline_z, 'r-', 'LineWidth', 3);
 
 
 figure(1);

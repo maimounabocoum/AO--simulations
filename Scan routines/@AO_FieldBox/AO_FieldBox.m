@@ -86,8 +86,7 @@ classdef AO_FieldBox
             obj.time = t + (0:(size(h,1)-1))/fs;
             
         end
-        
-         
+                
         function Iout = ShowMaxField(obj,plane,FigHandle)
             
             if ~ishandle(FigHandle)
@@ -139,16 +138,16 @@ classdef AO_FieldBox
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
             m = max(abs( squeeze(Field_max(:))'));
-            for i = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
+            for loop = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
-                surfc(obj.x*1e3,obj.z*1e3,abs( squeeze(Field_max(1,:,:,i))')/m );
+                imagesc(obj.x*1e3,obj.z*1e3,abs( squeeze(Field_max(1,:,:,loop))')/m );
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])
                 % title(['P(t) on XZ, z(t)= ',num2str((obj.time(i))*1540*1e3),'mm']) 
                 colormap(cmap)
                 colorbar
-                %caxis([0.2*min(Field_max(:)) 0.7*max(Field_max(:))])
+                %caxis([0.2*min(Field_max(:))/m 0.7*max(Field_max(:))/m])
                 drawnow
                
                % caxis('auto')                

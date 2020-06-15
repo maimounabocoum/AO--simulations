@@ -16,18 +16,20 @@ CurrentExperiement = Experiment(param);
 
 % Example : set active elements
 
-%CurrentExperiement.MyProbe = CurrentExperiement.MyProbe.Set_ActiveList(1:300);
+ for n_scan = 1:CurrentExperiement.Nscan
 
-%% view active elements
-CurrentExperiement.MyProbe.ShowProbe
+Nactive = sum(CurrentExperiement.BoolActiveList(:,n_scan));
+Xs        = (0:Nactive-1)*param.width;  
 
-%% set delay law
-CurrentExperiement.MyProbe = ...
-CurrentExperiement.MyProbe.Set_ActuatorDelayLaw('plane',-50*pi/180,param.c);
-
- 
-% view active elements
-% CurrentExperiement.MyProbe.ShowDelay
+            [~,~,~,EXCITATION] = CalcMatHole(param.f0*1e-6,...
+                CurrentExperiement.ScanParam(n_scan,1),...
+                CurrentExperiement.ScanParam(n_scan,2),...
+                param.nuX0*1e-3,...
+                param.nuZ0*1e-3,Xs*1e3,...
+                param.fs*1e-6,param.c,...
+                param.Bascule ); % Calculer la matrice
+           
+ end
 
 
 

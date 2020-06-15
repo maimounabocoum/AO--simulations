@@ -65,21 +65,22 @@ end
  
  for n_scan = 1:CurrentExperiement.Nscan
  
-     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ; % Initializes the Probe
-     CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ; % Calculate the Field Over input BOX
-     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ; % Calculate current AO signal - Photorefractive
-     %  CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
+     CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
+     CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
+     % CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ; % Calculate current AO signal - Photorefractive
+     % CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
      % Calculate current AO signal - Holographie
 
     % % option for screening : XY, Xt , XZt
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
-    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 23.5e-6 , 1);
+     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6 , 1);
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
     
     % field profile
-    % [Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
+    % Field = CurrentExperiement.MySimulationBox.Field;
+    % Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
     % max(obj.Field,[],1) : returns for each colulm
     % the maximum field pressure.
     % Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
@@ -98,12 +99,11 @@ end
  
  close(h) 
  
- t_simulation = toc
+ t_simulation = toc ;
  
  %% show acquisition loop results
  
- 
- CurrentExperiement.ShowAcquisitionLine();
+ CurrentExperiement.ShowAcquisitionLine() ;
  
 %  figure
 %  imagesc(CurrentExperiement.ScanParam*1e3+20,...
@@ -134,7 +134,7 @@ end
      
      % saving folder name with todays date
      SubFolderName = generateSubFolderName(SimuPathFolder) ;
-     FileName   = generateSaveName(SubFolderName ,'name','1mmInclusions','type',param.FOC_type);
+     FileName   = generateSaveName(SubFolderName ,'name','TaboltEffect_off','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
@@ -178,11 +178,10 @@ c               = param.c ;
  MyImage = OP(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam,...
               CurrentExperiement.MySimulationBox.z,param.fs_aq,param.c); 
             
-save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR',...
+ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R','zR',...
               'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param');
 
          case 'OS'
-%save('C:\Users\mbocoum\Dropbox\PPT - prez\SLIDES_FRANCOIS\scripts\Simulation_fieldOF.mat','AOSignal','ScanParam') 
   MyImage = OS(CurrentExperiement.AOSignal,CurrentExperiement.ScanParam(:,1),...
              CurrentExperiement.ScanParam(:,2),param.df0x,...
              CurrentExperiement.MySimulationBox.z,...
@@ -190,8 +189,11 @@ save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission','MyImage','R',
              param.c,[param.X0 , param.X1]); 
      
     save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
-                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param')            
-             
+                  'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param','Field')            
+         case 'JM'  
+
+    save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
+                  'DelayLAWS','ActiveLIST','param','CurrentExperiement')               
      end
      %%%%%%%%%%%%%%%%%%%%
  end
