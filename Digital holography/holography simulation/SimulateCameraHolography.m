@@ -1,10 +1,8 @@
-<<<<<<< HEAD
 addpath('..\..\..\AO--commons\shared functions folder')
-=======
+
 %% addpath
 Include;
 
->>>>>>> 5f76e53ba4f06c0059a0ab9308653fdef4ae284b
 % clearvars  -except SIG
 
 isRef  = 0;     % = 0 : signal , = 1 noise
