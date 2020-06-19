@@ -2,9 +2,8 @@
 %%%%%%%%%%%%%%% load experiemental data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %clearvars;
-% addpath('functions')
-% addpath('..\Scan routines')
-% addpath('shared functions folder')
+addpath('..\..\AO--commons\shared functions folder')
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % update of the OP structure
                             % X : theta 
@@ -15,7 +14,6 @@
 %% ================ load datas ==============
  clearvars
 
- %%
 %%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
 SimuPathFolder = 'Q:\datas\simulated datas';
 SubFolderName = generateSubFolderName(SimuPathFolder) ;
