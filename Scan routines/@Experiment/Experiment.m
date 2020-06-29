@@ -623,8 +623,6 @@ methods ( Access = 'public' )
             
             [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
             
-            
-            
             if ~ishandle(FigHandle)
                 FigHandle = figure ;
             end     
@@ -649,6 +647,8 @@ methods ( Access = 'public' )
                 %% define field correlator
                 output      = obj.MySimulationBox.Field;
                 t           = obj.MySimulationBox.time(:);
+                
+                %Eref        = repmat( exp(-1i*2*pi*obj.param.f0*t(:)), 1 , size( output , 2 )  ); 
                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( output , 2 )  );  
                 E_tagged    = hilbert(output);
 
@@ -671,9 +671,20 @@ methods ( Access = 'public' )
                                 
                 myField = abs(sum(myField,1));
                 myField = reshape(myField ,[Ny,Nx,Nz]);     
-                myField = squeeze( myField(I_plane,:,:) ) ; 
-                
+                myField = squeeze( myField(I_plane,:,:) ) ;
+                myFieldm = reshape( max(envelope(output,300)),[Ny,Nx,Nz]);  
+                myFieldm= squeeze( myFieldm(I_plane,:,:) ) ; 
+                subplot(121)
                         imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myField' );
+                        xlabel('x (mm)')
+                        ylabel('z (mm)')
+                        ylim([min(obj.MySimulationBox.z*1e3) max(obj.MySimulationBox.z*1e3)])
+                        title(['P(t) on XZ, \tau_c =',num2str(1e6*obj.param.tau_c ),'\mu s']) 
+                        cb = colorbar ;
+                        ylabel(cb,'a.u')
+                        drawnow
+              subplot(122)
+                        imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myFieldm' );
                         xlabel('x (mm)')
                         ylabel('z (mm)')
                         ylim([min(obj.MySimulationBox.z*1e3) max(obj.MySimulationBox.z*1e3)])

@@ -11,15 +11,16 @@ function [nuX,nuZ,t,Mat] = CalcMatHole(f0,nbX,nbZ,nuX0,nuZ0,x,Fe,c,Bascule)
 
 % conversion of all input to SI units : 
 Fe = Fe*1e6 ;           % MHz->Hz
+dt = 1/Fe ; % in s
+
 f0 = f0*1e6;            % MHz->Hz
 nuZ = 1e3*(nbZ*nuZ0) ;  % mm-1->m-1
 nuX = 1e3*(nbX*nuX0);   % mm-1->m-1
 x = x*1e-3;             % mm->m
 
 % conversion to temporal frequency along z
-fz = c*nuZ ; %Hz
+fz = c*nuZ ; % Hz
 
-dt = 1/Fe ; % in s
 % Tmax = (20.1*1e-6);   % periode maximale d'un cycle élémentaire (en s)
 
 Tz = 1/fz;          % periode de l'envelloppe A in s
@@ -32,18 +33,14 @@ T0 = 1/f0;          % periode de la porteuse A in s
 %    return;
 % end;
 
-Nrep = nbZ;
-%Nrep = floor(Tmax/Tz);    % on essaie de se rapprocher au mieux de Tmax 
-                          % (essentially N = 1 for fundamental)
                           
-% N = round(Nrep*(Tz/dt));  % Nombre de point effectifs
-N = nbZ*(Fe/fz);
+N = Fe/(c*1e3*nuZ0);
 
 Tot = N*dt;        % durée totale de la séquence
 
-Tz = Tot/Nrep;    % ré-ajustement de la période ??
-fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
-nuZ = fz/c ;
+%Tz = Tot/Nrep;    % ré-ajustement de la période ??
+%fz = 1/Tz   ;     % ré-ajustement de la fréquence (en MHz) ??
+%nuZ = fz/c ;
 
 k = round(Tot/T0); % nombre de cycles porteuse
 f0 = k/Tot; % ré-ajustement de la fréquence porteuse
@@ -65,7 +62,7 @@ if strcmp(Bascule,'on')
 else
     
         if nbZ==0
-           Mat = sign(carrier) ;
+           Mat = sign(carrier).*( sin( 2*pi*nuX*X )> 0 );
         else
            Mat = sign(carrier).*( sin( 2*pi*fz*(T-alpha*X) )> 0 );   
         end    
@@ -76,10 +73,11 @@ nuZ = 1e-3*nuZ;
 nuX = 1e-3*nuX;
 
 %% print matrix
-% figure(100)
-%         imagesc(Mat)
-%         xlabel('x (mm)')
-%         ylabel('z(mm)')
-%         drawnow
+figure(100)
+        imagesc(x*1e3,t*1e6,Mat)
+        xlabel('x (mm)')
+        ylabel('t(\mu s)')
+        drawnow
+        pause(1)
 end
     

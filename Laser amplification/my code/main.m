@@ -5,7 +5,7 @@ parameters;
 
 %% simultion variables
 F = TF_t(1024,0.2e6);
-E0s_in    = 0.3e-3; % seed input energy in J
+E0s_in    = 10.6e-3;  % seed input energy in J
 E0p_in    = 50e-3;   % pump input energy in J
 stau_fwhm = 3000e-6; % seed beam
 ptau_fwhm = 1000e-6; % pump beam
@@ -19,8 +19,6 @@ Ipulse    = Pulse_in/(pi*w0_main^2);
 
 % Rp = eta*Pump_in/(pi*w0^2*c*Ep) ;       % pumping rate nbre/m3/s
 % RP = N0*sigma_a*Pump_in/(pi*w0^2*Ep) ; % pumping rate s^{-1}
-
-
 
 % sigma_a*tau/(pi*w0^2*Ep)
 
@@ -43,7 +41,7 @@ hold on
 plot(1e6*F.t,Pulse_in)
 legend('pump(W)','seed(W)')
 xlabel('time(\mu s)')
-ylabel('pump intensity(W)')
+ylabel('pump power(W)')
 title(['g0 = ',num2str(1e-2*g0),' cm^{-1}'])
 %% definition of z grid for CW simulation
 
