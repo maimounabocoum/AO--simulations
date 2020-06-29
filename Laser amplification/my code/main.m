@@ -27,8 +27,8 @@ Ipulse    = Pulse_in/(pi*w0_main^2);
 figure(1)
 hold off
 plot(1e6*F.t,1e-4*Pulse_in/(pi*w0_main^2))
-hold on
-yline(1e-4*Is,'-.b');
+% hold on
+% line(1e-4*Is,'-.b');
 xlabel('time(\mu s)')
 ylabel('seed peak intensity(W/cm^{2})')
 title(['Total energy = ',num2str(1e3*trapz(F.t,Pulse_in)),' mJ'])
