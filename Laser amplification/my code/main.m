@@ -4,11 +4,11 @@ parameters;
 
 
 %% simultion variables
-F = TF_t(1024,0.2e6);
-E0s_in    = 10.6e-3;  % seed input energy in J
-E0p_in    = 50e-3;   % pump input energy in J
-stau_fwhm = 3000e-6; % seed beam
-ptau_fwhm = 1000e-6; % pump beam
+F = TF_t(1024,1e6);
+E0s_in    = 0.1e-3;  % seed input energy in J
+E0p_in    = 3e-3;   % pump input energy in J
+stau_fwhm = 300e-6; % seed beam
+ptau_fwhm = 100e-6; % pump beam
 Pulse_in = exp(-log(2)*(2*F.t/stau_fwhm).^6); % seed profile
 Pump_in  = exp(-log(2)*(2*F.t/ptau_fwhm).^6); % pup profile
 % normalization of input pulse
@@ -25,8 +25,8 @@ Ipulse    = Pulse_in/(pi*w0_main^2);
 figure(1)
 hold off
 plot(1e6*F.t,1e-4*Pulse_in/(pi*w0_main^2))
-% hold on
-% line(1e-4*Is,'-.b');
+hold on
+plot(1e6*F.t,1e-4*repmat(Is,1,F.N),'-.b');
 xlabel('time(\mu s)')
 ylabel('seed peak intensity(W/cm^{2})')
 title(['Total energy = ',num2str(1e3*trapz(F.t,Pulse_in)),' mJ'])
@@ -82,10 +82,10 @@ ylabel('time (\mu s)')
 cb = colorbar ;
 ylabel(cb,'[W/cm^2]')
 subplot(2,2,3)
-plot( z_grid*1e3, 100*(w0_main^2/w0_pump^2)*IPULSE(F.N/2+1 , :)/IPUMP(F.N/2+1,1) )
+plot( z_grid*1e3, 100*(w0_main^2/w0_pump^2)*(IPULSE(F.N/2+1 , :)-IPULSE(F.N/2+1 , 1))/IPUMP(F.N/2+1,1) )
 title('Rod amplification')
 xlabel('crystal length (mm)')
-ylabel('I_{out}/I_{pump}[%]')
+ylabel('(I_{out}-I_{in})/I_{pump}[%]')
 subplot(2,2,4)
 plot( z_grid*1e3, IPULSE(F.N/2+1 , :)/IPULSE(F.N/2+1 , 1) )
 title('Rod amplification')

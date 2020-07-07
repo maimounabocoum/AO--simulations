@@ -2,7 +2,7 @@
 h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
-Rod = 'Nd:YAG';
+Rod = 'Nd:YVO4';
 Regime = 'CW';
 
 w0_pump  = 150e-6;         % active surface 
@@ -44,7 +44,25 @@ switch Rod
         sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
         N0 = 3.52e19*1e6 ;      % 0.1%-doping concentration in cm^{-3}
     case 'Nd:YVO4'
-        N0 = 1.25e20 ;          % doping concentration cm^{-3}
+        tau   = 90e-6;         % fluorescent time
+        gamma = 1;              % degenerency ratio
+        lambda_e = 1064e-9;
+        nu_e = c/lambda_e ;
+        Ee = h*nu_e ;           % photon energy
+        sigma_e = 114-20*1e-4; % emission cross section m2 at 1064nm
+        % https://www.unitedcrystals.com
+        GainBW = 1e-9; % gain Bandwith m
+        Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
+        Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
+        % pumpin at 946nm
+        N0 = 1.25e20*1e6 ;          % doping concentration cm^{-3}
+                                % 1%-doping concentration in cm^{-3}
+        eta = 0.32; % absorption slope
+        sigma_a = 60e-20*1e-4; % absorption cross section m2 at 808nm p.86
+        lambda_p = 808e-9; % pump wavelength        
+        nu_p = c/lambda_p;
+        Ep = h*nu_p ;
+   
     case 'Nd:YAG'
         tau   = 230e-6;         % fluorescent time
         gamma = 1;              % degenerency ratio
