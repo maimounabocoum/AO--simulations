@@ -5,11 +5,21 @@ c = 3e8;
 Rod = 'Nd:YVO4';
 Regime = 'CW';
 
-w0_pump  = 150e-6;         % active surface 
-w0_main  = 100e-6;         % active surface 
+w0_pump  = 170e-6;         % active surface 
+w0_main  = 85e-6;         % active surface 
 
-L   = 1e-2;
+L   = 0.5e-2;
 %L  = pi*w0^2/(800e-9);     % crystal length in m
+
+%% define function
+
+
+
+
+SigmaCorr = BWCorrection(1,808e-9,4e-9,(800:820)*1e-9);
+figure; plot(800:820,SigmaCorr)
+
+%%
 
 switch Rod
     case 'Ruby'
@@ -49,17 +59,24 @@ switch Rod
         lambda_e = 1064e-9;
         nu_e = c/lambda_e ;
         Ee = h*nu_e ;           % photon energy
-        sigma_e = 114-20*1e-4; % emission cross section m2 at 1064nm
-        % https://www.unitedcrystals.com
+        sigma_e = 25e-19*1e-4;  % emission cross section m2 at 1064nm
+                                % https://www.unitedcrystals.com
         GainBW = 1e-9; % gain Bandwith m
         Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
         Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
-        % pumpin at 946nm
+        % pumpinp at 946nm
         N0 = 1.25e20*1e6 ;          % doping concentration cm^{-3}
-                                % 1%-doping concentration in cm^{-3}
-        eta = 0.32; % absorption slope
-        sigma_a = 60e-20*1e-4; % absorption cross section m2 at 808nm p.86
-        lambda_p = 808e-9; % pump wavelength        
+                                    % 1%-doping concentration in cm^{-3}
+                                    % https://www.rp-photonics.com/doping_concentration.html
+        eta = 0.48;                 % absorption slope
+                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
+        
+        % 30 cm-1 : sigma_a = 24e-20*1e-4 along C-axis
+        % 10 cm-1 : sigma_a = 8e-20*1e-4 along A-axis
+        AbsBW = 3e-9;               % absortption Bandwith m
+        lambda_p = 808e-9;          % pump wavelength       
+        sigma_a = 0.5*( 8e-20 + 24e-20 )*1e-4; % absorption cross section m2 at 808nm p.86
+        sigma_a = BWCorrection(sigma_a,lambda_p,AbsBW,804e-9); % correction of absoption coefficient using gaussian fit
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
    
@@ -75,10 +92,12 @@ switch Rod
         Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
         Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
         % pumpin at 946nm
-        N0 = 1.38e20*1e6 ; % 1%-doping concentration in cm^{-3}
+        N0 = 1.38e20*1e6 ;              % 1%-doping concentration in [cm^{-3}]*1e6
+                                        % https://www.rp-photonics.com/doping_concentration.html
         eta = 0.32; % absorption slope
         sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
-        lambda_p = 808e-9; % pump wavelength        
+        lambda_p = 808e-9;      % pump wavelength   
+        AbsBW = 5e-9;           % absortption Bandwith m
         nu_p = c/lambda_p;
         Ep = h*nu_p ;
         
@@ -102,6 +121,13 @@ switch Rod
         Ep = h*nu_p ;
         N0 = 4.56e19*1e6 ; % Cr3+ concentration in cm^{-3} -> m^{-3}
         sigma_a = 5.3e-20*1e-4; % absorption cross section m2 at 532nm-pi 
+
+end
+
+%%
+function Sigma = BWCorrection(Sigma0,lambda0,BW,lambda)
+
+Sigma = Sigma0*exp(-(lambda-lambda0).^2/BW^2) ;
 
 end
 

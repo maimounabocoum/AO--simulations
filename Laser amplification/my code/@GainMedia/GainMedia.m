@@ -9,6 +9,7 @@ classdef GainMedia
         w0  = 100e-6;   % active surface 
         
         tau % lasing fluorescent lifetime
+        gamma 
         N0  % laser density
     end
     
@@ -51,7 +52,29 @@ switch Rod
         % inversion density 6e24 /m3
         N0 = 3.52e19*1e6 ; % 0.1%-doping concentration in cm^{-3}
     case 'Nd:YVO4'
-        N0 = 1.25e20 ; % doping concentration cm^{-3}
+        obj.tau   = 90e-6;             % fluorescent time
+        obj.gamma = 1;                 % degenerency ratio
+        obj.lambda_e = 1064e-9;
+        obj.nu_e = c/lambda_e ;
+        obj.Ee = h*nu_e ;           % photon energy
+        obj.sigma_e = 25e-19*1e-4;  % emission cross section m2 at 1064nm
+                                % https://www.unitedcrystals.com
+        obj.GainBW = 1e-9; % gain Bandwith m
+        obj.Es = 1e-4*(h*nu_e)/(gamma*sigma_e); % saturation fluence J/cm2
+        obj.Is = (Ee)/(tau*sigma_e); % Saturation intensity W/m2
+        % pumpinp at 946nm
+        obj.N0 = 1.25e20*1e6 ;          % doping concentration cm^{-3}
+                                    % 1%-doping concentration in cm^{-3}
+                                    % https://www.rp-photonics.com/doping_concentration.html
+        obj.eta = 0.48;                 % absorption slope
+                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
+        obj.sigma_a = 0.5*( 8e-20 + 24e-20 )*1e-4; % absorption cross section m2 at 808nm p.86
+        % 30 cm-1 : sigma_a = 24e-20*1e-4 along C-axis
+        % 10 cm-1 : sigma_a = 8e-20*1e-4 along A-axis
+        obj.AbsBW = 4e-9;               % absortption Bandwith m
+        obj.lambda_p = 808e-9;          % pump wavelength        
+        obj.nu_p = c/lambda_p;
+        obj. Ep = h*nu_p ;
     case 'Nd:YAG'
         obj.tau   = 230e-6;         % fluorescent time
         lambda_e = 1064e-9;

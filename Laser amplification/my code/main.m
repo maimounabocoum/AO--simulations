@@ -97,41 +97,20 @@ hold on
 plot(1e6*F.t,1e-4*IPULSE(:,end))
 legend('I_{pulse in}(W/cm^2)','I_{sat}','I_{pulse out}(W/cm^2)')
 
+figure(3)
+plot(z_grid*1e3,IPUMP(F.N/2+1,:)/IPUMP(F.N/2+1,1));
+hold on 
+plot(z_grid*1e3,exp(-(z_grid-z_grid(1))*(1e2)*10));
+xlabel('mm')
+ylabel('a.u')
+legend('absorption simulation','th')
+
 figure(2)
 hold on
 plot(1e6*F.t,pi*w0_main^2*IPULSE(:,end))
 legend('pump(W)','seed(W)','amplified(W)')
 
     case 'pulsed'
-z_grid = linspace(0,L,5000);
-dzgrid = z_grid(2) - z_grid(1);
-Is = (Ee)/(tau*sigma_e);
-
-% pump population inversion:
-[Nu,NL] = PumpInversion(F.t,0,0,RP,tau,0.1e-12);
-
-Igrid = repmat(Pulse_in(:)/w0^2,1,length(z_grid));
-figure(3)
-imagesc(z_grid*1e3,F.t*1e6,Igrid)
-xlabel('mm')
-ylabel('\mu s')
-
-DeltaN = 0*Igrid;
-DeltaN(:,1) = Nu-NL;
-
-for loop = 2:length(z_grid)
-    
-     DeltaN(:,loop) = trapz(F.t,-(Igrid(:,loop-1)./(tau*Is)).*(Nu-NL));
-     
-     Igrid(:,loop) = Igrid(:,loop-1) + dzgrid*sigma_e*Igrid(:,loop-1).*DeltaN(:,loop) ;
-                             
-end
-
-figure(4)
-imagesc(z_grid*1e3,F.t*1e6,DeltaN)
-xlabel('z(mm)')
-ylabel('time')
-colorbar
 
 end
 
