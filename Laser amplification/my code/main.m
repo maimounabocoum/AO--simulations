@@ -1,16 +1,25 @@
 %%% test script %%
 clearvars;
-parameters;
 
+param = (10:10:200)*1e-6;          % active surface  ;
+myScan = zeros(1,length(param));
+
+for n_scan = 1:length(param)
+
+    parameters;
 
 %% simultion variables
-F = TF_t(1024,6e6);
+F = TF_t(1024,1e6);
 P0s_in    = 0.150;    % seed input power in W
-P0p_in    = 3.2 ;   % pump input power in W
+P0p_in    = 30 ;     % pump input power in W
 stau_fwhm = 100e-6;   % seed beam
-ptau_fwhm = 100e-6;   % pump beam
-Pulse_in = exp(-log(2)*4*(2*F.t/stau_fwhm).^6); % seed profile
-Pump_in  = exp(-log(2)*4*(2*F.t/ptau_fwhm).^6); % pup profile
+ptau_fwhm = 120e-6;   % pump beam
+Pulse_in = exp(-log(2)*4*(2*F.t/stau_fwhm).^200); % seed profile
+Pump_in  = exp(-log(2)*4*(2*F.t/ptau_fwhm).^100); % pup profile
+% difnition of interaction temporal window:
+Interact_Window = 1 + 0*F.t;
+Interact_Window( Pulse_in < max(Pulse_in)/1e5) = 0 ;
+
 % normalization of input pulse
 Pulse_in  = P0s_in*Pulse_in; % in W
 Pump_in   = P0p_in*Pump_in; % in W
@@ -61,7 +70,7 @@ for loop = 2:length(z_grid)
     
     DeltaN0(:,loop) = N0*sigma_a*tau*IPUMP(:,loop-1)./( Ep +sigma_a*tau*IPUMP(:,loop-1) ) ;
     
-    Is = Ee*(1+Ep +sigma_a*tau*IPUMP(:,loop-1)/Ep)/(tau*sigma_e);
+    Is = Ee*( 1 + Ep +sigma_a*tau*IPUMP(:,loop-1)/Ep )/(tau*sigma_e);
     
     DeltaN(:,loop) = DeltaN0(:,loop)./(1 + IPULSE(:,loop-1)./Is);
          
@@ -74,24 +83,28 @@ for loop = 2:length(z_grid)
 end
 
 case 'QCW' % QCW case
+    
 for loop = 2:length(z_grid)
     
     % loop on temporal profile
-    for loop2 = 2:F.N
-       
-        DeltaN(loop2,loop) = DeltaN(loop2-1,loop-1) + (F.dt)*( N0*sigma_a*tau*IPUMP(loop2,loop-1)/Ep )...
-                             - (F.dt)*( sigma_e*IPULSE(loop2,loop-1)/Ee + sigma_a*IPUMP(loop2,loop-1)/Ep  + 1/tau)*DeltaN(loop2-1,loop-1)   ;
+    a_t = -( (sigma_e/Ee)*IPULSE(:,loop-1) + (sigma_a/Ep)*IPUMP(:,loop-1) + 1/tau ) ;
+    b_t =  N0*(sigma_a/Ep)*IPUMP(:,loop-1) ;
+    A_t = cumtrapz(F.t,a_t);
+    expmA_t = min(exp(-A_t),realmax('double')); % correction of out od double range error
     
-    end
     
-    % DeltaN0(:,loop) = N0*sigma_a*tau*IPUMP(:,loop-1)./(Ep)- tau*[diff(DeltaN(:,loop-1));0]/(F.dt) ;
-    
-    % DeltaN(:,loop) = DeltaN0(:,loop)./( tau*sigma_e*IPULSE(:,loop-1)/Ee + 1 + sigma_a*tau*IPUMP(:,loop-1)/Ep );
+    DeltaN(:,loop) = cumtrapz( F.t , b_t.*expmA_t )./expmA_t ;
+
+%     DeltaN0(:,loop) = N0*sigma_a*tau*IPUMP(:,loop-1)./( Ep +sigma_a*tau*IPUMP(:,loop-1) ) ;
+%     Is = Ee*(1+Ep +sigma_a*tau*IPUMP(:,loop-1)/Ep)/(tau*sigma_e);
+%     DeltaN2(:,loop) = DeltaN0(:,loop)./(1 + IPULSE(:,loop-1)./Is);
+%     
+    IPULSE(:,loop) = IPULSE(:,loop-1) + dzgrid*sigma_e*IPULSE(:,loop-1).*DeltaN(:,loop) ;
+    IPUMP(:,loop) = IPUMP(:,loop-1) - dzgrid*sigma_a*IPUMP(:,loop-1).*(N0-DeltaN(:,loop)) ;
              
-    IPULSE(:,loop) = IPULSE(:,loop-1) + dzgrid*(sigma_e*IPULSE(:,loop-1).*DeltaN(:,loop) - [diff(IPULSE(:,loop-1));0]/(c*F.dt)  ) ;
-     
-    IPUMP(:,loop) = IPUMP(:,loop-1) - dzgrid*(sigma_a*IPUMP(:,loop-1).*(N0-DeltaN(:,loop)) - [diff(IPUMP(:,loop-1));0]/(c*F.dt) ) ;
-     
+   %  IPULSE(:,loop) = IPULSE(:,loop-1)  + dzgrid*(sigma_e*IPULSE(:,loop-1).*DeltaN(:,loop)   - [diff(IPULSE(:,loop-1));0]/(c*F.dt)  ) ;     
+   %  IPUMP(:,loop)  = IPUMP(:,loop-1)   - dzgrid*(sigma_a*IPUMP(:,loop-1).*(N0-DeltaN(:,loop)) - [diff(IPUMP(:,loop-1));0]/(c*F.dt) ) ;
+%      
 end
 
 
@@ -101,18 +114,18 @@ end
 figure(4)
 hold off
 subplot(2,2,(1:2))
-imagesc(z_grid*1e3,F.t*1e6,IPUMP*1e-4)
-%imagesc(z_grid*1e3,F.t*1e6,DeltaN)
-title('I_{pump} evolution')
+%imagesc(z_grid*1e3,F.t*1e6,IPUMP*1e-4)
+imagesc(z_grid*1e3,F.t*1e6,DeltaN/N0)
+title(['I_{pump} evolution. Overall absorption ',num2str( floor(100*(1-trapz( F.t ,IPUMP(:,end))/trapz(F.t,IPUMP(:,1))) )),' %'])
 xlabel('crystal length (mm)')
 ylabel('time (\mu s)')
 cb = colorbar ;
 ylabel(cb,'[W/cm^2]')
 subplot(2,2,3)
-plot( z_grid*1e3, 100*(w0_main^2/w0_pump^2)*(IPULSE(F.N/2+1 , :)-IPULSE(F.N/2+1 , 1))/IPUMP(F.N/2+1,1) )
+plot( z_grid*1e3, 100*(w0_main^2/w0_pump^2)*(trapz(F.t,IPULSE(:,:))- trapz(F.t,IPULSE(:,1)))./trapz(F.t,Interact_Window(:).*IPUMP(:,1)) )
 title('Rod amplification')
 xlabel('crystal length (mm)')
-ylabel('(I_{out}-I_{in})/I_{pump}[%]')
+ylabel('(E_{out}- E_{in})/E_{pump}[%]')
 subplot(2,2,4)
 plot( z_grid*1e3, IPULSE(F.N/2+1 , :)/IPULSE(F.N/2+1 , 1) )
 title('Rod amplification')
@@ -124,23 +137,30 @@ hold on
 plot(1e6*F.t,1e-4*IPULSE(:,end))
 legend('I_{pulse in}(W/cm^2)','I_{sat}','I_{pulse out}(W/cm^2)')
 
-figure(3)
-plot(z_grid*1e3,IPUMP(F.N/2+1,:)/IPUMP(F.N/2+1,1));
-hold on 
-plot(z_grid*1e3,exp(-(z_grid-z_grid(1))*(1e2)*10));
-xlabel('mm')
-ylabel('a.u')
-legend('absorption simulation','th')
+% figure(3)
+% plot(z_grid*1e3,IPUMP(F.N/2+1,:)/IPUMP(F.N/2+1,1));
+% hold on 
+% plot(z_grid*1e3,exp(-(z_grid-z_grid(1))*(1e2)*10));
+% xlabel('mm')
+% ylabel('a.u')
+% legend('absorption simulation','th')
+% 
+% figure(2)
+% hold on
+% plot(1e6*F.t,pi*(min(w0_main,w0_pump))^2*IPULSE(:,end))
+% legend('pump(W)','seed(W)','amplified(W)')
 
-figure(2)
-hold on
-plot(1e6*F.t,pi*w0_main^2*IPULSE(:,end))
-legend('pump(W)','seed(W)','amplified(W)')
+
+myScan(n_scan) = 100*(min(w0_main,w0_pump)^2/w0_pump^2)*(trapz(F.t,IPULSE(:,end))- trapz(F.t,IPULSE(:,1)))./trapz(F.t,Interact_Window(:).*IPUMP(:,1)) ;
+
+end
 
 
-
-    
-
+ figure(5)
+ plot(param,myScan);
+ xlabel('Input Seed Power (W)')
+ ylabel('Extracted Power Ratio (%)')
+ legend('Scan')
 
 
 

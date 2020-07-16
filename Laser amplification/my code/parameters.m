@@ -6,7 +6,7 @@ Rod = 'Nd:YVO4';
 Regime = 'QCW';
 
 w0_pump  = 170e-6;         % active surface 
-w0_main  = 85e-6;          % active surface 
+w0_main  = param(n_scan);% 85e-6;          % active surface 
 
 L   = 5e-3;
 %L  = pi*w0^2/(800e-9);     % crystal length in m
@@ -67,9 +67,7 @@ switch Rod
         % pumpinp at 946nm
         N0 = 1.25e20*1e6 ;          % doping concentration cm^{-3}
                                     % 1%-doping concentration in cm^{-3}
-                                    % https://www.rp-photonics.com/doping_concentration.html
-        eta = 0.48;                 % absorption slope
-                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
+                                    % https://www.rp-photonics.com/doping_concentration.html                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
         
         % 30 cm-1 : sigma_a = 24e-20*1e-4 along C-axis
         % 10 cm-1 : sigma_a = 8e-20*1e-4 along A-axis
