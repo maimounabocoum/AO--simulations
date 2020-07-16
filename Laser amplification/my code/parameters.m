@@ -3,12 +3,12 @@ h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
 Rod = 'Nd:YVO4';
-Regime = 'CW';
+Regime = 'QCW';
 
 w0_pump  = 170e-6;         % active surface 
-w0_main  = 85e-6;         % active surface 
+w0_main  = 85e-6;          % active surface 
 
-L   = 0.5e-2;
+L   = 5e-3;
 %L  = pi*w0^2/(800e-9);     % crystal length in m
 
 %% define function
@@ -16,8 +16,8 @@ L   = 0.5e-2;
 
 
 
-SigmaCorr = BWCorrection(1,808e-9,4e-9,(800:820)*1e-9);
-figure; plot(800:820,SigmaCorr)
+% SigmaCorr = BWCorrection(1,808e-9,4e-9,(800:820)*1e-9);
+% figure; plot(800:820,SigmaCorr)
 
 %%
 
