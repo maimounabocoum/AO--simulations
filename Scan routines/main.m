@@ -75,8 +75,8 @@ end
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
-     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6 , 1);
-    % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
+    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6 , 1);
+     CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
     
     % field profile
     % Field = CurrentExperiement.MySimulationBox.Field;

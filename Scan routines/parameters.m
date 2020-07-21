@@ -16,8 +16,8 @@ param.element_height= 6/1000;       % Height of element [m] 6
 param.width = 0.2/1000;             % Width of element [m] - 0.11 for 15MhZ probe
 param.kerf = 0/1000;                % Distance between transducer elements [m]
 param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
-param.X0 = -40/1000  ;              % position min of effective probe shooting (center probe = 0mm)
-param.X1 =  40/1000 ;               % position max of effective probe shooting (center probe = 0mm)
+param.X0 = -5/1000  ;              % position min of effective probe shooting (center probe = 0mm)
+param.X1 =  5/1000 ;               % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
 param.attenuation = 0;              % en db/cm/Mhz
 param.no_sub_x = 1;
@@ -33,7 +33,7 @@ param.TrigDelay = 10e-6;
 % JM : 'Jean-Michel continuoous waves' (not implemented yet)
 % OS : 'Structured Waves ' 
 
-param.FOC_type    = 'JM'; 
+param.FOC_type    = 'OF'; 
 param.Bascule     = 'off';             % parameter for JM with / without Talbot Effect
 param.focus       = 23/1000;           % Initial electronic focus     - only active in OF mode
 param.angles      = 0*pi/180;          % Line Vector Angular scan     - only active in OP and OS mode 

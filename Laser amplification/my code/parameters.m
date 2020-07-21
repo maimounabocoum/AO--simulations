@@ -16,8 +16,8 @@ L   = 0.5e-2;
 
 
 
-SigmaCorr = BWCorrection(1,808e-9,4e-9,(800:820)*1e-9);
-figure; plot(800:820,SigmaCorr)
+% SigmaCorr = BWCorrection(1,808e-9,4e-9,(800:820)*1e-9);
+% figure; plot(800:820,SigmaCorr)
 
 %%
 
