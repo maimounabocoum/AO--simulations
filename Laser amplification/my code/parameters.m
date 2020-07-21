@@ -5,11 +5,14 @@ c = 3e8;
 Rod = 'Nd:YVO4';
 Regime = 'QCW';
 
-w0_pump  = 170e-6;         % active surface 
-w0_main  = param(n_scan);% 85e-6;          % active surface 
+w0_pump  = 180e-6;                          % pump waist 
+w0_main  = 85e-6;% param(n_scan);% 85e-6; 	% seed waist
+
+
 
 L   = 5e-3;
-%L  = pi*w0^2/(800e-9);     % crystal length in m
+Z_focus = 3*L;
+%L  = pi*w0_main^2/(1064e-9);     % crystal length in m
 
 %% define function
 
@@ -54,7 +57,7 @@ switch Rod
         sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
         N0 = 3.52e19*1e6 ;      % 0.1%-doping concentration in cm^{-3}
     case 'Nd:YVO4'
-        tau   = 90e-6;         % fluorescent time
+        tau   = 90e-6;          % fluorescent time 90e-6
         gamma = 1;              % degenerency ratio
         lambda_e = 1064e-9;
         nu_e = c/lambda_e ;
@@ -128,6 +131,7 @@ function Sigma = BWCorrection(Sigma0,lambda0,BW,lambda)
 Sigma = Sigma0*exp(-(lambda-lambda0).^2/BW^2) ;
 
 end
+
 
 %%
 

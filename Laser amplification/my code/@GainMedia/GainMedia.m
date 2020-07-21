@@ -5,7 +5,7 @@ classdef GainMedia
     properties
         % rod caracteristics
         Rod
-        L  = 10e-2;     % crystal length in m
+        L   = 10e-2;     % crystal length in m
         w0  = 100e-6;   % active surface 
         
         tau % lasing fluorescent lifetime
