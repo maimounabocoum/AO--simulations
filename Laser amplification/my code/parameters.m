@@ -3,13 +3,16 @@ h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
 Rod = 'Nd:YVO4';
-Regime = 'CW';
+Regime = 'QCW';
 
-w0_pump  = 170e-6;         % active surface 
-w0_main  = 85e-6;         % active surface 
+w0_pump  = 180e-6;                          % pump waist 
+w0_main  = 85e-6;% param(n_scan);% 85e-6; 	% seed waist
 
-L   = 0.5e-2;
-%L  = pi*w0^2/(800e-9);     % crystal length in m
+
+
+L   = 5e-3;
+Z_focus = 3*L;
+%L  = pi*w0_main^2/(1064e-9);     % crystal length in m
 
 %% define function
 
@@ -54,7 +57,7 @@ switch Rod
         sigma_a = 4.1e-20*1e-4; % absorption cross section m2 at 808nm p.86
         N0 = 3.52e19*1e6 ;      % 0.1%-doping concentration in cm^{-3}
     case 'Nd:YVO4'
-        tau   = 90e-6;         % fluorescent time
+        tau   = 90e-6;          % fluorescent time 90e-6
         gamma = 1;              % degenerency ratio
         lambda_e = 1064e-9;
         nu_e = c/lambda_e ;
@@ -67,9 +70,7 @@ switch Rod
         % pumpinp at 946nm
         N0 = 1.25e20*1e6 ;          % doping concentration cm^{-3}
                                     % 1%-doping concentration in cm^{-3}
-                                    % https://www.rp-photonics.com/doping_concentration.html
-        eta = 0.48;                 % absorption slope
-                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
+                                    % https://www.rp-photonics.com/doping_concentration.html                                    % http://www.pmoptics.com/neodymium_doped_yvo4.html
         
         % 30 cm-1 : sigma_a = 24e-20*1e-4 along C-axis
         % 10 cm-1 : sigma_a = 8e-20*1e-4 along A-axis
@@ -130,6 +131,7 @@ function Sigma = BWCorrection(Sigma0,lambda0,BW,lambda)
 Sigma = Sigma0*exp(-(lambda-lambda0).^2/BW^2) ;
 
 end
+
 
 %%
 
