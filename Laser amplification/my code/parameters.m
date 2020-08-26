@@ -5,13 +5,13 @@ c = 3e8;
 Rod = 'Nd:YVO4';
 Regime = 'QCW';
 
-w0_pump  = 180e-6;                          % pump waist 
+w0_pump  = 170e-6;                          % pump waist 
 w0_main  = 85e-6;% param(n_scan);% 85e-6; 	% seed waist
 
 
 
 L   = 5e-3;
-Z_focus = 3*L;
+Z_focus = 2*L;
 %L  = pi*w0_main^2/(1064e-9);     % crystal length in m
 
 %% define function

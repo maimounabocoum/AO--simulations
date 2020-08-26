@@ -2,7 +2,9 @@
 clearvars;
 
 param = [0.280,0.5,0.6,0.7,0.8,0.9,1,1.3];          % active surface  ;
+
 myScan = zeros(1,length(param));
+I_last = zeros(1,length(param));
 
  for n_scan = 1:length(param)
 
@@ -10,10 +12,10 @@ myScan = zeros(1,length(param));
 
 %% simultion variables
 F = TF_t(2048,5e6);
-P0s_in    = param(n_scan);% 0.28;    % seed input power in W
-P0p_in    = 20 ;     % pump input power in W
-stau_fwhm = 200e-6;   % seed beam
-ptau_fwhm = 170e-6;   % pump beam
+P0s_in    = param(n_scan);  % 0.28;    % seed input power in W
+P0p_in    = 20 ;            % pump input power in W
+stau_fwhm = 200e-6;         % seed beam
+ptau_fwhm = 170e-6;         % pump beam
 Pulse_in = exp(-log(2)*4*(2*(F.t - 88e-6)/stau_fwhm).^200); % seed profile78
 Pump_in  = exp(-log(2)*4*(2*F.t/ptau_fwhm).^100); % pup profile
 % difnition of interaction temporal window:
@@ -22,7 +24,7 @@ Interact_Window( Pulse_in < max(Pulse_in)/1e5) = 0 ;
 
 % z grid definition
 z_grid = linspace(0,L,5000);
-w0_z = w0_main + 0*Wz( Z_focus , w0_main , lambda_e ,z_grid );
+w0_z = Wz( Z_focus , w0_main , lambda_e ,z_grid );
 dzgrid = z_grid(2) - z_grid(1);
 
 % normalization of input pulse
@@ -82,7 +84,7 @@ for loop = 2:length(z_grid)
          dzgrid*sigma_a*IPUMP(:,loop-1).*(N0-DeltaN(:,loop)) ;
      
      % intensity renormalization:
-     % IPULSE(:,loop) = (w0_z(loop)/w0main)*IPULSE(:,loop);
+    IPULSE(:,loop) = (w0_z(loop-1)/w0_z(loop))^2*IPULSE(:,loop); %
      
 end
 
@@ -94,7 +96,7 @@ for loop = 2:length(z_grid)
     b_t =  N0*(sigma_a/Ep)*IPUMP(:,loop-1) ;
     A_t = cumtrapz(F.t,a_t);
     % expmA_t = exp(-A_t) ;
-    expmA_t = min(exp(-A_t),realmax('double')); % correction of out od double range error
+    expmA_t = min(exp(-A_t),realmax('double')); % correction of out of double range error
     
     
     DeltaN(:,loop) = cumtrapz( F.t , b_t.*expmA_t )./expmA_t ;
@@ -134,7 +136,7 @@ ylabel('time (\mu s)')
 cb = colorbar ;
 ylabel(cb,'[W/cm^2]')
 subplot(2,2,3)
-plot( z_grid*1e3, 100*(1/w0_pump^2)*(w0_z.^2.*trapz(F.t,IPULSE(:,:))- w0_z(1)^2*trapz(F.t,IPULSE(:,1)))./trapz(F.t,Interact_Window(:).*IPUMP(:,1)) )
+plot( z_grid*1e3, 100*(1/w0_pump^2)*(min(w0_z,w0_pump).^2.*trapz(F.t,IPULSE(:,:))- min(w0_z(1),w0_pump)^2*trapz(F.t,IPULSE(:,1)))./trapz(F.t,Interact_Window(:).*IPUMP(:,1)) )
 title('Rod amplification')
 xlabel('crystal length (mm)')
 ylabel('(E_{out}- E_{in})/E_{pump}[%]')
@@ -159,11 +161,12 @@ legend('I_{pulse in}(W/cm^2)','I_{sat}','I_{pulse out}(W/cm^2)')
 % 
 figure(2)
 hold on
-plot(1e6*F.t,pi*(min(w0_main,w0_pump))^2*IPULSE(:,end))
+plot(1e6*F.t,pi*(min(w0_z(end),w0_pump))^2*IPULSE(:,end))
 % plot(pi*(min(w0_z(end),w0_pump))^2*IPULSE(:,end))
 legend('pump(W)','seed(W)','amplified(W)')
 % 
 myScan(n_scan) = pi*(min(w0_z(end),w0_pump))^2*IPULSE(1296,end);
+I_last(n_scan) = IPULSE(1296,end);
 
  end
 
@@ -172,14 +175,15 @@ myScan(n_scan) = pi*(min(w0_z(end),w0_pump))^2*IPULSE(1296,end);
  hold on
  plot(param,myScan);
  xlabel('Input Seed Power (W)')
- ylabel('Extracted Power Ratio (%)')
- legend('Scan')
+ % ylabel('Extracted Power Ratio (%)')
+ % legend('Scan')
 
 
-
-
-
-
+% figure(4)
+% semilogy(diff(I_last)./diff(param/(pi*w0_main^2)))
+% hold on
+% semilogy(( 1./( param/(pi*w0_main^2) ) + 1/Is )./(1./I_last + 1/Is))
+% hold off
 
 
 
