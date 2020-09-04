@@ -2,16 +2,16 @@
 h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
-Rod = 'Nd:YVO4';
-Regime = 'QCW';
+Rod = 'TiSa';%TiSa-Nd:YVO4
+Regime = 'CW';
 
-w0_pump  = 180e-6;                          % pump waist 
+w0_pump  = 170e-6;                          % pump waist 
 w0_main  = 85e-6;% param(n_scan);% 85e-6; 	% seed waist
 
 
 
 L   = 5e-3;
-Z_focus = 3*L;
+Z_focus = 0;
 %L  = pi*w0_main^2/(1064e-9);     % crystal length in m
 
 %% define function
@@ -125,6 +125,49 @@ switch Rod
 
 end
 
+
+
+
+%% scaling QCW pulse 
+% 
+% clearvars;
+% 
+% frep = 10 ;        % repetition rate in Hz
+% dt = 5e-6;
+% t = 0:dt:1;        % time in s
+% P_cw = 1;          % average power in W
+% 
+% tau = 10e-3;      % pulse duration in s
+% Npulse = floor(tau/dt);
+% Nrep = floor( 1/(frep*dt)) ;
+% 
+% P_peak = P_cw/(tau*frep);
+% Pulse = 0*t ;
+% 
+% for k = 0:10
+% Pulse( k*Nrep + (1:Npulse) ) = 1;
+% end
+% 
+% Pulse = P_peak*Pulse(1:length(t));
+% 
+% figure(1);subplot(211); hold off ; plot(1e6*t,Pulse,'linewidth',2);
+% hold on ; plot(1e6*t,0*t + P_cw ,'linewidth',2);
+% legend('QCW','CW')
+% xlabel('time (\mu s)')
+% ylabel('peak power (W)')
+% title(['repetion rate : ',num2str(frep),'Hz '])
+% 
+% P_peak = 1:1e3; % W
+% tau = 100e-6;
+% frep = 10; % Hz
+% Pcw = (tau*frep)*P_peak ;
+% subplot(212); hold off;  plot(P_peak,Pcw,'linewidth',2)
+% hold on ; plot(P_peak,10*Pcw,'linewidth',2) ;
+% legend('\Delta t = 100\mu s','\Delta t = 1 ms')
+% xlabel('P_{peak} (W)')
+% ylabel('<P(W)>')
+% title(['repetion rate : ',num2str(frep),'Hz '])
+
 %%
 function Sigma = BWCorrection(Sigma0,lambda0,BW,lambda)
 
@@ -133,7 +176,6 @@ Sigma = Sigma0*exp(-(lambda-lambda0).^2/BW^2) ;
 end
 
 
-%%
 
 
 
