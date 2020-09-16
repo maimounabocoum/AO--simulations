@@ -2,7 +2,7 @@
 h = 6.62e-34;% J.s
 c = 3e8;
 %% parameters sheet
-Rod = 'TiSa';%TiSa-Nd:YVO4
+Rod = 'Nd:YVO4';%TiSa-Nd:YVO4
 Regime = 'CW';
 
 w0_pump  = 170e-6;                          % pump waist 

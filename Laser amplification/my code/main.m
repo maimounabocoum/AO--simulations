@@ -12,8 +12,8 @@ clearvars;
 
 %% simultion variables
 F = TF_t(2048,5e6);
-P0s_in    = 0.50;  % 0.28;     % seed input power in W
-P0p_in    = 100 ;               % pump input power in W
+P0s_in    = 70;  % 0.28;     % seed input power in W
+P0p_in    = 70 ;               % pump input power in W
 stau_fwhm = 100e-6;             % seed beam
 ptau_fwhm = 100e-6;              % pump beam
 Pulse_in = exp(-log(2)*4*(2*(F.t - 0e-6)/stau_fwhm).^200); % seed profile78
@@ -176,8 +176,8 @@ plot(1e6*F.t,pi*(min(w0_z(end),w0_pump))^2*IPULSE(:,end))
 % plot(pi*(min(w0_z(end),w0_pump))^2*IPULSE(:,end))
 legend('pump(W)','seed(W)','amplified(W)')
 % 
-myScan(n_scan) = pi*(min(w0_z(end),w0_pump))^2*IPULSE(1296,end);
-I_last(n_scan) = IPULSE(1296,end);
+%myScan(n_scan) = pi*(min(w0_z(end),w0_pump))^2*IPULSE(1296,end);
+%I_last(n_scan) = IPULSE(1296,end);
 
  % end
 
