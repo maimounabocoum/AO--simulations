@@ -72,8 +72,6 @@ classdef ActuatorProbe
                 
         end
         
-
-        
         function obj = Set_ActiveList(obj,ActiveList)
             % check that value are well into 1 and Nelement :
             

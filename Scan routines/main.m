@@ -1,15 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  main  program  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% maimouna bocoum 04-01-2017
 clearvars ;
-
 addpath('..\Field_II')
 addpath('..\radon inversion')
 addpath('subscripts')
 addpath('..\..\AO--commons\shared functions folder')
 field_init(0);
-
-parameters;
-IsSaved = 1 ;
+IsSaved = 0 ;
 
 %%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
 SimuPathFolder = 'Q:\datas\simulated datas';
@@ -17,32 +14,18 @@ SimuPathFolder = 'Q:\datas\simulated datas';
 
 
 
-%%
-%%%%%%%%%%%%%%%%%%%% Initialize Experiement  %%%%%%%%%%%%%%%%%%%%%%%
+%% =========  %%%%%%%%%%%%%%%%%%%% Initialize Experiement  %%%%%%%%%%%%%%%%%%%%%%%
+clearvars ; 
 
-
-CurrentExperiement = Experiment(param);
-
-% initial excitation field :
-
-%     excitation_env = hilbert(excitation);
-%     excitation_env= abs(excitation_env);
-% 
-%     figure;
-%     plot(t_excitation*1e6,excitation)
-%     hold on 
-%     plot(t_excitation*1e6,excitation,'color','red')
-%     xlabel('time in \mu s')
-%     ylabel('a.u')
-%     title('field excitation')
-    
-    
+parameters; % script with simulation parameter (to edit befor running the simulation)
+CurrentExperiement = Experiment(param); %initializes the experiement
+  
 % evaluate Phantom on simulation Box :
 CurrentExperiement = CurrentExperiement.EvalPhantom();
 
 % use param.angles has an input to additionally show Radon transform
 % CurrentExperiement.ShowPhantom(param.angles);
-CurrentExperiement.ShowPhantom();
+% CurrentExperiement.ShowPhantom();
 
 % creating memory to save probe delay law
 if param.Activated_FieldII == 1 
@@ -52,40 +35,19 @@ end
  [Nx,Ny,Nz]    = SizeBox(CurrentExperiement.MySimulationBox);
  Field_Profile = zeros(Nz,Nx,CurrentExperiement.Nscan);
  
- %% run acquision loop over Nscan
+ %% run acquision loop over Nscan for tagged photon flux
  
-% figure(1);plot(real(CurrentExperiement.MyAO.Event)); 
-
  tic
- Hf = gcf;
  h = waitbar(0,'Please wait...');
-
- 
-
  
  for n_scan = 1:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
      CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
-     % CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ; % Calculate current AO signal - Photorefractive
+     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;   % Calculate current AO signal - Photorefractive
      % CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
-     % Calculate current AO signal - Holographie
-
-    % % option for screening : XY, Xt , XZt
-    % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
-    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6 , 1);
-     CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
-    
-    % field profile
-    % Field = CurrentExperiement.MySimulationBox.Field;
-    % Field_max,Tmax] = max(CurrentExperiement.MySimulationBox.Field,[],1);
-    % max(obj.Field,[],1) : returns for each colulm
-    % the maximum field pressure.
-    % Field_Profile(:,:,n_scan) = squeeze( reshape(Field_max,[Ny,Nx,Nz]) )';
-   
-    % retreive delay law for current scan
+     
+    % Retreive delay law for current scan for saving
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
      DelayLAWS( :  ,n_scan) = CurrentExperiement.MyProbe.DelayLaw ;
     end
@@ -95,7 +57,7 @@ end
  end
 
 
- ActiveLIST = CurrentExperiement.BoolActiveList ;
+ ActiveLIST = CurrentExperiement.BoolActiveList ; % list of active piezo-element for each n_scan (matrix), for saving
  
  close(h) 
  
@@ -103,29 +65,30 @@ end
  
  %% show acquisition loop results
  
- CurrentExperiement.ShowAcquisitionLine() ;
+ CurrentExperiement.ShowAcquisitionLine() ; % Show results of simulated acquistion
+ % return the AO image on the simualtion grid for photorefractive detection
+ % returns a plot for camera-based detection as resulted by camera
+ % integration
  
-%  figure
-%  imagesc(CurrentExperiement.ScanParam*1e3+20,...
-%           CurrentExperiement.MySimulationBox.z*1e3,...
-%           CurrentExperiement.AOSignal)
-%       
-%   x = CurrentExperiement.ScanParam*1e3+20 ;
-%   z = CurrentExperiement.MySimulationBox.z*1e3 ;
-%   I = CurrentExperiement.AOSignal ;
-%   save('C:\Users\mbocoum\Dropbox\self-written documents\acoustic-structured-illumination\images\datas\SimuOF','x','z','I')
-
-% [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
-% Transmission = squeeze( reshape(CurrentExperiement.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-% plot(CurrentExperiement.MySimulationBox.z*1e3,Transmission(75,:))
-% hold on
-% plot(CurrentExperiement.MySimulationBox.z*1e3,CurrentExperiement.AOSignal(:,64)/max(CurrentExperiement.AOSignal(:,64)))
+ %% run this code portion to visualize the field temporal and/or spatial profile
+ Hf = gcf;      % open a new figure
+ n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
+ parameters; % script with simulation parameter (to edit befor running the simulation)
+CurrentExperiement = Experiment(param); 
+ CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
+ CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
+     % % option for screening : XY, Xt , XZt
+    % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
+    %
+     %CurrentExperiement = CurrentExperiement.MyAO.BuildJM(param.f0,param.nuZ0,param.c,param.Bascule,CurrentExperiement.ScanParam);
+     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+    % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
+    
+    
+ %% run this code portion to visualize the field autocorrelation with reference beam (holography detection only)
  
-% set(findall(gcf,'-property','FontSize'),'FontSize',15) 
-% [cx,cy,c] = improfile;
-% figure;
-% plot(cx(1) + sqrt((cx-cx(1)).^2 + (cy-cy(1)).^2),c/max(c))
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  %% save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

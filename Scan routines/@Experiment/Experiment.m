@@ -276,7 +276,7 @@ methods ( Access = 'public' )
                                                obj.param.nuX0*1e-3,obj.param.nuZ0*1e-3,Xs*1e3,...
                                                obj.param.fs*1e-6,obj.param.c, obj.param.Bascule ); % Calculer la matrice
             
-             EXCITATION = EXCITATION';                              
+             EXCITATION = repmat(EXCITATION',1,obj.param.patternRep);                              
              %EXCITATION = repmat(EXCITATION',1,6);
 
             % test study FFT
@@ -619,7 +619,7 @@ methods ( Access = 'public' )
             
         end
         
-        function Iout = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,nscan)
+        function myField = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,Exposure,nscan)
             
             [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
             
@@ -645,53 +645,77 @@ methods ( Access = 'public' )
                 
                 set(FigHandle,'name','(XZ) maximum field (t) values');
                 %% define field correlator
-                output      = obj.MySimulationBox.Field;
-                t           = obj.MySimulationBox.time(:);
+                output      = obj.MySimulationBox.Field;   % real pressure field over time(one column), for each point of simulation 
+                % box(number of column)
+                t           = obj.MySimulationBox.time(:); % simulation time column vector
                 
                 %Eref        = repmat( exp(-1i*2*pi*obj.param.f0*t(:)), 1 , size( output , 2 )  ); 
-                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( output , 2 )  );  
-                E_tagged    = hilbert(output);
-
-                
-                %TrigDelay = obj.param.TrigDelay;
+                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( output , 2 )  );  % reference field 
+                E_tagged    = hilbert(output); % complexe simulated field over time (each line), for each point o th the simulated
+                % box (number of column)
+    
                 % change size of Eref depending on parameter
-                E_tagged(~(t>TrigDelay),:) = []; 
-                
+                E_tagged( (t<TrigDelay) | (t>=(TrigDelay+Exposure)),:) = []; % removing before trigger and after CCD integration time                              
                 Nref = size(Eref,1);
                 Ntagged = size(E_tagged,1);
+                
                 if( Nref > Ntagged )
-                Eref(Nref+1:end,:) = [];    
+                Eref(Ntagged+1:end,:) = [];    
                 elseif( Nref < Ntagged )
                     %find index of point greater then delay      
                 E_tagged((Nref+1):end,:) = [];    
                 end
                 
                 
-                myField = E_tagged.*Eref  ; % correlation on each column
+                myFieldt = E_tagged.*(Eref)  ; % correlation on each column
                                 
-                myField = abs(sum(myField,1));
-                myField = reshape(myField ,[Ny,Nx,Nz]);     
-                myField = squeeze( myField(I_plane,:,:) ) ;
-                myFieldm = reshape( max(envelope(output,300)),[Ny,Nx,Nz]);  
-                myFieldm= squeeze( myFieldm(I_plane,:,:) ) ; 
-                subplot(121)
-                        imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myField' );
+                myField = abs(sum(myFieldt,1)); % integration correlation for each point of the box
+                myField = reshape(myField ,[Ny,Nx,Nz]);     % resize the box to current screening
+                myField = squeeze( myField(I_plane,:,:) )' ; % remove single direction
+                
+                subplot(2,2,[1 3])
+                        imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myField );
                         xlabel('x (mm)')
                         ylabel('z (mm)')
                         ylim([min(obj.MySimulationBox.z*1e3) max(obj.MySimulationBox.z*1e3)])
-                        title(['P(t) on XZ, \tau_c =',num2str(1e6*obj.param.tau_c ),'\mu s']) 
+                        title(['correlation with Reference, \tau_{exp,CCD} = ',num2str(1e6*Exposure),'\mu s']) 
                         cb = colorbar ;
                         ylabel(cb,'a.u')
                         drawnow
-              subplot(122)
-                        imagesc(obj.MySimulationBox.x*1e3,obj.MySimulationBox.z*1e3, myFieldm' );
-                        xlabel('x (mm)')
-                        ylabel('z (mm)')
-                        ylim([min(obj.MySimulationBox.z*1e3) max(obj.MySimulationBox.z*1e3)])
-                        title(['P(t) on XZ, \tau_c =',num2str(1e6*obj.param.tau_c ),'\mu s']) 
-                        cb = colorbar ;
-                        ylabel(cb,'a.u')
-                        drawnow
+                subplot(2,2,4)
+                        index_center_box = obj.MySimulationBox.GetIndexPoint( obj.MySimulationBox.GetCenter() );% index of point located at center of the simulation box
+                        List = obj.MySimulationBox.Points();
+                        plot( t*1e6 , output(:,index_center_box)/max(output(:,index_center_box)) )
+                        hold on 
+                        plot( TrigDelay*1e6+obj.MyAO.t*1e6 , real( obj.MyAO.Event(:,nscan) ) )
+                        hold on
+                        plot(t*1e6, (t>TrigDelay & t<TrigDelay+Exposure),'g' )
+                        ylabel('normalized field a.u')
+                        title(sprintf('temporal profil at center [x(mm),y(mm) ,z(mm)] = [%.1f,%.0f,%.1f] ',...
+                            List(index_center_box,1)*1e3,...
+                            List(index_center_box,2)*1e3,...
+                            List(index_center_box,3)*1e3 ) )
+                        
+                        xlabel('simulation time (\mu s)')
+                        legend('Simu FieldII','Reference','camera integration')        
+                subplot(2,2,2)
+                        index_center_box = obj.MySimulationBox.GetIndexPoint( [0,0,0] );% index of point located at center of the simulation box
+                        plot( t*1e6 , output(:,index_center_box)/max(output(:,index_center_box)) )
+                        hold on 
+                        plot( TrigDelay*1e6+obj.MyAO.t*1e6 , real( obj.MyAO.Event(:,nscan) ) )
+                        hold on
+                        plot(t*1e6, (t>TrigDelay & t<TrigDelay+Exposure),'g' )
+%                         hold on 
+%                         plot(t(t>TrigDelay & t<TrigDelay+Exposure)*1e6,real(myFieldt)/max(real(myFieldt)),'r','linewidth',2)
+                        ylabel('normalized field a.u')
+                        title(sprintf('temporal profil at center [x(mm),y(mm) ,z(mm)] = [%.0f,%.0f,%.0f] ',...
+                            0,...
+                            0,...
+                            0 ) )
+                        
+                        xlabel('simulation time (\mu s)')
+                        legend('Simu FieldII','Reference','camera integration') 
+                        
 
             end
             

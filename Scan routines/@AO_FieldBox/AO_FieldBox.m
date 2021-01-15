@@ -70,6 +70,19 @@ classdef AO_FieldBox
      
         end
         
+        function I_pointIndex = GetIndexPoint(obj,point)
+            % retreive value using normal distance
+            % center is the closest value to gepmetrical center
+   
+            List = Points(obj);
+            distance = sum(abs(  List - repmat( point , size(List,1),1 ) ).^2,2);
+            I_pointIndex = find( distance == min(distance) ) ;
+            I_pointIndex = I_pointIndex(1); % get single value if exist equidistant points
+            
+            
+            
+        end
+        
         function center = GetCenter(obj)
            center = [mean(obj.x), mean(obj.y),mean(obj.z)];           
         end

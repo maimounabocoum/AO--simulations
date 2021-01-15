@@ -4,6 +4,7 @@ classdef AOmodulator
     
     properties
         N       % number of point
+        t
         Fe      % Sampling Frequency
         Event   % Event Buffer
     end
@@ -20,35 +21,36 @@ classdef AOmodulator
             N = floor(tau_c*Fe);
             obj.Fe = Fe;
             obj.N = N;
+            obj.t = (0:(obj.N-1))/(obj.Fe);
         end
         
         function Event = BuildOF(f0,Nevent)
-            t = (0:(obj.N-1))/(obj.Fe);
-            Event = repmat( exp(-1i*2*pi*f0*t(:)) , 1 , Nevent );
+
+            Event = repmat( exp(-1i*2*pi*f0*obj.t(:)) , 1 , Nevent );
         end
+        
         function Event = BuildJM(obj,f0,nuZ0,c,Bascule,ScanParam)
             
-            t = (0:(obj.N-1))/(obj.Fe);
-            
+    
             Nevent = size(ScanParam,1);
             
             Event = zeros(obj.N,Nevent);
             
             for nscan=1:Nevent
-            nuZ = (ScanParam(nscan,1)*nuZ0);   % mm-1->m-1
+            nuZ = (ScanParam(nscan,2)*nuZ0);   % mm-1->m-1
             fz = c*nuZ ; %Hz
-            Event(:,nscan) = exp(-1i*2*pi*f0*t(:));
+            Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:));
             
                 if strcmp(Bascule,'on')
-                        Am = mod(ceil(2*fz*t(:)),4);
+                        Am = mod(ceil(2*fz*obj.t(:)),4);
                         Am(Am==2)=0;
                         Am(Am==3)=-1;
-                        Event(:,nscan) = exp(-1i*2*pi*f0*t(:)).*Am;
+                        Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*Am;
                 else
                         if ScanParam(nscan,1)==0
-                           Event(:,nscan) = exp(-1i*2*pi*f0*t(:)) ;
+                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)) ;
                         else
-                           Event(:,nscan) = exp(-1i*2*pi*f0*t(:)).*( sin( 2*pi*fz*(t(:)) )> 0 );   
+                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( sin( 2*pi*fz*(obj.t(:)) )>0 );
                         end    
                 end
                 
