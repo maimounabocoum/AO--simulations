@@ -74,7 +74,7 @@ end
  Hf = gcf;      % open a new figure
  n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
  parameters; % script with simulation parameter (to edit befor running the simulation)
-CurrentExperiement = Experiment(param); 
+ CurrentExperiement = Experiment(param); 
  CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
      % % option for screening : XY, Xt , XZt
