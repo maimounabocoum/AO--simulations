@@ -38,6 +38,7 @@ classdef AOmodulator
             
             for nscan=1:Nevent
             nuZ = (ScanParam(nscan,2)*nuZ0);   % mm-1->m-1
+            phase = ScanParam(nscan,3);
             fz = c*nuZ ; %Hz
             Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:));
             
@@ -50,7 +51,7 @@ classdef AOmodulator
                         if ScanParam(nscan,1)==0
                            Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)) ;
                         else
-                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( sin( 2*pi*fz*(obj.t(:)) )>0 );
+                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( sin( 2*pi*phase + 2*pi*fz*(obj.t(:)) )>0 );
                         end    
                 end
                 

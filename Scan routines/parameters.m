@@ -6,7 +6,7 @@
 
 % set_field('show_time',1);
 
-param.f0 = 3e6;                     % Transducer center frequency [Hz]
+param.f0 = 6e6;                     % Transducer center frequency [Hz]
 param.fs = 100e6;                   % Sampling frequency in FIELDII[Hz]
 param.fs_aq  = 10e6;                % Sampling frequency of the photodiode [Hz]
 param.Noc = 4 ;                     % Number of optical cycles
@@ -19,13 +19,21 @@ param.N_elements = 192;             % 192; % Number of elements for SL10-2 probe
 param.X0 = -50/1000  ;              % position min of effective probe shooting (center probe = 0mm)
 param.X1 =  50/1000 ;               % position max of effective probe shooting (center probe = 0mm)
 param.Rfocus = 35/1000;             % Static Elevation focus
-param.attenuation = 0;              % en db/cm/Mhz
+param.attenuation = 0;              % en db/cm/MHz (not yet implemented)- in water : 0.3 ?
 param.no_sub_x = 1;
 param.no_sub_y = 10; % for designed probes, you should put a value > 2 for proper calculation (10 is good!)
 
 
 param.farfield  = param.width^2/(4*param.lambda); 
-param.tau_c     = 20e-6; % camera intergration type for holography detection (advise: leave it at 20us )
+
+param.detection = 'holography'; % holography or photorefractive
+param.tau_c     = 20e-6;        % camera intergration type for holography detection (advise: leave it at 20us )
+param.Trigdelay = 20e-6;        % accounts for time fo flight delay before camera triggers
+
+% tips: you can evaluate tau_c and Trigdelay using the "visualize the
+% field" bloc adjusting parameters in:
+% CurrentExperiement.ShowFieldCorrelation()
+
 %% type of focalization to apply for the virtual experiment :
 % OF : 'Focused Waves'
 % OP : 'Plane Waves'
@@ -47,8 +55,9 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 2;                          % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = 5;                          % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbZ         = 10;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = -5;                             % 20 Nb de composantes de Fourier en X, 'JM'
+param.phase       = [0,0.25,0.5,0.75];                          % phases i 2pi unit for 'JM'
 param.nuZ0 = 1/( (param.c)*20*1e-6 );           % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 
 
@@ -84,8 +93,8 @@ param.center = [0 0 23]/1000 ;      % specify the center of the gaussian beam.
 %% absorbers positions :
     % fringes : modulation of intensity in direction given by Position
     param.phantom.Positions = [-1.5 0 23 ; 0 1.5 23]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [1.5 ; 1.5]/1000;                  % dimension in all direction [dim ; dim ; ...]
-    param.phantom.Types = {'gaussian','gaussian'} ;          % available types exemple : { 'square', 'gaussian', ...}
+    param.phantom.Sizes     = [1.5 ; 1.5]/1000;             % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Types = {'gaussian','gaussian'} ;         % available types exemple : { 'square', 'gaussian', ...}
     
     
 %% Probe defintion :

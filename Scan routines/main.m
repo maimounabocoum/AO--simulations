@@ -40,12 +40,12 @@ end
  tic
  h = waitbar(0,'Please wait...');
  
- for n_scan = 1:CurrentExperiement.Nscan
+ for n_scan = 1%:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
      CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
-     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;   % Calculate current AO signal - Photorefractive
-     % CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'Photorefractive','Holography') ; 
+     %CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan) ;   % Calculate current AO signal - Photorefractive
+     CurrentExperiement = CurrentExperiement.GetAcquisitionLine(n_scan,'holography') ;  % detection choice : photorafractive / holography
      
     % Retreive delay law for current scan for saving
     if strcmp(param.FOC_type,'OP') || strcmp(param.FOC_type,'OS')
@@ -71,8 +71,9 @@ end
  % integration
  
  %% run this code portion to visualize the field temporal and/or spatial profile
+ 
  Hf = gcf;      % open a new figure
- n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
+ n_scan =  2;  % index of the scan - look inside variable for corresponding parameters
  parameters; % script with simulation parameter (to edit befor running the simulation)
  CurrentExperiement = Experiment(param); 
  CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
@@ -119,6 +120,7 @@ SampleRate      = param.fs_aq ;
 TypeOfSequence  = param.FOC_type ;
 NbX             = param.NbX ;        % ondes JM
 NbZ             = param.NbZ ;        % ondes JM
+phase           = param.phase  ;     % ondes JM
 decimation      = param.decimation ; % ondes OS
 dFx             = param.df0x;        % ondes OS
 c               = param.c ;

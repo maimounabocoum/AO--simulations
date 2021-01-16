@@ -1,5 +1,6 @@
 classdef Experiment
-    %UNTITLED Summary of this class goes here
+    
+    %   ----------- Summary of this class goes here ---------- 
     %   Detailed explanation goes here
     
     properties (SetAccess = public)
@@ -8,18 +9,18 @@ classdef Experiment
         MyProbe ;
         MyLaser ;         % LaserBeam
         MySimulationBox;  % AO_FieldBox
-        MyExcitation
+        MyExcitation;     % 
         MyAO;             % AOmodulator type
         
         % phantom on simulation bow transmission profile
         DiffuseLightTransmission
       
-       ScanParam       % Parameter used for the scan
-       Nscan           % number of scans performed in the experiement
-       BoolActiveList  % active actuator encoded on boolean table, where each column describe 
-                       % one scan, and the line index matches the actuator
-                       % index
-       AOSignal
+        ScanParam       % Parameter used for the scan
+        Nscan           % number of scans performed in the experiement
+        BoolActiveList  % active actuator encoded on boolean table, where each column describe 
+                        % one scan, and the line index matches the actuator
+                        % index
+       AOSignal         
         
     end
     
@@ -29,14 +30,14 @@ classdef Experiment
 
     end
     
-methods ( Access = 'protected' )
+    methods ( Access = 'protected' )
         
         obj= SetShootLim(obj)
         BoolActiveList = SetDecimate(obj,decimation,BoolActiveList,type) 
             
-end
+    end
     
-methods ( Access = 'public' )
+    methods ( Access = 'public' )
         
         % constructor :
         function obj = Experiment(param)
@@ -130,24 +131,29 @@ methods ( Access = 'public' )
                     end
                     
                        % retreive the total number of scans     
+                       
+                       if isempty(obj.param.phase)
+                           obj.param.phase = 0 ;
+                       end
 
+                       [NBZ, PHASE , NBX] = meshgrid( obj.param.NbZ , obj.param.phase , obj.param.NbX) ;
 
-                       [NBX, NBZ] = meshgrid( obj.param.NbX , obj.param.NbZ ) ;
+                       %PHASE = repmat(obj.param.phase(:),Nfrequencymodes,1);
                        obj.Nscan = length(NBX(:)); 
-                       
-                       
-                       obj.ScanParam = [NBX(:), NBZ(:)];
-                       % reindexation of X0, X1 for 0 to Lmax of the probe
+                                              
+                       obj.ScanParam = [NBX(:), NBZ(:), PHASE(:)];
+ 
+                       % ---------- reindexation of X0, X1 for 0 to Lmax of the probe
                        X0 = obj.param.X0 + (1/2)*obj.param.N_elements*obj.param.width;
                        X1 = obj.param.X1 + (1/2)*obj.param.N_elements*obj.param.width;
                        ElmtBorns   = [min(obj.param.N_elements,max(1,round(X0/obj.param.width))),...
                                       max(1,min(obj.param.N_elements,round(X1/obj.param.width)))];
-                       ElmtBorns   = sort(ElmtBorns); % in case X0 and X1 are mixed up
-                       MedElmtList = ElmtBorns(1):ElmtBorns(2);  
+                       ElmtBorns   = sort(ElmtBorns); % --------- in case X0 and X1 are mixed up
+                       MedElmtList = ElmtBorns(1):ElmtBorns(2);
                        obj.BoolActiveList = false(obj.param.N_elements,obj.Nscan);   
                        obj.BoolActiveList(MedElmtList,:) = true ;                   
                    
-                       % update the AO reference beam
+                       % ----------- update the AO reference beam
                        obj.MyAO  = obj.MyAO.AOsequenceGenerate(obj.param,obj.ScanParam);
                     
                 case 'OS'
@@ -218,14 +224,17 @@ methods ( Access = 'public' )
      
             end
             
-            % update time of simulation :
-           %obj.MySimulationBox.time = 0:(1/obj.param.fs_aq):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;
-           
+           % --------- update time of simulation :
+           % obj.MySimulationBox.time = 0:(1/obj.param.fs_aq):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;          
            % data Result Size initialization 
-           
+           Detection = obj.param.detection;
+           switch Detection
+               case 'photorafractive'
            obj.AOSignal = zeros(obj.param.Nz,obj.Nscan) ;
-                      
-            
+               case 'holography'
+           obj.AOSignal = [];        
+           end
+       
         end
         
         function obj = InitializeProbe(obj,n_scan)
@@ -471,7 +480,7 @@ methods ( Access = 'public' )
             
             
         end 
-        %same function to use with parfor   
+        % same function to use with parfor -----------  
         function [E,PHI] = GaussianPulse(obj,X,Y,Z)
             
             z_x = obj.param.focus;
@@ -506,9 +515,7 @@ methods ( Access = 'public' )
                 
             % propagation phae + guy phase + sperical wave phase contributions : 
             PHI = k.*Z - XI_x +k*X.^2./(2*R_x);
-            
-        
-            
+     
         end
         
         function obj = EvalPhantom(obj)
@@ -573,7 +580,7 @@ methods ( Access = 'public' )
                 
         end
         
-        function obj = GetAcquisitionLine(obj,n)
+        function obj = GetAcquisitionLine(obj,nscan,Detector)
 
 
 
@@ -581,17 +588,64 @@ methods ( Access = 'public' )
             % full profile calculated here to optimize loop Scan calulation :     
             
             LightTransmission = repmat(obj.DiffuseLightTransmission,length(obj.MySimulationBox.time),1)  ;
-            Enveloppe = envelope(obj.MySimulationBox.Field,300).^2;
+            
+            switch Detector
+                case 'photorefractive'
+            Enveloppe = envelope(obj.MySimulationBox.Field,300).^2; % pressure squared amplitude over time each column.
+            % each column corresponds to a simulation box coordinate
             MarkedPhotons = Enveloppe.^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
-            obj.AOSignal(:,n) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
+            obj.AOSignal(:,nscan) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
+            
+                case 'holography'
+            
+                % temporary perfect synchrone detection of tagged light:
+                t           = obj.MySimulationBox.time(:); % simulation time column vector
+                Enveloppe = envelope(obj.MySimulationBox.Field,300).^2; 
+                MarkedPhotons = Enveloppe.^2.*LightTransmission ;
+                %MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
+                line = sum(MarkedPhotons,2);
+                % box(number of column)
+%                 E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
+%                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
+%                                
+% 
+%                 I_cameraOFF = (t<obj.param.Trigdelay) | (t>=(obj.param.Trigdelay + obj.param.tau_c));
+%                 t(I_cameraOFF) = [];
+%                 
+%                 E_tagged( I_cameraOFF ,:) = []; % removing before trigger and after CCD integration time                              
+%                 Nref = size(Eref,1);
+%                 Ntagged = size(E_tagged,1);
+%                 
+%                 if( Nref > Ntagged )
+%                 Eref(Ntagged+1:end,:) = [];    
+%                 elseif( Nref < Ntagged )
+%                     %find index of point greater then delay      
+%                 E_tagged((Nref+1):end,:) = [];    
+%                 end
+%              
+%                 %myFieldt = E_tagged.*(Eref)  ; % correlation on each column                               
+%                 myField = abs( sum( abs(conj(E_tagged) + Eref).^2, 2 ) ); % spatial integration integration over each point
+
+                obj.AOSignal(:,1)       = t ;
+                obj.AOSignal(:,nscan+1) = line ;
+          
+                               
+            end
 
             
         end
         
         function [] = ShowAcquisitionLine(obj)
+            
+            Detection = obj.param.detection;
+            
+            switch Detection
+                
+                case 'photorefractive'
+            
             FigHandle = figure;
             %set(FigHandle,'WindowStyle','docked'); 
             obj.param.FOC_type
@@ -610,13 +664,39 @@ methods ( Access = 'public' )
             imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
             xlabel('scan param')
             end
+            
+            
             ylabel('z = ct (mm) ')
             title('\int_{x,y,z} P(x,y,z,t) dxdydz')
             cb = colorbar ;
             ylabel(cb,'a.u')
             set(findall(FigHandle,'-property','FontSize'),'FontSize',15) 
+            
+                case 'holography'
+                    
+               plot(obj.AOSignal(:,1),obj.AOSignal(:,2:end))     
+            end
 
             
+        end
+        
+        function Etagged = EvalTaggedPhotonsField(obj)
+            % this function should run after field has been calculated
+            
+            if isempty(obj.MySimulationBox.Field)
+                error('please evaluate before calculating tagged photons field');
+            else
+            
+                output      = obj.MySimulationBox.Field;   % real pressure field over time(one column), for each point of simulation 
+                % box(number of column)
+                               
+                % Eref       = repmat( exp(-1i*2*pi*obj.param.f0*t(:)), 1 , size( output , 2 )  );                 
+                
+                 Etagged    = hilbert(output) ;             
+                %Etagged    = envelope(output,300).*exp( 1i*angle(hilbert(output)) ); 
+                % complexe simulated field over time (each line), for each point of the simulated
+                % box (number of column)   
+            end
         end
         
         function myField = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,Exposure,nscan)
@@ -644,31 +724,29 @@ methods ( Access = 'public' )
                end
                 
                 set(FigHandle,'name','(XZ) maximum field (t) values');
-                %% define field correlator
-                output      = obj.MySimulationBox.Field;   % real pressure field over time(one column), for each point of simulation 
-                % box(number of column)
-                t           = obj.MySimulationBox.time(:); % simulation time column vector
                 
-                %Eref        = repmat( exp(-1i*2*pi*obj.param.f0*t(:)), 1 , size( output , 2 )  ); 
-                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( output , 2 )  );  % reference field 
-                E_tagged    = hilbert(output); % complexe simulated field over time (each line), for each point o th the simulated
-                % box (number of column)
-    
-                % change size of Eref depending on parameter
-                E_tagged( (t<TrigDelay) | (t>=(TrigDelay+Exposure)),:) = []; % removing before trigger and after CCD integration time                              
+                %% define field correlator
+                t           = obj.MySimulationBox.time(:); % simulation time column vector
+                % box(number of column)
+                E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
+                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
+                
+                
+                % change size of Eref and E_tagged to camera integration
+                % windows
+                E_tagged_camera = E_tagged ;
+                E_tagged_camera( (t<TrigDelay) | (t>=(TrigDelay+Exposure)),:) = []; % removing before trigger and after CCD integration time                              
                 Nref = size(Eref,1);
-                Ntagged = size(E_tagged,1);
+                Ntagged = size(E_tagged_camera,1);
                 
                 if( Nref > Ntagged )
                 Eref(Ntagged+1:end,:) = [];    
                 elseif( Nref < Ntagged )
                     %find index of point greater then delay      
-                E_tagged((Nref+1):end,:) = [];    
+                E_tagged_camera((Nref+1):end,:) = [];    
                 end
-                
-                
-                myFieldt = E_tagged.*(Eref)  ; % correlation on each column
-                                
+                               
+                myFieldt = E_tagged_camera.*(Eref)  ; % correlation on each column                               
                 myField = abs(sum(myFieldt,1)); % integration correlation for each point of the box
                 myField = reshape(myField ,[Ny,Nx,Nz]);     % resize the box to current screening
                 myField = squeeze( myField(I_plane,:,:) )' ; % remove single direction
@@ -685,7 +763,7 @@ methods ( Access = 'public' )
                 subplot(2,2,4)
                         index_center_box = obj.MySimulationBox.GetIndexPoint( obj.MySimulationBox.GetCenter() );% index of point located at center of the simulation box
                         List = obj.MySimulationBox.Points();
-                        plot( t*1e6 , output(:,index_center_box)/max(output(:,index_center_box)) )
+                        plot( t*1e6 , real(E_tagged(:,index_center_box))/max(real(E_tagged(:,index_center_box))) )
                         hold on 
                         plot( TrigDelay*1e6+obj.MyAO.t*1e6 , real( obj.MyAO.Event(:,nscan) ) )
                         hold on
@@ -700,13 +778,13 @@ methods ( Access = 'public' )
                         legend('Simu FieldII','Reference','camera integration')        
                 subplot(2,2,2)
                         index_center_box = obj.MySimulationBox.GetIndexPoint( [0,0,0] );% index of point located at center of the simulation box
-                        plot( t*1e6 , output(:,index_center_box)/max(output(:,index_center_box)) )
+                        plot( t*1e6 , real(E_tagged(:,index_center_box))/max(real(E_tagged(:,index_center_box))) )
                         hold on 
                         plot( TrigDelay*1e6+obj.MyAO.t*1e6 , real( obj.MyAO.Event(:,nscan) ) )
                         hold on
                         plot(t*1e6, (t>TrigDelay & t<TrigDelay+Exposure),'g' )
-%                         hold on 
-%                         plot(t(t>TrigDelay & t<TrigDelay+Exposure)*1e6,real(myFieldt)/max(real(myFieldt)),'r','linewidth',2)
+%                       hold on 
+%                       plot(t(t>TrigDelay & t<TrigDelay+Exposure)*1e6,real(myFieldt)/max(real(myFieldt)),'r','linewidth',2)
                         ylabel('normalized field a.u')
                         title(sprintf('temporal profil at center [x(mm),y(mm) ,z(mm)] = [%.0f,%.0f,%.0f] ',...
                             0,...
@@ -721,8 +799,7 @@ methods ( Access = 'public' )
             
             
         end
-       
-       
+              
     end
     
 end
