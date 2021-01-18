@@ -286,11 +286,7 @@ classdef Experiment
                                                obj.param.fs*1e-6,obj.param.c, obj.param.Bascule ); % Calculer la matrice
             
              EXCITATION = repmat(EXCITATION',1,obj.param.patternRep);                              
-             %EXCITATION = repmat(EXCITATION',1,6);
-
-            % test study FFT
-            
-            
+        
             end
             
 %            MyFFT = TF_t(2^(3+nextpow2(size(EXCITATION,2))),obj.param.fs);
@@ -335,7 +331,7 @@ classdef Experiment
                     % xdc_rectangles doesnt allow empty rectActive List
                     Probe = xdc_rectangles(obj.MyProbe.rectActive,[10 10 10], [11 0 0]);   
 
-                    % calculate impulse response in FIELD II
+                    % set the impulse impulse response in FIELD II
                         t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
                         impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
                         impulse           = impulse.*hanning(length(impulse))'; 
@@ -590,6 +586,7 @@ classdef Experiment
             LightTransmission = repmat(obj.DiffuseLightTransmission,length(obj.MySimulationBox.time),1)  ;
             
             switch Detector
+                
                 case 'photorefractive'
             Enveloppe = envelope(obj.MySimulationBox.Field,300).^2; % pressure squared amplitude over time each column.
             % each column corresponds to a simulation box coordinate
@@ -746,7 +743,8 @@ classdef Experiment
                 E_tagged_camera((Nref+1):end,:) = [];    
                 end
                                
-                myFieldt = E_tagged_camera.*(Eref)  ; % correlation on each column                               
+                myFieldt = E_tagged_camera.*(Eref)  ; % correlation on each column       
+                %myFieldt = abs(E_tagged_camera).^2  ; % correlation on each column 
                 myField = abs(sum(myFieldt,1)); % integration correlation for each point of the box
                 myField = reshape(myField ,[Ny,Nx,Nz]);     % resize the box to current screening
                 myField = squeeze( myField(I_plane,:,:) )' ; % remove single direction
