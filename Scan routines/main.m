@@ -117,16 +117,13 @@ Spectre= 0*SpectreIN;
     Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
     Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = SpectreIN((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx);
 
-    
-
-    
     %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
     %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   
 
  end
  
  %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
- ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
+ %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
  
 Reconstruct = G.ifourier( ObjectFFT );
 I_obj_r = G.ifourier( Spectre );
