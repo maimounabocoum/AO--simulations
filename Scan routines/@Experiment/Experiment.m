@@ -626,8 +626,8 @@ classdef Experiment
 %                 %myFieldt = E_tagged.*(Eref)  ; % correlation on each column                               
 %                 myField = abs( sum( abs(conj(E_tagged) + Eref).^2, 2 ) ); % spatial integration integration over each point
 
-                obj.AOSignal(:,1)       = t ;
-                obj.AOSignal(:,nscan+1) = line ;
+                obj.AOSignal(:,nscan)       = t ;
+                obj.AOSignal(:,nscan + (obj.Nscan)) = line ;
           
                                
             end
@@ -674,6 +674,14 @@ classdef Experiment
                plot(obj.AOSignal(:,1),obj.AOSignal(:,2:end))     
             end
 
+            
+        end
+        
+        function Im = ShowFFTreconstruction(obj)
+            
+            % creation of a FFT structure
+            F = fourier2D(N,Fe);
+            
             
         end
         

@@ -55,10 +55,10 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 10;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = -5;                             % 20 Nb de composantes de Fourier en X, 'JM'
-param.phase       = [0,0.25,0.5,0.75];                          % phases i 2pi unit for 'JM'
-param.nuZ0 = 1/( (param.c)*20*1e-6 );           % Pas fréquence spatiale en Z (en mm-1)
+param.NbZ         = 1:23;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = -5:5;                             % 20 Nb de composantes de Fourier en X, 'JM'
+param.phase       = 0;                          % phases i 2pi unit for 'JM'
+param.nuZ0 = 1/( (param.c)*20e-6 );           % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 
 
 
@@ -71,29 +71,29 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-15 15]/1000;     % in m [-15 15]
+    param.Xrange = [-10 10]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;            % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [0 40]/1000;       % simulation JM : [5 40]/1000;
+    param.Zrange = [0 20]/1000;       % simulation JM : [5 40]/1000;
 
-    param.Nx = 50;          % number of interpolating points along Xrange
+    param.Nx = 100;          % number of interpolating points along Xrange
     param.Ny = 1;           % number of interpolating points along Yrange
     param.patternRep = 2;   % number of times the 40us main pattern is repeted (minimum = 1) 
     % in order to match fs_aq(Hz) along Zrange , and 
     % unshures Nz >=1
-    param.Nz = 50;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
+    param.Nz = 100;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 %% definition of laser beam
     
 % waist of diffuse IR laser beam
 param.w0 = [10 10]/1000 ;             % specify the center of the gaussian beam.
-param.center = [0 0 23]/1000 ;      % specify the center of the gaussian beam.    
+param.center = [0 0 11]/1000 ;      % specify the center of the gaussian beam.    
              
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
 %% absorbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [-1.5 0 23 ; 0 1.5 23]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
-    param.phantom.Sizes     = [1.5 ; 1.5]/1000;             % dimension in all direction [dim ; dim ; ...]
+    param.phantom.Positions = [0 0 12 ; 0 0 9]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Sizes     = [1 ; 1]/1000;             % dimension in all direction [dim ; dim ; ...]
     param.phantom.Types = {'gaussian','gaussian'} ;         % available types exemple : { 'square', 'gaussian', ...}
     
     

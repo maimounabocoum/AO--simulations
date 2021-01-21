@@ -6,10 +6,10 @@ addpath('..\radon inversion')
 addpath('subscripts')
 addpath('..\..\AO--commons\shared functions folder')
 field_init(0);
-IsSaved = 0 ;
+IsSaved = 1 ;
 
 %%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
-SimuPathFolder = 'Q:\datas\simulated datas';
+SimuPathFolder = 'D:\Data\simulations';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -25,7 +25,7 @@ CurrentExperiement = CurrentExperiement.EvalPhantom();
 
 % use param.angles has an input to additionally show Radon transform
 % CurrentExperiement.ShowPhantom(param.angles);
-% CurrentExperiement.ShowPhantom();
+ CurrentExperiement.ShowPhantom();
 
 % creating memory to save probe delay law
 if param.Activated_FieldII == 1 
@@ -40,7 +40,7 @@ end
  tic
  h = waitbar(0,'Please wait...');
  
- for n_scan = 1%:CurrentExperiement.Nscan
+ for n_scan = 1:CurrentExperiement.Nscan
  
      CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
      CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
@@ -70,6 +70,104 @@ end
  % returns a plot for camera-based detection as resulted by camera
  % integration
  
+ %CurrentExperiement.ShowFFTreconstruction() ;
+ %% reconstruction of JM image:
+ 
+Nfft = 2^10;
+G = TF2D( Nfft , Nfft , (Nfft-1)*param.nuX0 , (Nfft-1)*param.nuZ0 );
+ x_phantom = CurrentExperiement.MySimulationBox.x ;
+ z_phantom = CurrentExperiement.MySimulationBox.z - 0.5*max(CurrentExperiement.MySimulationBox.z) ;
+ [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
+ [X,Z] = meshgrid(G.x,G.z);
+ %[MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
+ObjectFFT = zeros(Nfft , Nfft);
+I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
+
+
+I_ccd = 2000:4000 ;
+
+% get single NBx Nbz values phase = 0
+
+%I_phase0 = find(CurrentExperiement.ScanParam(:,3)==0.5);
+
+SpectreIN = G.fourier(I_obj);
+Spectre= 0*SpectreIN;
+
+ for n_loop = 1:CurrentExperiement.Nscan
+ 
+     myTrace = CurrentExperiement.AOSignal(:,n_loop + CurrentExperiement.Nscan );
+     t = CurrentExperiement.AOSignal(:,n_loop);
+%      plot(CurrentExperiement.AOSignal(I_ccd,1), myTrace( I_ccd ))
+%      hold on 
+%      plot(CurrentExperiement.AOSignal(:,1), myTrace)
+     
+     Nbx = CurrentExperiement.ScanParam(n_loop,1);
+     Nbz = CurrentExperiement.ScanParam(n_loop,2);
+%     PHASE = CurrentExperiement.ScanParam(n_loop,3);
+     Cnm(n_loop) = sum( myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(param.nuZ0)*(param.c)*t( I_ccd )) );
+     
+    DecalZ  =   0.39; % ??
+    DecalX  =   0; % ??
+    PhiZ2   = 0;
+    s =  exp(2i*pi*(DecalZ*Nbz + PhiZ2*Nbz.^2+ DecalX*Nbx));
+
+
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -conj(1i*s*Cnm(n_loop));
+    ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
+    Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
+    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = SpectreIN((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx);
+
+    
+
+    
+    %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
+    %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   
+
+ end
+ 
+ %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
+ ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
+ 
+Reconstruct = G.ifourier( ObjectFFT );
+I_obj_r = G.ifourier( Spectre );
+% % I = ifft2(ifftshift(ObjectFFT));
+% Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
+% % I = ifftshift(I,2);
+figure(2);
+subplot(221)
+imagesc(G.fx/(param.nuX0),G.fz/(param.nuZ0),abs(ObjectFFT))
+axis([-5 5 -23 23])
+colorbar
+subplot(222)
+imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
+ylim([-8 8])
+title('reconstructed AO image')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+subplot(224)
+imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
+ylim([-8 8])
+subplot(223)
+imagesc(G.fx/(param.nuX0),G.fz/(param.nuZ0),abs(Spectre))
+axis([-5 5 -23 23])
+
+%%
+figure
+spectre1D = Spectre(:,(Nfft/2+1));
+spectre1D_simu = ObjectFFT(:,(Nfft/2+1));
+%plot( G.fz/(param.nuZ0) , abs(spectre1D)/max(abs(spectre1D)),'o-')
+plot( G.fz/(param.nuZ0) , abs(angle(spectre1D.*conj(spectre1D_simu))) ,'o-')
+% hold on
+% %plot( G.fz/(param.nuZ0) , abs(spectre1D_simu)/max(abs(spectre1D_simu)),'o-')
+% plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D_simu)),'o-')
+ xlim([-20 20])
+% legend('phantom','simulation')
+
+
+
+
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
@@ -98,7 +196,7 @@ end
      
      % saving folder name with todays date
      SubFolderName = generateSubFolderName(SimuPathFolder) ;
-     FileName   = generateSaveName(SubFolderName ,'name','TaboltEffect_off','type',param.FOC_type);
+     FileName   = generateSaveName(SubFolderName ,'name','Simu_noPJ_verticalInclusions','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
