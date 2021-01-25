@@ -29,7 +29,7 @@ classdef AOmodulator
             Event = repmat( exp(-1i*2*pi*f0*obj.t(:)) , 1 , Nevent );
         end
         
-        function Event = BuildJM(obj,f0,nuZ0,c,Bascule,ScanParam)
+        function Event =  BuildJM(obj,f0,nuZ0,c,Bascule,ScanParam)
             
     
             Nevent = size(ScanParam,1);
@@ -48,7 +48,7 @@ classdef AOmodulator
                         Am(Am==3)=-1;
                         Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*Am;
                 else
-                        if ScanParam(nscan,1)==0
+                        if ScanParam(nscan,2)==0
                            Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)) ;
                         else
                            Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( sin( 2*pi*phase + 2*pi*fz*(obj.t(:)) )>0 );

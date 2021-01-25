@@ -6,16 +6,19 @@ addpath('..\radon inversion')
 addpath('subscripts')
 addpath('..\..\AO--commons\shared functions folder')
 field_init(0);
-IsSaved = 1 ;
 
-%%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
-SimuPathFolder = 'D:\Data\simulations';
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 
 %% =========  %%%%%%%%%%%%%%%%%%%% Initialize Experiement  %%%%%%%%%%%%%%%%%%%%%%%
 clearvars ; 
+IsSaved = 1 ;
+%%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
+SimuPathFolder = 'D:\Data\simulations';
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 parameters; % script with simulation parameter (to edit befor running the simulation)
 CurrentExperiement = Experiment(param); %initializes the experiement
@@ -169,17 +172,18 @@ plot( G.fz/(param.nuZ0) , abs(angle(spectre1D.*conj(spectre1D_simu))) ,'o-')
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
- n_scan =  2;  % index of the scan - look inside variable for corresponding parameters
+ n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
  parameters; % script with simulation parameter (to edit befor running the simulation)
  CurrentExperiement = Experiment(param); 
+ CurrentExperiement = CurrentExperiement.EvalPhantom();
  CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
-     % % option for screening : XY, Xt , XZt
+    % % option for screening : XY, Xt , XZt
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     %
-     %CurrentExperiement = CurrentExperiement.MyAO.BuildJM(param.f0,param.nuZ0,param.c,param.Bascule,CurrentExperiement.ScanParam);
+    % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
     
@@ -194,7 +198,7 @@ plot( G.fz/(param.nuZ0) , abs(angle(spectre1D.*conj(spectre1D_simu))) ,'o-')
      
      % saving folder name with todays date
      SubFolderName = generateSubFolderName(SimuPathFolder) ;
-     FileName   = generateSaveName(SubFolderName ,'name','Simu_noPJ_verticalInclusions','type',param.FOC_type);
+     FileName   = generateSaveName(SubFolderName ,'name','Simu_longwindows_NbZ=4','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
@@ -254,7 +258,7 @@ c               = param.c ;
          case 'JM'  
 
     save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
-                  'DelayLAWS','ActiveLIST','param','CurrentExperiement')               
+                  'param','CurrentExperiement')               
      end
      %%%%%%%%%%%%%%%%%%%%
  end

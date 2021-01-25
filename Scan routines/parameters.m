@@ -55,8 +55,8 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 1:23;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = -5:5;                             % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbZ         = 10;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = -5;                          % 20 Nb de composantes de Fourier en X, 'JM'
 param.phase       = 0;                          % phases i 2pi unit for 'JM'
 param.nuZ0 = 1/( (param.c)*20e-6 );           % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 
@@ -73,14 +73,14 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
     param.Xrange = [-10 10]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;            % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [27 42]/1000;       % simulation JM : [5 40]/1000;
+    param.Zrange = [1 45]/1000;       % simulation JM : [5 40]/1000;
 
     param.Nx = 110;          % number of interpolating points along Xrange
     param.Ny = 1;           % number of interpolating points along Yrange
     param.patternRep = 2;   % number of times the 40us main pattern is repeted (minimum = 1) 
     % in order to match fs_aq(Hz) along Zrange , and 
     % unshures Nz >=1
-    param.Nz = 110;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
+    param.Nz = 310;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 %% definition of laser beam
     
 % waist of diffuse IR laser beam
