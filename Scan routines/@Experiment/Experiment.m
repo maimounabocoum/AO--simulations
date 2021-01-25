@@ -671,7 +671,10 @@ classdef Experiment
             
                 case 'holography'
                     
-               plot(obj.AOSignal(:,1),obj.AOSignal(:,2:end))     
+               plot(1e6*obj.AOSignal(:,1:obj.Nscan),obj.AOSignal(:, obj.Nscan + (1:obj.Nscan))) ;
+               xlabel('time(\mu s)')
+               ylabel('a.u')
+               title('Tagged photons traces')
             end
 
             

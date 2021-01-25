@@ -83,8 +83,10 @@ G = TF2D( Nfft , Nfft , (Nfft-1)*param.nuX0 , (Nfft-1)*param.nuZ0 );
 ObjectFFT = zeros(Nfft , Nfft);
 I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
 
+ I_extract = find(CurrentExperiement.ScanParam(:,1)==0);
+ figure;imagesc(CurrentExperiement.AOSignal(:,I_extract + CurrentExperiement.Nscan ))
 
-I_ccd = 2000:4000 ;
+I_ccd = (2000:4000) ;
 
 % get single NBx Nbz values phase = 0
 
@@ -97,25 +99,24 @@ Spectre= 0*SpectreIN;
  
      myTrace = CurrentExperiement.AOSignal(:,n_loop + CurrentExperiement.Nscan );
      t = CurrentExperiement.AOSignal(:,n_loop);
-%      plot(CurrentExperiement.AOSignal(I_ccd,1), myTrace( I_ccd ))
-%      hold on 
-%      plot(CurrentExperiement.AOSignal(:,1), myTrace)
-     
+
      Nbx = CurrentExperiement.ScanParam(n_loop,1);
      Nbz = CurrentExperiement.ScanParam(n_loop,2);
 %     PHASE = CurrentExperiement.ScanParam(n_loop,3);
-     Cnm(n_loop) = sum( myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(param.nuZ0)*(param.c)*t( I_ccd )) );
+     Cnm(n_loop) = sum(myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(param.nuZ0)*(param.c)*t( I_ccd )) );
      
     DecalZ  =   0.39; % ??
     DecalX  =   0; % ??
-    PhiZ2   = 0;
-    s =  exp(2i*pi*(DecalZ*Nbz + PhiZ2*Nbz.^2+ DecalX*Nbx));
+ 
+    s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx));
 
-
-    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -conj(1i*s*Cnm(n_loop));
+%if Nbz < 10
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -1i*s*Cnm(n_loop);
     ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
     Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
-    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = SpectreIN((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx);
+    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
+    
+%end
 
     %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
     %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   

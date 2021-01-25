@@ -74,9 +74,10 @@ nuX = 1e-3*nuX;
 
 %% print matrix
 figure(100)
-        imagesc(x*1e3,t*1e6,Mat)
+        imagesc((x-mean(x))*1e3,t*1e6,Mat)
         xlabel('x (mm)')
         ylabel('t(\mu s)')
+        %axis([-1 1 0 1])
         drawnow
         pause(1)
 end

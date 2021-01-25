@@ -17,7 +17,7 @@ CurrentExperiement = Experiment(param);
 % Example : set active elements
 
  for n_scan = 1:CurrentExperiement.Nscan
-
+if CurrentExperiement.ScanParam(n_scan,1) == 0
 Nactive = sum(CurrentExperiement.BoolActiveList(:,n_scan));
 Xs        = (0:Nactive-1)*param.width;  
 
@@ -28,7 +28,7 @@ Xs        = (0:Nactive-1)*param.width;
                 param.nuZ0*1e-3,Xs*1e3,...
                 param.fs*1e-6,param.c,...
                 param.Bascule ); % Calculer la matrice
-           
+end
  end
 
 
