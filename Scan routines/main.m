@@ -73,13 +73,15 @@ end
  % returns a plot for camera-based detection as resulted by camera
  % integration
  
+ figure; imagesc(CurrentExperiement.AOSignal(:,CurrentExperiement.Nscan+1:end))
+ 
  %CurrentExperiement.ShowFFTreconstruction() ;
  %% reconstruction of JM image:
  
 Nfft = 2^10;
 G = TF2D( Nfft , Nfft , (Nfft-1)*param.nuX0 , (Nfft-1)*param.nuZ0 );
  x_phantom = CurrentExperiement.MySimulationBox.x ;
- z_phantom = CurrentExperiement.MySimulationBox.z - 0.5*max(CurrentExperiement.MySimulationBox.z) ;
+ z_phantom = CurrentExperiement.MySimulationBox.z - 0.8*max(CurrentExperiement.MySimulationBox.z) ;
  [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
  [X,Z] = meshgrid(G.x,G.z);
  %[MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
@@ -89,6 +91,9 @@ I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
  I_extract = find(CurrentExperiement.ScanParam(:,1)==0);
  figure;imagesc(CurrentExperiement.AOSignal(:,I_extract + CurrentExperiement.Nscan ))
 
+%  Flux = sum(CurrentExperiement.AOSignal(I_ccd,I_extract + CurrentExperiement.Nscan ),1);
+% hold on ; plot(1:10,18*(Flux-mean(Flux))/max(Flux))
+%  
 I_ccd = (2000:4000) ;
 
 % get single NBx Nbz values phase = 0
@@ -108,13 +113,14 @@ Spectre= 0*SpectreIN;
 %     PHASE = CurrentExperiement.ScanParam(n_loop,3);
      Cnm(n_loop) = sum(myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(param.nuZ0)*(param.c)*t( I_ccd )) );
      
-    DecalZ  =   0.39; % ??
+     
+    DecalZ  =   0.17; % ??
     DecalX  =   0; % ??
  
     s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx));
 
 %if Nbz < 10
-    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -1i*s*Cnm(n_loop);
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -1i*conj(s*Cnm(n_loop));
     ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
     Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
     Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
@@ -159,10 +165,10 @@ figure
 spectre1D = Spectre(:,(Nfft/2+1));
 spectre1D_simu = ObjectFFT(:,(Nfft/2+1));
 %plot( G.fz/(param.nuZ0) , abs(spectre1D)/max(abs(spectre1D)),'o-')
-plot( G.fz/(param.nuZ0) , abs(angle(spectre1D.*conj(spectre1D_simu))) ,'o-')
+plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D.*conj(spectre1D_simu)))/(2*pi) ,'o-')
 % hold on
-% %plot( G.fz/(param.nuZ0) , abs(spectre1D_simu)/max(abs(spectre1D_simu)),'o-')
-% plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D_simu)),'o-')
+% % plot( G.fz/(param.nuZ0) , abs(spectre1D_simu)/max(abs(spectre1D_simu)),'o-')
+% % plot( G.fz/(param.nuZ0) ,  unwrap(angle(spectre1D_simu)),'o-')
  xlim([-20 20])
 % legend('phantom','simulation')
 

@@ -281,12 +281,15 @@ classdef Experiment
                 EXCITATION = repmat(excitation,Nactive,1) ;
                 case 'JM'
              Xs        = (0:Nactive-1)*obj.param.width;             % Echelle de graduation en X
+             
             [~,~,~,EXCITATION] = CalcMatHole(obj.param.f0*1e-6,obj.ScanParam(n_scan,1),obj.ScanParam(n_scan,2),...
                                                obj.param.nuX0*1e-3,obj.param.nuZ0*1e-3,Xs*1e3,...
                                                obj.param.fs*1e-6,obj.param.c, obj.param.Bascule ); % Calculer la matrice
             
              EXCITATION = repmat(EXCITATION',1,obj.param.patternRep);                              
-        
+             t_excitation = (0:size(EXCITATION,2)-1)/obj.param.fs ;
+             t_excitation = t_excitation - mean(t_excitation) ;
+             
             end
             
 %            MyFFT = TF_t(2^(3+nextpow2(size(EXCITATION,2))),obj.param.fs);
@@ -374,33 +377,34 @@ classdef Experiment
         else
            
          %%================= implementation without use of FILEDII=====================
-         
-          switch obj.param.FOC_type
-              
-                case 'OF'
-                    
-                   tmin = (obj.param.Zrange(1)/(obj.param.c)) ;
-                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation)) ;
-                   
-                case 'OP'
-                           
-                   tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
-                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
-                   
-                case 'OS' 
-                  
-                   tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
-                   tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
-           end
-           
-           obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
+          tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
+          tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
+          obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
                                  
-           [X,Y,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.y,obj.MySimulationBox.z);
-
-           T = (obj.MySimulationBox.time')*ones(1,length(Z(:)));
+           [X,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.z);
+           
+           % time matrix 
+           [R, T] = meshgrid( Z(:) , obj.MySimulationBox.time ) ;
+           
+           % field in emission plane: EXCITATION
    
            switch obj.param.FOC_type
                
+               case 'JM'
+          % coordinate of centers of emission probe:
+          X_emission = obj.MyProbe.center; 
+          
+          % interpolation column by column
+          for loop = 1:length(obj.MySimulationBox.y)
+              [Xe,Te] = meshgrid(X_emission(:,1),t_excitation );
+              [~,DELAY_z] = meshgrid( (obj.param.c)*X_emission(:,3) , t_excitation ) ;
+              
+          Field = interp2(Xe,Te+DELAY_z,EXCITATION',R,T - R/(obj.param.c),'linear',0)  ;  
+          end
+          %figure;imagesc(Field)
+          
+          obj.MySimulationBox.Field = Field;
+          
                 case 'OF'
                     
             [Field,phi]= obj.GaussianPulse(X-obj.ScanParam(n_scan),Y,Z);   
