@@ -198,7 +198,7 @@ plot( G.fz/(param.nuZ0) , abs(angle(spectre1D.*conj(spectre1D_simu))) ,'o-')
      
      % saving folder name with todays date
      SubFolderName = generateSubFolderName(SimuPathFolder) ;
-     FileName   = generateSaveName(SubFolderName ,'name','Simu_longwindows_NbZ=4','type',param.FOC_type);
+     FileName   = generateSaveName(SubFolderName ,'name','Simu_longwindows_NbZ=10_NbX=10','type',param.FOC_type);
      
  x_phantom = CurrentExperiement.MySimulationBox.x ;
  y_phantom = CurrentExperiement.MySimulationBox.y ;
