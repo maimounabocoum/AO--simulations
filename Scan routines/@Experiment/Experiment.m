@@ -288,7 +288,7 @@ classdef Experiment
             
              EXCITATION = repmat(EXCITATION',1,obj.param.patternRep);                              
              t_excitation = (0:size(EXCITATION,2)-1)/obj.param.fs ;
-             t_excitation = t_excitation - mean(t_excitation) ;
+
              
             end
             
@@ -377,14 +377,15 @@ classdef Experiment
         else
            
          %%================= implementation without use of FILEDII=====================
-          tmin = ( obj.param.Zrange(1)*cos(obj.ScanParam(n_scan)) )/(obj.param.c) ;
+          tmin = 0 ;
           tmax = (max(abs(obj.MySimulationBox.z))/(obj.param.c) + max(t_excitation));
-          obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax ;
+          obj.MySimulationBox.time = tmin:(1/obj.param.fs):tmax;
                                  
-           [X,Z] = meshgrid(obj.MySimulationBox.x,obj.MySimulationBox.z);
+           Points = obj.MySimulationBox.Points() ;
            
            % time matrix 
-           [R, T] = meshgrid( Z(:) , obj.MySimulationBox.time ) ;
+           [X, T] = meshgrid( Points(:,1) , obj.MySimulationBox.time ) ;
+          
            
            % field in emission plane: EXCITATION
    
@@ -392,18 +393,46 @@ classdef Experiment
                
                case 'JM'
           % coordinate of centers of emission probe:
-          X_emission = obj.MyProbe.center; 
+          C = obj.MyProbe.center; 
           
           % interpolation column by column
-          for loop = 1:length(obj.MySimulationBox.y)
-              [Xe,Te] = meshgrid(X_emission(:,1),t_excitation );
-              [~,DELAY_z] = meshgrid( (obj.param.c)*X_emission(:,3) , t_excitation ) ;
+
+              [Xc,Te] = meshgrid(C(:,1),t_excitation );
+              [DELAY_zc,~] = meshgrid( C(:,3)/(obj.param.c) , t_excitation ) ;
+     
+              % interpolate field as if all point where located on emission
+              % probe
+              % DELAY_zc : propagation delay in case center is not located in
+              % z=0
+              Field = interp2( Xc , Te + DELAY_zc, EXCITATION' , X , T ,'linear',0)  ;  
+%            figure(2)
+%           imagesc(Field)             
+              % add propagation delay depending in Z position
+
+              N_delay =  floor( (obj.param.fs)*Points(:,3)/(obj.param.c) ) ; % delay in matrix points for each point of the simulation box
               
-          Field = interp2(Xe,Te+DELAY_z,EXCITATION',R,T - R/(obj.param.c),'linear',0)  ;  
-          end
-          %figure;imagesc(Field)
+              for loop = 1:length(N_delay)
+              Field(:,loop) = circshift( Field(:,loop) , N_delay(loop) );   
+              end
+              
           
           obj.MySimulationBox.Field = Field;
+%           
+%           figure(3)
+%           imagesc(Field)
+%           figure(2); 
+%           surfc(Xc,Te*1e6,EXCITATION'); shading interp
+%           view([0 90])
+%           caxis([0 1])
+%           colorbar;
+%           figure(4);
+%           surfc(X,T*1e6,Field ); shading interp
+%           view([0 90])
+%           caxis([0 1])
+%           colorbar;
+          %figure;imagesc(Field)
+          
+          
           
                 case 'OF'
                     

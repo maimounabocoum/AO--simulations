@@ -34,14 +34,15 @@ classdef ActuatorProbe
             
             obj.Nactuators = Nactuators   ;
             ActiveList     = 1:Nactuators ;
-     
+        
+        % construction of probe coordinate matrix (cf p.38)
         rect = zeros(Nactuators*no_sub_x*no_sub_y,19);
         center= zeros(Nactuators,3);
                %% absolute center of the probe:
                Xc = (Width + (Nactuators-1)*(kerf+Width))/2;
                %% get center coordinate of all actuator (even if not in ActiveList)
                for i = 1:Nactuators
-               center(i,:) = [Width*(i-1)+Width/2,Height/2,0];
+               center(i,:) = [(kerf+Width)*(i-1),0,0];
                end
                obj.center = Vector_Translation(center,[-Xc,0,0]);
         
@@ -50,8 +51,11 @@ classdef ActuatorProbe
                   % creation of a single element with lower left corner located 
                   % at position (0,0,0)
                   Element = SingleElement(Height,Width,no_sub_x,no_sub_y,i);
+                  % translation along X to reach actuator position
                   Element = Element_TranslationX(Element,(ActiveList(i)-1)*(kerf+Width));
-                  Element = Element_TranslationY(Element,-Height/2);
+                  % recentering of the probe to user defined center of
+                  % element
+                  Element = Element_TranslationY(Element,-Height/2+center(i,2));
 
                   rect((1:no_sub_x*no_sub_y) + no_sub_x*no_sub_y*(i-1),:) = Element;
                 end
@@ -86,7 +90,7 @@ classdef ActuatorProbe
                end
                center = Vector_Translation(center,[-Xc,0,0]);
         
-               %% initialiaze individual active actuators:
+               %% initialize individual active actuators:
                 for i = 1:length(obj.ActiveList)               
                   % creation of a single element with lower left corner located 
                   % at position (0,0,0)
@@ -203,27 +207,41 @@ classdef ActuatorProbe
             
             h = figure;
             ha = axes ;
-                
-             X = [obj.rect(:,2),obj.rect(:,5),obj.rect(:,8),obj.rect(:,11),obj.rect(:,17)];
-             Y = [obj.rect(:,3),obj.rect(:,6),obj.rect(:,9),obj.rect(:,12),obj.rect(:,18)] ;
-             Z = [obj.rect(:,4),obj.rect(:,7),obj.rect(:,10),obj.rect(:,13),obj.rect(:,19)];
-             %X = obj.rect(:,17)*1e3;
-             %Y = obj.rect(:,18)*1e3;
-             s = ones(1,length(Z(:)));
-             s(obj.ActiveList) = 7;
-             scatter3(X(:),Y(:),Z(:),s,Z(:));
-             %surfc(X,Y,Z);
+             
+             % obj.rect(:,1)        : index of piezoactuator
+             % obj.rect(:,2:4)      : first corner coordinate
+             % obj.rect(:,5:7)      : second corner coordinate
+             % obj.rect(:,8:10)     : third corner coordinate
+             % obj.rect(:,11:13)    : fourth corner coordinate
+             % obj.rect(:,15)       : width of rectangle directtion x = (Ex : 0.2mm/(no_sub_x))
+             % obj.rect(:,16)       : height of rectangle directtion y = (Ex : 6mm/(no_sub_y))
+             % obj.rect(:,17:19)    : center point of rectangle
+             
+             
+%              X = [obj.rect(:,2),obj.rect(:,5),obj.rect(:,8),obj.rect(:,11),obj.rect(:,17)];
+%              Y = [obj.rect(:,3),obj.rect(:,6),obj.rect(:,9),obj.rect(:,12),obj.rect(:,18)] ;
+%              Z = [obj.rect(:,4),obj.rect(:,7),obj.rect(:,10),obj.rect(:,13),obj.rect(:,19)];
+             X = obj.rect(:,17);
+             Y = obj.rect(:,18) ;
+             Z = obj.rect(:,19);
+             Xc = obj.center(:,1);
+             Yc = obj.center(:,2) ;
+             Zc = obj.center(:,3);
+%              s = ones(1,length(Z(:)));
+%              s(obj.ActiveList) = 10;
+             scatter3(X(:)*1e3,Y(:)*1e3,Z(:)*1e3,3,Z(:)*1e3);
+%              hold on
+%              scatter3(X(:)*1e3,repmat(mean(Y(:)),length(X(:)),1)*1e3,Z(:)*1e3,6,Z(:)*1e3);
+             hold on
+             scatter3(Xc(:)*1e3,Yc(:)*1e3,Zc(:)*1e3,20,Zc(:)*1e3);
+             xlabel('X(mm)')
+             ylabel('Y(mm)')
              shading interp
              axis equal
-            %hold on
-%             plot(X,Y,'o')
-%             grid on
-%              set(ha,'XTick',sort(unique(X)))
-%              set(ha,'YTick',sort(unique(Y)))
-%              xlim([-obj.rect(1,15)*1e3*obj.Nactuators/2 obj.rect(1,15)*1e3*obj.Nactuators/2])
-%             xlabel('x(mm)')
-%             ylabel('y(mm)')
-         
+             cb = colorbar;
+             ylabel(cb,'Z(mm)')
+             title('Proce center of rectangles')
+
             
         end
         

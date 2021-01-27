@@ -81,15 +81,15 @@ end
 Nfft = 2^10;
 G = TF2D( Nfft , Nfft , (Nfft-1)*param.nuX0 , (Nfft-1)*param.nuZ0 );
  x_phantom = CurrentExperiement.MySimulationBox.x ;
- z_phantom = CurrentExperiement.MySimulationBox.z - 0.8*max(CurrentExperiement.MySimulationBox.z) ;
+ z_phantom = CurrentExperiement.MySimulationBox.z - 0.5*max(CurrentExperiement.MySimulationBox.z) ;
  [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
  [X,Z] = meshgrid(G.x,G.z);
- %[MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
+ [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
 ObjectFFT = zeros(Nfft , Nfft);
 I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
 
- I_extract = find(CurrentExperiement.ScanParam(:,1)==0);
- figure;imagesc(CurrentExperiement.AOSignal(:,I_extract + CurrentExperiement.Nscan ))
+%  I_extract = find(CurrentExperiement.ScanParam(:,1)==0);
+%  figure;imagesc(CurrentExperiement.AOSignal(:,I_extract + CurrentExperiement.Nscan ))
 
 %  Flux = sum(CurrentExperiement.AOSignal(I_ccd,I_extract + CurrentExperiement.Nscan ),1);
 % hold on ; plot(1:10,18*(Flux-mean(Flux))/max(Flux))
@@ -114,13 +114,13 @@ Spectre= 0*SpectreIN;
      Cnm(n_loop) = sum(myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(param.nuZ0)*(param.c)*t( I_ccd )) );
      
      
-    DecalZ  =   0.17; % ??
+    DecalZ  =   0.67; % ??
     DecalX  =   0; % ??
  
     s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx));
 
 %if Nbz < 10
-    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = -1i*conj(s*Cnm(n_loop));
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = 1i*conj(s*Cnm(n_loop));
     ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
     Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
     Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
@@ -147,7 +147,7 @@ axis([-5 5 -23 23])
 colorbar
 subplot(222)
 imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
-ylim([-8 8])
+%ylim([-8 8])
 title('reconstructed AO image')
 xlabel('x(mm)')
 ylabel('z(mm)')
@@ -155,9 +155,12 @@ cb = colorbar;
 ylabel(cb,'a.u.')
 subplot(224)
 imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
-ylim([-8 8])
+%ylim([-8 8])
+title('input phantom AO image')
 subplot(223)
 imagesc(G.fx/(param.nuX0),G.fz/(param.nuZ0),abs(Spectre))
+cb = colorbar;
+ylabel(cb,'a.u.')
 axis([-5 5 -23 23])
 
 %%
@@ -186,14 +189,14 @@ plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D.*conj(spectre1D_simu)))/(2*pi) 
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
     % % option for screening : XY, Xt , XZt
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
-    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
+     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     %
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
-     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
-    
-    
+%  CurrentExperiement.MyProbe.ShowProbe()   
+% figure;imagesc(CurrentExperiement.MySimulationBox.Field)    
  %% run this code portion to visualize the field autocorrelation with reference beam (holography detection only)
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
