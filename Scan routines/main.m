@@ -181,7 +181,7 @@ plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D.*conj(spectre1D_simu)))/(2*pi) 
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
- n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
+ n_scan =  10;  % index of the scan - look inside variable for corresponding parameters
  parameters; % script with simulation parameter (to edit befor running the simulation)
  CurrentExperiement = Experiment(param); 
  CurrentExperiement = CurrentExperiement.EvalPhantom();
@@ -189,11 +189,11 @@ plot( G.fz/(param.nuZ0) , unwrap(angle(spectre1D.*conj(spectre1D_simu)))/(2*pi) 
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
     % % option for screening : XY, Xt , XZt
     % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
-     CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
+    % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     %
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
-    % CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
 % figure;imagesc(CurrentExperiement.MySimulationBox.Field)    
