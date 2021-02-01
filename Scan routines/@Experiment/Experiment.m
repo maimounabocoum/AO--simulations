@@ -20,7 +20,8 @@ classdef Experiment
         BoolActiveList  % active actuator encoded on boolean table, where each column describe 
                         % one scan, and the line index matches the actuator
                         % index
-       AOSignal         
+       AOSignal_PD
+       AOSignal_CCD
         
     end
     
@@ -227,12 +228,19 @@ classdef Experiment
            % --------- update time of simulation :
            % obj.MySimulationBox.time = 0:(1/obj.param.fs_aq):max(abs(obj.MySimulationBox.z))/(obj.param.c) ;          
            % data Result Size initialization 
-           Detection = obj.param.detection;
-           switch Detection
-               case 'photorafractive'
-           obj.AOSignal = zeros(obj.param.Nz,obj.Nscan) ;
-               case 'holography'
-           obj.AOSignal = [];        
+           Detection_cellList = obj.param.detection;
+           
+           for i = 1:length(Detection_cellList)
+            Detection = Detection_cellList{i};  
+
+            switch Detection
+                   case 'photodiode'
+               obj.AOSignal_PD = [] ;
+                   case 'camera'
+               obj.AOSignal_CCD = zeros((obj.param.Nz)*(obj.param.Ny)*(obj.param.Nz),obj.Nscan) ;       
+            
+            end
+           
            end
        
         end
@@ -292,18 +300,7 @@ classdef Experiment
              
             end
             
-%            MyFFT = TF_t(2^(3+nextpow2(size(EXCITATION,2))),obj.param.fs);
-%            PaddedField = padarray(EXCITATION',MyFFT.N - size(EXCITATION',1)  ,0);
-%            Result = MyFFT.fourier(PaddedField);
-%            
-%            figure(8);
-%            subplot(211)
-%            imagesc(EXCITATION')
-%            subplot(212)
-%            plot(MyFFT.f*1e-6 , abs(Result(:,90)),'-o')
-%            xlabel('frequency (MHz)')
-%            title('profile on first column')
-            
+       
 %%
         if obj.param.Activated_FieldII == 1
             % in field, the excitation fieldII should be real
@@ -620,16 +617,21 @@ classdef Experiment
             
             switch Detector
                 
-                case 'photorefractive'
+                case 'old'
             Enveloppe = envelope(obj.MySimulationBox.Field,300).^2; % pressure squared amplitude over time each column.
             % each column corresponds to a simulation box coordinate
             MarkedPhotons = Enveloppe.^2.*LightTransmission ;
             MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
             line = squeeze( sum(sum(sum(MarkedPhotons,1),2),3) );
             % interpolation on simulation box 
-            obj.AOSignal(:,nscan) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
+            obj.AOSignal_PD(:,nscan) = interp1((obj.MySimulationBox.time)*obj.param.c,line,obj.MySimulationBox.z,'square',0);
             
-                case 'holography'
+                case 'camera'
+             
+             myField = obj.GetCameraTagged(obj.param.Trigdelay,obj.param.tau_c,nscan);
+             obj.AOSignal_CCD(:,nscan) = myField(:);
+            
+                case 'photodiode'
             
                 % temporary perfect synchrone detection of tagged light:
                 t           = obj.MySimulationBox.time(:); % simulation time column vector
@@ -637,30 +639,9 @@ classdef Experiment
                 MarkedPhotons = Enveloppe.^2.*LightTransmission ;
                 %MarkedPhotons = reshape(MarkedPhotons',[Ny,Nx,Nz,length(obj.MySimulationBox.time)]);
                 line = sum(MarkedPhotons,2);
-                % box(number of column)
-%                 E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
-%                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
-%                                
-% 
-%                 I_cameraOFF = (t<obj.param.Trigdelay) | (t>=(obj.param.Trigdelay + obj.param.tau_c));
-%                 t(I_cameraOFF) = [];
-%                 
-%                 E_tagged( I_cameraOFF ,:) = []; % removing before trigger and after CCD integration time                              
-%                 Nref = size(Eref,1);
-%                 Ntagged = size(E_tagged,1);
-%                 
-%                 if( Nref > Ntagged )
-%                 Eref(Ntagged+1:end,:) = [];    
-%                 elseif( Nref < Ntagged )
-%                     %find index of point greater then delay      
-%                 E_tagged((Nref+1):end,:) = [];    
-%                 end
-%              
-%                 %myFieldt = E_tagged.*(Eref)  ; % correlation on each column                               
-%                 myField = abs( sum( abs(conj(E_tagged) + Eref).^2, 2 ) ); % spatial integration integration over each point
 
-                obj.AOSignal(:,nscan)       = t ;
-                obj.AOSignal(:,nscan + (obj.Nscan)) = line ;
+                obj.AOSignal_PD(:,nscan)       = t ;
+                obj.AOSignal_PD(:,nscan + (obj.Nscan)) = line ;
           
                                
             end
@@ -668,46 +649,33 @@ classdef Experiment
             
         end
         
-        function [] = ShowAcquisitionLine(obj)
-            
-            Detection = obj.param.detection;
-            
+        function [] = ShowAcquisitionLine(obj,Detection)
+                       
             switch Detection
                 
-                case 'photorefractive'
+                case 'photodiode'
             
             FigHandle = figure;
-            %set(FigHandle,'WindowStyle','docked'); 
-            obj.param.FOC_type
-            switch obj.param.FOC_type
-                
-                case 'OF'
-            imagesc(obj.ScanParam*1e3+20,obj.MySimulationBox.z*1e3,obj.AOSignal)
-            xlabel('x (mm)')
-                case 'OP'
-            imagesc(obj.ScanParam*180/pi,obj.MySimulationBox.z*1e3,obj.AOSignal)
-            xlabel('angles (°)')
-                case 'OS'
-            imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
-            xlabel('scan param')
-                case 'JM'
-            imagesc(obj.ScanParam(:,2),obj.MySimulationBox.z*1e3,obj.AOSignal)
-            xlabel('scan param')
-            end
-            
-            
-            ylabel('z = ct (mm) ')
-            title('\int_{x,y,z} P(x,y,z,t) dxdydz')
+
+            imagesc( obj.AOSignal_PD(:,1)*1e6 , 1:obj.Nscan , obj.AOSignal_PD(:, obj.Nscan + (1:obj.Nscan)) )
+            xlabel('n_{scan}')
+            ylabel('t (\mu s) ')
+            title('\int_{x,y,z} I_{obj}.|P|^2(x,y,z,t) dxdydz')
             cb = colorbar ;
             ylabel(cb,'a.u')
             set(findall(FigHandle,'-property','FontSize'),'FontSize',15) 
             
-                case 'holography'
-                    
-               plot(1e6*obj.AOSignal(:,1:obj.Nscan),obj.AOSignal(:, obj.Nscan + (1:obj.Nscan))) ;
-               xlabel('time(\mu s)')
-               ylabel('a.u')
-               title('Tagged photons traces')
+                case 'camera'
+            FigHandle = figure;     
+            
+            imagesc(1e6*obj.AOSignal_CCD) ;
+               xlabel('n_{scan}')
+               ylabel('pixel on simulation box')
+               cb = colorbar ;
+               ylabel(cb,'a.u')
+               title('\int_{\tau_{c}} |P|^2(x,y,z,t) dt')
+               set(findall(FigHandle,'-property','FontSize'),'FontSize',15) 
+               
             end
 
             
@@ -740,6 +708,234 @@ classdef Experiment
             end
         end
         
+        function myField = GetCameraTagged(obj,TrigDelay,Exposure,nscan)
+                
+%                [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
+            
+                t           = obj.MySimulationBox.time(:); % simulation time column vector
+                % box(number of column)
+                E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
+                Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
+                
+                
+                % change size of Eref and E_tagged to camera integration
+                % windows
+                E_tagged_camera = E_tagged ;
+                E_tagged_camera( (t<TrigDelay) | (t>=(TrigDelay+Exposure)),:) = []; % removing before trigger and after CCD integration time                              
+                Nref = size(Eref,1);
+                Ntagged = size(E_tagged_camera,1);
+                
+                if( Nref > Ntagged )
+                Eref(Ntagged+1:end,:) = [];    
+                elseif( Nref < Ntagged )
+                    %find index of point greater then delay      
+                E_tagged_camera((Nref+1):end,:) = [];    
+                end
+                               
+                myFieldt = E_tagged_camera.*(Eref)  ; % correlation on each column       
+                %myFieldt = abs(E_tagged_camera).^2  ; % correlation on each column 
+                myField = abs(sum(myFieldt,1)); % integration correlation for each point of the box
+               % myField = reshape(myField ,[Ny,Nx,Nz]);     % resize the box to current screening
+
+                
+                
+                
+        end
+        
+        function [] = ShowJMreconstruction_camera(obj)
+            
+                       % coordinate of simulation box
+             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
+            % get input phantom for proper comparison
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+            x_phantom = obj.MySimulationBox.x ;
+            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+            % check if dimension agree (to be properly removed)
+              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+                  MyTansmission = MyTansmission';
+              end  
+ 
+              % define FFT sturcture for iFFT reconstruction
+ Nfft = 2^10;
+ G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
+
+ [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
+ [X,Z] = meshgrid(G.x,G.z);
+
+ 
+
+             
+ObjectFFT = zeros(Nfft , Nfft);
+I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
+
+
+SpectreIN = G.fourier(I_obj);
+Spectre= 0*SpectreIN;
+
+ for n_loop = 1:obj.Nscan
+     
+     Nbx = obj.ScanParam(n_loop,1);
+     Nbz = obj.ScanParam(n_loop,2);
+     PHASE = obj.ScanParam(n_loop,3);
+     
+     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
+     
+     
+     DecalZ  =   0.31; % ??
+     DecalX  =   0; % ??
+ 
+    s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx + PHASE));
+
+%if Nbz < 10
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + Cnm(n_loop)*s;
+    ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
+    Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
+    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
+    
+%end
+
+    %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
+    %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   
+
+ end
+ 
+ %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
+ %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
+ 
+Reconstruct = G.ifourier( ObjectFFT );
+I_obj_r = G.ifourier( Spectre );
+% % I = ifft2(ifftshift(ObjectFFT));
+% Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
+% % I = ifftshift(I,2);
+figure(2);
+subplot(221)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
+axis([-5 5 -23 23])
+colorbar
+subplot(222)
+imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
+%ylim([-8 8])
+title('reconstructed AO image')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+subplot(224)
+imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
+%ylim([-8 8])
+title('input phantom AO image')
+subplot(223)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
+cb = colorbar;
+ylabel(cb,'a.u.')
+axis([-5 5 -23 23])
+            
+        end
+            
+            
+        function [] = ShowJMreconstruction_photodiode(obj)
+       
+            % coordinate of simulation box
+             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
+            % get input phantom for proper comparison
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+            x_phantom = obj.MySimulationBox.x ;
+            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+            % check if dimension agree (to be properly removed)
+              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+                  MyTansmission = MyTansmission';
+              end  
+ 
+              % define FFT sturcture for iFFT reconstruction
+ Nfft = 2^10;
+ G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
+
+ [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
+ [X,Z] = meshgrid(G.x,G.z);
+
+ 
+
+             
+ObjectFFT = zeros(Nfft , Nfft);
+I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
+
+%  I_extract = find(CurrentExperiement.ScanParam(:,1)==0);
+%  figure;imagesc(CurrentExperiement.AOSignal(:,I_extract + CurrentExperiement.Nscan ))
+
+%  Flux = sum(CurrentExperiement.AOSignal(I_ccd,I_extract + CurrentExperiement.Nscan ),1);
+% hold on ; plot(1:10,18*(Flux-mean(Flux))/max(Flux))
+%  
+I_ccd = (2000:4000) ;
+
+% get single NBx Nbz values phase = 0
+
+%I_phase0 = find(CurrentExperiement.ScanParam(:,3)==0.5);
+
+SpectreIN = G.fourier(I_obj);
+Spectre= 0*SpectreIN;
+
+ for n_loop = 1:obj.Nscan
+ 
+     myTrace = obj.AOSignal_PD(:,n_loop + obj.Nscan );
+     t = obj.AOSignal_PD(:,n_loop);
+
+     Nbx = obj.ScanParam(n_loop,1);
+     Nbz = obj.ScanParam(n_loop,2);
+%     PHASE = CurrentExperiement.ScanParam(n_loop,3);
+     Cnm(n_loop) = sum(myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(obj.param.nuZ0)*(obj.param.c)*t( I_ccd )) );
+     
+     
+    DecalZ  =   0.67; % ??
+    DecalX  =   0; % ??
+ 
+    s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx));
+
+%if Nbz < 10
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = 1i*conj(s*Cnm(n_loop));
+    ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
+    Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
+    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
+    
+%end
+
+    %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
+    %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   
+
+ end
+ 
+ %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
+ %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
+ 
+Reconstruct = G.ifourier( ObjectFFT );
+I_obj_r = G.ifourier( Spectre );
+% % I = ifft2(ifftshift(ObjectFFT));
+% Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
+% % I = ifftshift(I,2);
+figure(2);
+subplot(221)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
+axis([-5 5 -23 23])
+colorbar
+subplot(222)
+imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
+%ylim([-8 8])
+title('reconstructed AO image')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+subplot(224)
+imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
+%ylim([-8 8])
+title('input phantom AO image')
+subplot(223)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
+cb = colorbar;
+ylabel(cb,'a.u.')
+axis([-5 5 -23 23])
+   
+        end
+        
         function myField = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,Exposure,nscan)
             
             [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
@@ -767,6 +963,8 @@ classdef Experiment
                 set(FigHandle,'name','(XZ) maximum field (t) values');
                 
                 %% define field correlator
+                % myField = GetCameraTagged(obj,TrigDelay,Exposure,nscan)
+                
                 t           = obj.MySimulationBox.time(:); % simulation time column vector
                 % box(number of column)
                 E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan

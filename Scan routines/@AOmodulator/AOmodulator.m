@@ -51,7 +51,7 @@ classdef AOmodulator
                         if ScanParam(nscan,2)==0
                            Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)) ;
                         else
-                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( sin( 2*pi*phase + 2*pi*fz*(obj.t(:)) )>0 );
+                           Event(:,nscan) = exp(-1i*2*pi*f0*obj.t(:)).*( 1+ sin( 2*pi*phase + 2*pi*fz*(obj.t(:)) ) );
                         end    
                 end
                 
