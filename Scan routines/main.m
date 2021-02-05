@@ -96,9 +96,12 @@ end
   
   %% matrix reconstruction
   
-  M = CurrentExperiement.GetMatrix('Real'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
+  M = CurrentExperiement.GetMmatrix('Fourier'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
  
+  
    
+%%
+
   CurrentExperiement.ShowMatrixreconstruction_camera()
 
   
