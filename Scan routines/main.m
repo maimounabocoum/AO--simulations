@@ -81,32 +81,44 @@ end
  CurrentExperiement.ShowAcquisitionLine('photodiode') ; % Show results of simulated acquistion
  CurrentExperiement.ShowAcquisitionLine('camera') ; % Show results of simulated acquistion
 
+ %% view fourier matrix for specific comonant
+ n_scan = 10;
+  CurrentExperiement.ShowActualFFT(n_scan) ; % Show results of simulated acquistion
+
 
  %% reconstruction of JM image:
  
- CurrentExperiement.ShowJMreconstruction_photodiode();
+ CurrentExperiement.ShowJMreconstruction_photodiode();%inpout phase
 
  %%
- 
+
   CurrentExperiement.ShowJMreconstruction_camera();
+  
+  %% matrix reconstruction
+  
+  M = CurrentExperiement.GetMatrix('Real'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
+ 
+   
+  CurrentExperiement.ShowMatrixreconstruction_camera()
 
   
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
- n_scan =  3;  % index of the scan - look inside variable for corresponding parameters
+ n_scan =  1;  % index of the scan - look inside variable for corresponding parameters
  parameters; % script with simulation parameter (to edit befor running the simulation)
  CurrentExperiement = Experiment(param); 
  CurrentExperiement = CurrentExperiement.EvalPhantom();
  CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
-    % % option for screening : XY, Xt , XZt
-    % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
+    % % option for screening : XY, Xt , XZt , Zt
+     %CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
+     CurrentExperiement.MySimulationBox.ShowMaxField('Zt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
-myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
-     CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
-     CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+    % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
+    % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
+      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
 % figure;imagesc(CurrentExperiement.MySimulationBox.Field)    

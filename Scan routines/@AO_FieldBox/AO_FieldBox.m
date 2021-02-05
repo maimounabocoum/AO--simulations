@@ -122,6 +122,7 @@ classdef AO_FieldBox
                 case 'Xt'
             %set(FigHandle,'name','(XT) field values for fixed z');
             
+            
             output = envelope(obj.Field,300).^2;
             %Enveloppe = envelope(obj.MySimulationBox.Field,300).^2;
             
@@ -136,7 +137,48 @@ classdef AO_FieldBox
                 xlabel('x (mm)')
                 ylabel('t (\mu s)')
                 title(['P(t), z(t)= ',num2str((obj.z(2))*1e3),'mm']);
-  
+                
+                case 'Zt'
+            %set(FigHandle,'name','(XT) field values for fixed z');
+            
+            F = TF_t( 2^13 , 1/(obj.time(2)-obj.time(1)) );
+            output = obj.Field;
+            %Enveloppe = envelope(obj.MySimulationBox.Field,300).^2;
+            
+            % size(output,1) = number of temporal points
+            % size(output,2) = number of spatial points
+            % creation of a 3D matrix
+            myField = reshape(output',[Ny,Nx,Nz,length(obj.time)]);    
+            
+            % get index of field in the center of the probe
+            Nextract = 92;
+            Iout = squeeze( myField(1,Nextract,:,:))';
+            
+            subplot(121)
+            
+                imagesc(obj.time*1e6,obj.z*1e3,Iout')
+                ylabel('z (mm)')
+                xlabel('t (\mu s)')
+                title(['P(t), z(t)= ',num2str((obj.x(Nextract))*1e3),'mm']);
+                cb = colorbar;
+                ylabel(cb,'Pressure a.u.')
+                
+                % interpolation minus propagation
+                for i=1:size(Iout,2)
+                   Pressure(:,i) = interp1(obj.time - mean(obj.time),hilbert(Iout(:,i)),F.t,'linear',0);  
+                   Spectrum(:,i) = F.fourier( Pressure(:,i) );
+                end
+                
+           subplot(122)
+           
+                imagesc(F.f/(3e6),obj.z*1e3,abs(Spectrum)')
+                %xlim([5 20])
+                ylabel('z (mm)')
+                xlabel('t (\mu s)')
+                title(['P(t), z(t)= ',num2str((obj.x(Nextract))*1e3),'mm']);
+                cb = colorbar;
+                ylabel(cb,'temporal |FFT| a.u.')
+                
                 case 'XZt'
 
             set(FigHandle,'name','(XZ) maximum field (t) values');
@@ -147,13 +189,14 @@ classdef AO_FieldBox
             
             %output = envelope(obj.Field,300).^2 ;
             output = obj.Field;
-            Field_max = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
+            myField = reshape(output',[Ny,Nx,Nz,length(obj.time)]);     
             
             Nskip = max(1,floor(size(obj.Field,1)/100)) ;
-            m = max(abs( squeeze(Field_max(:))'));
+            m = max(abs( squeeze(myField(:))'));
             for loop = 1:Nskip:size(obj.Field,1) % loop over timefloor(size(obj.Field,1)/2) %
   
-                imagesc(obj.x*1e3,obj.z*1e3,abs( squeeze(Field_max(1,:,:,loop))')/m );
+                %imagesc(obj.x*1e3,obj.z*1e3,abs( squeeze(myField(1,:,:,loop))')/m );
+                imagesc(obj.x*1e3,obj.z*1e3,real( squeeze(myField(1,:,:,loop))')/m );
                 xlabel('x (mm)')
                 ylabel('z (mm)')
                 ylim([min(obj.z*1e3) max(obj.z*1e3)])

@@ -21,7 +21,7 @@ classdef Experiment
                         % one scan, and the line index matches the actuator
                         % index
        AOSignal_PD
-       AOSignal_CCD
+       AOSignal_CCD    % name to be changed to CorrelationMatrix
         
     end
     
@@ -680,16 +680,8 @@ classdef Experiment
 
             
         end
-        
-        function Im = ShowFFTreconstruction(obj)
-            
-            % creation of a FFT structure
-            F = fourier2D(N,Fe);
-            
-            
-        end
-        
-        function Etagged = EvalTaggedPhotonsField(obj)
+      
+        function Etagged = EvalComplexField(obj)
             % this function should run after field has been calculated
             
             if isempty(obj.MySimulationBox.Field)
@@ -708,13 +700,13 @@ classdef Experiment
             end
         end
         
-        function myField = GetCameraTagged(obj,TrigDelay,Exposure,nscan)
+        function myField = GetCameraCorrelation(obj,TrigDelay,Exposure,nscan)
                 
 %                [Nx,Ny,Nz]       = SizeBox(obj.MySimulationBox);
             
                 t           = obj.MySimulationBox.time(:); % simulation time column vector
                 % box(number of column)
-                E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
+                E_tagged    = obj.EvalComplexField(); % evaluate field of current simulation n_scan
                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
                 
                 
@@ -740,6 +732,178 @@ classdef Experiment
                 
                 
                 
+        end
+        
+        function [] = ShowMatrixreconstruction_camera(obj)
+      
+                       % coordinate of simulation box
+             [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
+            % get input phantom for proper comparison
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+            x_phantom = obj.MySimulationBox.x ;
+            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+            % check if dimension agree (to be properly removed)
+              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+                  MyTansmission = MyTansmission';
+              end  
+ 
+              % define FFT sturcture for iFFT reconstruction
+ Nfft = 2^10;
+ G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
+
+ [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+ [X,Z] = meshgrid(G.x,G.z);
+
+ 
+
+             
+ObjectFFT = zeros(Nfft , Nfft);
+I_obj = interp2(Xi,Zi,MyTansmission+10,X,Z,'linear',0);
+figure;imagesc(I_obj)
+
+SpectreIN = G.fourier(I_obj);
+Spectre= 0*SpectreIN;
+
+% evaluation of transfert Matrix
+ for n_loop = 1:obj.Nscan
+  PHASE = obj.ScanParam(n_loop,3);
+  s =  exp(2i*pi*(PHASE));
+  g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
+  G_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
+  G_corr_fft = G.fourier(G_corr);
+  
+  subplot(122)
+  imagesc(G_corr);
+  subplot(121)
+  imagesc(abs(G_corr_fft));
+  imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(G_corr_fft))
+  axis([-10 10 -10 10])
+  drawnow
+ end
+
+ for n_loop = 1:obj.Nscan
+     
+     % get fourier projection
+%       g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
+%       G_corr = interp2(Xi,Zi,g_corr,X,Z+mean(z_phantom),'linear',0);
+%       G_corrFFT = G.fourier(G_corr);
+%      
+     Nbx = obj.ScanParam(n_loop,1);
+     Nbz = obj.ScanParam(n_loop,2);
+     PHASE = obj.ScanParam(n_loop,3);
+     
+     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
+     
+     
+     DecalZ  =   0.31; % ??
+     DecalX  =   0; % ??
+ 
+    s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx + PHASE));
+
+
+    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + Cnm(n_loop)*s;
+    ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
+    Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
+    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
+    
+
+ end
+ 
+ %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
+ %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
+ 
+Reconstruct = G.ifourier( ObjectFFT );
+I_obj_r = G.ifourier( Spectre );
+% % I = ifft2(ifftshift(ObjectFFT));
+% Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
+% % I = ifftshift(I,2);
+figure(2);
+subplot(221)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
+axis([-10 10 -10 10])
+xlabel('Nb_x')
+ylabel('Nb_z')
+cb = colorbar;
+ylabel(cb,'|FFT| (a.u)')
+title('Fetched using JM waves |FFT|')
+subplot(222)
+imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
+%ylim([-8 8])
+title('reconstructed AO image')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+subplot(224)
+imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+title('Input phantom AO image')
+subplot(223)
+imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
+cb = colorbar;
+axis([-10 10 -10 10])
+title('Input phantom |FFT|')
+xlabel('Nb_x')
+ylabel('Nb_z')
+cb = colorbar;
+ylabel(cb,'|FFT| (a.u)')
+
+            
+        end
+        
+        function M = GetMmatrix(obj,TypeMatrix)
+            
+              switch TypeMatrix
+                
+                case 'Fourier'
+                M = (obj.AOSignal_CCD)'*eye(length(obj.DiffuseLightTransmission(:)),length(obj.DiffuseLightTransmission(:)));
+                case 'Fourier-4-phase'
+        %             
+        
+        
+            end   
+        end
+        
+        function [ Y , yNscan , yScanParam ] = GetYvector(obj,TypeMatrix)
+            
+            % starting for obj.AOSignal_CCD Matrix :
+            % each line : g function
+            % each colmun : different pixels of camera
+            
+            switch TypeMatrix
+                
+                case 'Real'
+                    
+        Y = (obj.AOSignal_CCD)'*(obj.DiffuseLightTransmission(:));
+        yNscan = obj.Nscan ;
+        yScanParam = obj.ScanParam ;
+        
+                case 'Real-4phase'
+        %             
+        Y = (obj.AOSignal_CCD)'*(obj.DiffuseLightTransmission(:));
+        
+        % built Phase-compression Matrix
+        % image any matrix with N column to M/4 colum matrix unique Phase
+        % linear combinaison
+        [yScanParam , ~ ,Iphase] = unique( obj.ScanParam(:,1:2) ,'row'); % compress single element of Nbx,Nbz matrix 
+        
+        yNscan = size(yScanParam,1) ;
+        yScanParam = [yScanParam,zeros(yNscan,1)]; % fill to zero phase as reference (arbitrary) to
+        % keep consistency of ScanParam representation
+        MphaseCompression = zeros(yNscan,obj.Nscan);
+        
+        for loop = 1:yNscan  
+        Ifill = find(loop==Iphase);
+        MphaseCompression(loop,Ifill) = exp(1i*2*pi*( obj.ScanParam(Ifill,3) ) );
+        end
+        
+        Y = MphaseCompression*Y(:) ;
+        
+        
+            end
         end
         
         function [] = ShowJMreconstruction_camera(obj)
@@ -772,14 +936,17 @@ I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
 SpectreIN = G.fourier(I_obj);
 Spectre= 0*SpectreIN;
 
- for n_loop = 1:obj.Nscan
+% built acquisition -non-hermitian (minimal) matrix 
+[C_nsan,yNscan,yScanParam] = obj.GetYvector('Real-4phase'); % 'Real' , 'Real-4phase','Fourier','Fourier-4-phase'
+
+ for n_loop = 1:yNscan
      
-     Nbx = obj.ScanParam(n_loop,1);
-     Nbz = obj.ScanParam(n_loop,2);
-     PHASE = obj.ScanParam(n_loop,3);
+     Nbx = yScanParam(n_loop,1);
+     Nbz = yScanParam(n_loop,2);
+     PHASE = yScanParam(n_loop,3);
      
-     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
-     
+%     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
+     Cnm(n_loop) = C_nsan(n_loop) ;
      
      DecalZ  =   0.31; % ??
      DecalX  =   0; % ??
@@ -810,8 +977,12 @@ I_obj_r = G.ifourier( Spectre );
 figure(2);
 subplot(221)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
-axis([-5 5 -23 23])
-colorbar
+axis([-10 10 -10 10])
+xlabel('Nb_x')
+ylabel('Nb_z')
+cb = colorbar;
+ylabel(cb,'|FFT| (a.u)')
+title('Fetched using JM waves |FFT|')
 subplot(222)
 imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
 %ylim([-8 8])
@@ -822,17 +993,24 @@ cb = colorbar;
 ylabel(cb,'a.u.')
 subplot(224)
 imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
-%ylim([-8 8])
-title('input phantom AO image')
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
+title('Input phantom AO image')
 subplot(223)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
 cb = colorbar;
-ylabel(cb,'a.u.')
-axis([-5 5 -23 23])
+axis([-10 10 -10 10])
+title('Input phantom |FFT|')
+xlabel('Nb_x')
+ylabel('Nb_z')
+cb = colorbar;
+ylabel(cb,'|FFT| (a.u)')
+
             
         end
-            
-            
+     
         function [] = ShowJMreconstruction_photodiode(obj)
        
             % coordinate of simulation box
@@ -869,18 +1047,18 @@ I_ccd = (2000:4000) ;
 
 % get single NBx Nbz values phase = 0
 
-%I_phase0 = find(CurrentExperiement.ScanParam(:,3)==0.5);
+I_phase0 = find( obj.ScanParam(:,3)==0 );
 
 SpectreIN = G.fourier(I_obj);
 Spectre= 0*SpectreIN;
 
- for n_loop = 1:obj.Nscan
+ for n_loop = 1:length(I_phase0)
  
-     myTrace = obj.AOSignal_PD(:,n_loop + obj.Nscan );
-     t = obj.AOSignal_PD(:,n_loop);
+     myTrace = obj.AOSignal_PD(:,I_phase0(n_loop) + obj.Nscan );
+     t = obj.AOSignal_PD(:,I_phase0(n_loop));
 
-     Nbx = obj.ScanParam(n_loop,1);
-     Nbz = obj.ScanParam(n_loop,2);
+     Nbx = obj.ScanParam( I_phase0(n_loop) ,1);
+     Nbz = obj.ScanParam( I_phase0(n_loop) ,2);
 %     PHASE = CurrentExperiement.ScanParam(n_loop,3);
      Cnm(n_loop) = sum(myTrace( I_ccd ).*exp(1i*2*pi*Nbz*(obj.param.nuZ0)*(obj.param.c)*t( I_ccd )) );
      
@@ -914,8 +1092,14 @@ I_obj_r = G.ifourier( Spectre );
 figure(2);
 subplot(221)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
-axis([-5 5 -23 23])
-colorbar
+axis([-10 10 -10 10])
+xlabel('Nb_x')
+ylabel('Nb_z')
+cb = colorbar;
+ylabel(cb,'|FFT| (a.u.)')
+title('Fetched using JM (photorafractive) Spectrum |FFT|')
+cb = colorbar;
+ylabel(cb,'|FFT| a.u')
 subplot(222)
 imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
 %ylim([-8 8])
@@ -926,14 +1110,34 @@ cb = colorbar;
 ylabel(cb,'a.u.')
 subplot(224)
 imagesc(G.x*1e3,G.z*1e3,real(I_obj_r))
-%ylim([-8 8])
+xlabel('x(mm)')
+ylabel('z(mm)')
+cb = colorbar;
+ylabel(cb,'a.u.')
 title('input phantom AO image')
 subplot(223)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
+xlabel('Nb_x')
+ylabel('Nb_z')
 cb = colorbar;
-ylabel(cb,'a.u.')
-axis([-5 5 -23 23])
+ylabel(cb,'|FFT| (a.u.)')
+axis([-10 10 -10 10])
+title('Ideal Phantom Spectrum |FFT|')
    
+        end
+        
+        function SpectraProj = ShowActualFFT(obj,nscan)
+            
+         SpectraProj = obj.GetCameraTagged(obj.param.Trigdelay,obj.param.tau_c,nscan) ;
+            
+                       % define FFT sturcture for iFFT reconstruction
+         Nfft = 2^10;
+         G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
+         [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
+         [X,Z] = meshgrid(G.x,G.z);
+         
+
+         
         end
         
         function myField = ShowFieldCorrelation(obj,plane,FigHandle,TrigDelay,Exposure,nscan)
