@@ -101,8 +101,16 @@ end
   M = CurrentExperiement.GetMmatrix('Fourier-4phase'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
  
   rank(M)
-  figure;imagesc( abs( inv(real(M))+ 1i*inv(imag(M))) )
+  figure;imagesc( abs( inv(M)) )
   %%
+  
+  A = [1,1;1i,-1i]
+  Y = A*[1i;-1i];
+  rank(A)
+  inv(A)*Y
+  
+  %%
+  
 %   for i=1:size(M,1)
 %      Fplane = CurrentExperiement.vector2FFTplane( M(i,:) , G );
 %      imagesc(G.fx/(G.dfx),G.fz/(G.dfz),abs(Fplane))

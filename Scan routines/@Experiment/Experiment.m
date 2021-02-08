@@ -1006,15 +1006,19 @@ ylabel(cb,'|FFT| (a.u)')
              
             % get input phantom for proper comparison
             MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-%             x_phantom = obj.MySimulationBox.x ;
-%             z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+             x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
+             z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
             % check if dimension agree (to be properly removed)
               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
                   MyTansmission = MyTansmission';
               end  
  
               % define FFT structure for iFFT reconstruction
-
+            [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+            [X,Z] = meshgrid(G.x,G.z);
+         
+                % ObjectFFT = zeros(Nfft , Nfft);
+            MyTansmission = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
               
 
            % Returns Actual object coefficient in line vector
@@ -1089,15 +1093,18 @@ Spectre = 0*SpectreIN;
 [C_nsan,yNscan,yScanParam] = obj.GetYvector('Real-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
 
 % compare to Matric fecth * Inpout image :
- M = obj.GetMmatrix('Fourier-4phase'); 
+ M = obj.GetMmatrix('Fourier-4phase'); % matrix of g fourier componants
  
 % get reference image Fourier coefficient :
 [C_inpout,~,~] = obj.GetYvector('Fourier-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
-Spectre = obj.vector2FFTplane(C_inpout,G) ;
 
-% C_nsan = M*(C_inpout) ;
-% C_nsan = conj(C_nsan) ;
 
+ %   C_nsan = C_inpout ;
+%     C_nsan = M*C_inpout ;
+%     C_nsan = inv(M)*M*(C_inpout) ;
+
+    C_nsan = inv(M)*C_nsan;
+     C_nsan = conj(C_nsan) ; 
 % C_nsan : fetched complex Fourier coefficient (imageInpout*Signal)
 
 % 
@@ -1113,22 +1120,28 @@ Spectre = obj.vector2FFTplane(C_inpout,G) ;
      
      DecalZ  =   0.7; % ??
      DecalX  =   0; % ??
- 
+
     s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx + PHASE));
-    
+ 
     ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) = ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) + Cnm(n_loop)*s;
     ObjectFFT( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) );%-s*1i*Cnm(n_loop);
-   
+    
+    Spectre( G.Nz0 + Nbz , G.Nx0 + Nbx ) = SpectreIN( G.Nz0 + Nbz , G.Nx0 + Nbx );
+    Spectre( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( Spectre( G.Nz0 + Nbz , G.Nx0 + Nbx ) );
+    
  end
  
- C_inv = C_nsan ;
- ObjectFFT = obj.vector2FFTplane(C_inv,G);
+ ObjectFFT = obj.vector2FFTplane(C_nsan,G) ;
+ 
+%  C_inv = C_nsan ;
+%  ObjectFFT = obj.vector2FFTplane(C_inv,G);
  
  %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
  %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
  
-Reconstruct = G.ifourier( ObjectFFT );
+
 I_obj_r = G.ifourier( Spectre );
+Reconstruct = G.ifourier( ObjectFFT );
 % % I = ifft2(ifftshift(ObjectFFT));
 % Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
 % % I = ifftshift(I,2);
@@ -1144,6 +1157,7 @@ title('Fetched using JM waves |FFT|')
 subplot(222)
 imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
 %ylim([-8 8])
+caxis([-4000 4000])
 title('reconstructed AO image')
 xlabel('x(mm)')
 ylabel('z(mm)')
