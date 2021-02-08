@@ -91,14 +91,48 @@ end
  CurrentExperiement.ShowJMreconstruction_photodiode();%inpout phase
 
  %%
-
+ 
   CurrentExperiement.ShowJMreconstruction_camera();
   
   %% matrix reconstruction
+  [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
+  G = TF2D( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
   
-  M = CurrentExperiement.GetMmatrix('Fourier'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
+  M = CurrentExperiement.GetMmatrix('Fourier-4phase'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
  
+  rank(M)
+  figure;imagesc( abs( inv(real(M))+ 1i*inv(imag(M))) )
+  %%
+%   for i=1:size(M,1)
+%      Fplane = CurrentExperiement.vector2FFTplane( M(i,:) , G );
+%      imagesc(G.fx/(G.dfx),G.fz/(G.dfz),abs(Fplane))
+%      drawnow
+%   end
   
+  % M : 'Fourier-4phase'
+  % each line is the fourier transform of g-illumination pattern
+ 
+
+  
+  % reconstruct image from Matrix:
+  figure(1)
+  subplot(121)
+      FplaneIm = CurrentExperiement.GetYvector('Real-4phase');
+      Fplane = CurrentExperiement.vector2FFTplane(FplaneIm, G );
+      imagesc(G.fx/(G.dfx),G.fz/(G.dfz),abs(Fplane))
+      colorbar
+      title('fetch in experiment')
+  subplot(122)
+      FplaneImFFT = CurrentExperiement.GetYvector('Fourier-4phase');
+      Fplane = CurrentExperiement.vector2FFTplane( M*FplaneImFFT , G );
+      imagesc(G.fx/(G.dfx),G.fz/(G.dfz),abs(Fplane))
+      colorbar
+      title('calculated using matrix approach')
+      
+%       figure;
+%       plot( abs(FplaneIm) )
+%       hold on
+%       plot( abs(M*FplaneImFFT) )
    
 %%
 

@@ -855,10 +855,17 @@ ylabel(cb,'|FFT| (a.u)')
         end
         
         function M = GetMmatrix(obj,TypeMatrix)
-            
+         
+            % input grid parameters : 
+         [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox(); 
+         x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ; % center at origine for Fourier
+         z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine for Fourier    
+        % We start by Fourier-Transforming the g-function on Fourier Grid
+
+        
         % defined compressed scan of ScanParam
         [yScanParam , ~ ,Iphase] = unique( obj.ScanParam(:,1:2) ,'row'); % compress single element of Nbx,Nbz matrix 
-        yScanParam = [yScanParam,zeros(length(yScanParam),1)]; % New scanParam Where Phases are compression
+        yScanParam = [yScanParam,zeros(size(yScanParam,1),1)]; % New scanParam Where Phases are compression
         % Filling last comlun arbitrarely to phase=0 for consistency of
         % previsou notation
         % Iphase indexes of phase repeat: exple: [1,1,1,1,2,2,2...,yNscan,yNscan,yNscan,yNscan]
@@ -881,14 +888,6 @@ ylabel(cb,'|FFT| (a.u)')
         M = (obj.AOSignal_CCD)'*eye(length(obj.DiffuseLightTransmission(:)),length(obj.DiffuseLightTransmission(:)));
         M = MphaseCompression*M ;
                   case 'Fourier'
-         [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox(); 
-         x_phantom = obj.MySimulationBox.x - obj.param.center(1) ;
-         z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
-        % We start by Fourier-Transforming the g-function on Fourier Grid
-        [Xi,Zi] = meshgrid(x_phantom,z_phantom);
-         Nfft = 2^10;
-         G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
-         [X,Z] = meshgrid(G.x,G.z);
          
          % squared matrix to fill for Fourier Mapping
          M = zeros(obj.Nscan,obj.Nscan);
@@ -897,13 +896,20 @@ ylabel(cb,'|FFT| (a.u)')
          Nbz = unique(obj.ScanParam(:,2));
          
          for n_loop = 1:obj.Nscan
+
+          I_isophase = find( obj.ScanParam(:,3) == obj.ScanParam(n_loop,3));
+          
           g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
           G_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
           G_corr_fft = G.fourier(G_corr);
           
-          FFTMATRIX = G_corr_fft( (Nfft/2+1) + Nbx , (Nfft/2+1) + Nbz );
+%           [Fx,Fz] = meshgrid( G.fx/(obj.param.nuX0) , G.fz/(obj.param.nuZ0) );
+%           Fx = Fx((Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
+%           Fz = Fz((Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
+%           Test = [Fx(:),Fz(:)];
+          FFTMATRIX = G_corr_fft( (Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
           % fill image of n_loop componant:
-          M(:,n_loop) = FFTMATRIX(:); % tricky!!
+          M( I_isophase , n_loop ) = FFTMATRIX(:)/sum(abs(FFTMATRIX(:)).^2); % tricky!!
           
 %           subplot(122)
 %           imagesc(G_corr);
@@ -914,7 +920,43 @@ ylabel(cb,'|FFT| (a.u)')
 %           drawnow
          end
          
-              end   
+                  case 'Fourier-4phase'
+                      
+         [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox(); 
+         G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );
+ 
+         % interpolation parameters to match dx sampling
+         [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+         [X,Z] = meshgrid(G.x,G.z); 
+         
+        MphaseCompression = zeros(yNscan,obj.Nscan);   
+        for loop = 1:yNscan  
+        Ifill = find(loop==Iphase);
+        MphaseCompression(loop,Ifill) = exp(1i*2*pi*( obj.ScanParam(Ifill,3) ) );
+        end  
+
+         M = zeros(obj.Nscan,yNscan);
+        
+         % evaluation of Fourier Tranform of illumniation pattern g : AOSignal_CCD
+         for n_loop = 1:obj.Nscan
+
+          g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
+
+          g_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
+
+          %e1 = sum((G.dx*G.dz)*abs(g_corr(:)).^2)
+          G_corr_fft    = G.fourier( g_corr );
+          %e2 = sum((G.dfx*G.dfz)*abs(G_corr_fft(:)).^2)
+          FFTMATRIX     = obj.Fourier2vector(G_corr_fft,G);
+          % fill image of n_loop componant:         
+          M( n_loop , :  ) =  FFTMATRIX(:)' ; % tricky!!
+         end
+         
+         M = MphaseCompression*M;
+         
+              end
+         
+              
         end
         
         function [ Y , yNscan , yScanParam ] = GetYvector(obj,TypeMatrix)
@@ -922,7 +964,10 @@ ylabel(cb,'|FFT| (a.u)')
             % starting for obj.AOSignal_CCD Matrix :
             % each line : g function
             % each colmun : different pixels of camera
-            
+       [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
+       G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );     
+       
+       
             switch TypeMatrix
                 
                 case 'Real'
@@ -933,7 +978,7 @@ ylabel(cb,'|FFT| (a.u)')
         
                 case 'Real-4phase'
         %             
-        Y = (obj.AOSignal_CCD)'*(obj.DiffuseLightTransmission(:));
+        Y = (obj.AOSignal_CCD)'*(obj.DiffuseLightTransmission(:))*(G.dx)*(G.dz);
         
         % built Phase-compression Matrix
         % image any matrix with N column to M/4 colum matrix unique Phase
@@ -950,10 +995,66 @@ ylabel(cb,'|FFT| (a.u)')
         MphaseCompression(loop,Ifill) = exp(1i*2*pi*( obj.ScanParam(Ifill,3) ) );
         end
         
+        % result of acquisition using correlation camera function:
         Y = MphaseCompression*Y(:) ;
         
+                case 'Fourier-4phase'
+                         % coordinate of simulation box
+        [yScanParam , ~ ,Iphase] = unique( obj.ScanParam(:,1:2) ,'row'); % compress single element of Nbx,Nbz matrix  
+        yNscan = size(yScanParam,1) ;
+        
+             
+            % get input phantom for proper comparison
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+%             x_phantom = obj.MySimulationBox.x ;
+%             z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+            % check if dimension agree (to be properly removed)
+              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+                  MyTansmission = MyTansmission';
+              end  
+ 
+              % define FFT structure for iFFT reconstruction
+
+              
+
+           % Returns Actual object coefficient in line vector
+           
+              ObjectFFT = G.fourier( MyTansmission ) ;
+              
+              Y = obj.Fourier2vector(ObjectFFT,G);
         
             end
+            
+        end
+        
+        function IFFT = vector2FFTplane(obj,Yvector,S)
+            
+         Nbx = unique(obj.ScanParam(:,1));
+         Nbz = unique(obj.ScanParam(:,2));
+         
+         SubFFT = reshape( Yvector,[ length(Nbz) , length(Nbx) ] );
+         
+         IFFT = zeros(S.Nz,S.Nx);
+         
+         IFFT( S.Nz0 + Nbz , S.Nx0 + Nbx ) = SubFFT ;
+         
+         IFFT( S.Nz0 - Nbz , S.Nx0 - Nbx ) = conj( IFFT( S.Nz0 + Nbz , S.Nx0 + Nbx ) );
+            
+        end
+        
+        function Yvector = Fourier2vector(obj,ObjectFFT,S)
+         
+         % S is a Fourier structure
+         Nbx = unique(obj.ScanParam(:,1));
+         Nbz = unique(obj.ScanParam(:,2));
+%        [Fx,Fz] = meshgrid( G.fx/(obj.param.nuX0) , G.fz/(obj.param.nuZ0) );
+%        Fx = Fx((Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
+%        Fz = Fz((Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
+%        Test = [Fx(:),Fz(:)];
+       
+        ObjectFFT_Extract = ObjectFFT( S.Nz0 + Nbz , S.Nx0 + Nbx );
+        Yvector = ObjectFFT_Extract(:);
+            
         end
         
         function [] = ShowJMreconstruction_camera(obj)
@@ -962,59 +1063,66 @@ ylabel(cb,'|FFT| (a.u)')
              [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             % get input phantom for proper comparison
             MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-            x_phantom = obj.MySimulationBox.x ;
-            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+            x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
+            z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
             % check if dimension agree (to be properly removed)
               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
                   MyTansmission = MyTansmission';
               end  
  
               % define FFT sturcture for iFFT reconstruction
- Nfft = 2^10;
- G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
-
- [Xi,Zi] = meshgrid(x_phantom,z_phantom-0*min(z_phantom));
- [X,Z] = meshgrid(G.x,G.z);
+              G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 ); 
 
  
-
-             
-ObjectFFT = zeros(Nfft , Nfft);
+  [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+  [X,Z] = meshgrid(G.x,G.z);
+         
+% ObjectFFT = zeros(Nfft , Nfft);
 I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
 
+ObjectFFT   = 0*MyTansmission ;
 
 SpectreIN = G.fourier(I_obj);
-Spectre= 0*SpectreIN;
+Spectre = 0*SpectreIN;
 
 % built acquisition -non-hermitian (minimal) matrix 
-[C_nsan,yNscan,yScanParam] = obj.GetYvector('Real-4phase'); % 'Real' , 'Real-4phase','Fourier','Fourier-4-phase'
+[C_nsan,yNscan,yScanParam] = obj.GetYvector('Real-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
 
+% compare to Matric fecth * Inpout image :
+ M = obj.GetMmatrix('Fourier-4phase'); 
+ 
+% get reference image Fourier coefficient :
+[C_inpout,~,~] = obj.GetYvector('Fourier-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
+Spectre = obj.vector2FFTplane(C_inpout,G) ;
+
+% C_nsan = M*(C_inpout) ;
+% C_nsan = conj(C_nsan) ;
+
+% C_nsan : fetched complex Fourier coefficient (imageInpout*Signal)
+
+% 
+% yNscan
+% yScanParam = obj.ScanParam ;
+% yNscan = obj.Nscan ;
  for n_loop = 1:yNscan
-     
      Nbx = yScanParam(n_loop,1);
-     Nbz = yScanParam(n_loop,2);
-     PHASE = yScanParam(n_loop,3);
-     
+     Nbz = yScanParam(n_loop,2);    
+     PHASE = yScanParam(n_loop,3);    
 %     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
      Cnm(n_loop) = C_nsan(n_loop) ;
      
-     DecalZ  =   0.31; % ??
+     DecalZ  =   0.7; % ??
      DecalX  =   0; % ??
  
     s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx + PHASE));
-
-%if Nbz < 10
-    ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + Cnm(n_loop)*s;
-    ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );%-s*1i*Cnm(n_loop);
-    Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = SpectreIN((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx);
-    Spectre((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( Spectre((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );
     
-%end
-
-    %ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) = ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) + s*exp(1i*2*pi*PHASE)*P_tot(n_loop);
-    %ObjectFFT((Nfft/2+1)-Nbz,(Nfft/2+1)-Nbx) = conj( ObjectFFT((Nfft/2+1)+Nbz,(Nfft/2+1)+Nbx) );   
-
+    ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) = ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) + Cnm(n_loop)*s;
+    ObjectFFT( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) );%-s*1i*Cnm(n_loop);
+   
  end
+ 
+ C_inv = C_nsan ;
+ ObjectFFT = obj.vector2FFTplane(C_inv,G);
  
  %ObjectFFT = abs(Spectre).*exp(1i*angle(ObjectFFT));
  %ObjectFFT = abs(ObjectFFT).*exp(1i*angle(Spectre));
@@ -1027,7 +1135,7 @@ I_obj_r = G.ifourier( Spectre );
 figure(2);
 subplot(221)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
-axis([-10 10 -10 10])
+%axis([-10 10 -10 10])
 xlabel('Nb_x')
 ylabel('Nb_z')
 cb = colorbar;
@@ -1051,7 +1159,7 @@ title('Input phantom AO image')
 subplot(223)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(Spectre))
 cb = colorbar;
-axis([-10 10 -10 10])
+%axis([-10 10 -10 10])
 title('Input phantom |FFT|')
 xlabel('Nb_x')
 ylabel('Nb_z')
