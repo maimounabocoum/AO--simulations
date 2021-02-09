@@ -98,10 +98,18 @@ end
   [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
   G = TF2D( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
   
-  M = CurrentExperiement.GetMmatrix('Fourier-4phase'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
+   
+  M = CurrentExperiement.GetMmatrix('Real-4phase'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
  
   rank(M)
-  figure;imagesc( abs( inv(M)) )
+  
+  % algorithme SVD
+  [U,S,V] = svd(M);
+  % invert S
+  Si(abs(S)>0) = S(abs(S)>0).^(-1);
+  %V*Si*U';
+  figure;imagesc( abs( S ) )
+  colorbar
   %%
   
   A = [1,1;1i,-1i]

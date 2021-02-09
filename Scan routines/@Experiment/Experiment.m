@@ -909,7 +909,7 @@ ylabel(cb,'|FFT| (a.u)')
 %           Test = [Fx(:),Fz(:)];
           FFTMATRIX = G_corr_fft( (Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
           % fill image of n_loop componant:
-          M( I_isophase , n_loop ) = FFTMATRIX(:)/sum(abs(FFTMATRIX(:)).^2); % tricky!!
+          M( I_isophase , n_loop ) = FFTMATRIX(:) ; % tricky!!
           
 %           subplot(122)
 %           imagesc(G_corr);
@@ -949,7 +949,7 @@ ylabel(cb,'|FFT| (a.u)')
           %e2 = sum((G.dfx*G.dfz)*abs(G_corr_fft(:)).^2)
           FFTMATRIX     = obj.Fourier2vector(G_corr_fft,G);
           % fill image of n_loop componant:         
-          M( n_loop , :  ) =  FFTMATRIX(:)' ; % tricky!!
+          M( n_loop , :  ) =  conj(FFTMATRIX(:)') ; % tricky!!
          end
          
          M = MphaseCompression*M;
@@ -977,7 +977,25 @@ ylabel(cb,'|FFT| (a.u)')
         yScanParam = obj.ScanParam ;
         
                 case 'Real-4phase'
-        %             
+        %
+%              MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+%              x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
+%              z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
+%             % check if dimension agree (to be properly removed)
+%               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+%                   MyTansmission = MyTansmission';
+%               end  
+%         [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+%         [X,Z] = meshgrid(G.x,G.z);
+%          
+%         % ObjectFFT = zeros(Nfft , Nfft);
+%         MyTansmission = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);      
+%         for i=1:size(obj.AOSignal_CCD,2)
+%             AOSignal = reshape(obj.AOSignal_CCD(:,i),[Nz,Nx]);
+%             AOSignal = AOSignal';
+%             AOSignal = interp2(Xi,Zi,AOSignal,X,Z,'linear',0);   
+%             Y(i) = sum(sum(AOSignal.*MyTansmission));
+%         end
         Y = (obj.AOSignal_CCD)'*(obj.DiffuseLightTransmission(:))*(G.dx)*(G.dz);
         
         % built Phase-compression Matrix
@@ -992,7 +1010,7 @@ ylabel(cb,'|FFT| (a.u)')
         
         for loop = 1:yNscan  
         Ifill = find(loop==Iphase);
-        MphaseCompression(loop,Ifill) = exp(1i*2*pi*( obj.ScanParam(Ifill,3) ) );
+        MphaseCompression(loop,Ifill) = exp(-1i*2*pi*( obj.ScanParam(Ifill,3) ) );
         end
         
         % result of acquisition using correlation camera function:
@@ -1099,12 +1117,12 @@ Spectre = 0*SpectreIN;
 [C_inpout,~,~] = obj.GetYvector('Fourier-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
 
 
- %   C_nsan = C_inpout ;
-%     C_nsan = M*C_inpout ;
-%     C_nsan = inv(M)*M*(C_inpout) ;
+  %    C_nsan = C_inpout ;
+       C_nsan = M*conj(C_inpout) ;
+  %    C_nsan = inv(M)*M*(C_inpout) ;
 
-    C_nsan = inv(M)*C_nsan;
-     C_nsan = conj(C_nsan) ; 
+   % C_nsan = inv( M )*C_nsan;
+   % C_nsan = conj(C_nsan) ; 
 % C_nsan : fetched complex Fourier coefficient (imageInpout*Signal)
 
 % 
@@ -1117,18 +1135,13 @@ Spectre = 0*SpectreIN;
      PHASE = yScanParam(n_loop,3);    
 %     Cnm(n_loop) = sum( obj.AOSignal_CCD(:,n_loop).*(obj.DiffuseLightTransmission(:)) ); % signal integrated on all pixels
      Cnm(n_loop) = C_nsan(n_loop) ;
-     
      DecalZ  =   0.7; % ??
      DecalX  =   0; % ??
-
     s =  exp(2i*pi*(DecalZ*Nbz + DecalX*Nbx + PHASE));
- 
     ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) = ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) + Cnm(n_loop)*s;
-    ObjectFFT( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) );%-s*1i*Cnm(n_loop);
-    
+    ObjectFFT( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( ObjectFFT( G.Nz0 + Nbz , G.Nx0 + Nbx ) );%-s*1i*Cnm(n_loop);   
     Spectre( G.Nz0 + Nbz , G.Nx0 + Nbx ) = SpectreIN( G.Nz0 + Nbz , G.Nx0 + Nbx );
-    Spectre( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( Spectre( G.Nz0 + Nbz , G.Nx0 + Nbx ) );
-    
+    Spectre( G.Nz0 - Nbz , G.Nx0 - Nbx ) = conj( Spectre( G.Nz0 + Nbz , G.Nx0 + Nbx ) );    
  end
  
  ObjectFFT = obj.vector2FFTplane(C_nsan,G) ;
@@ -1157,7 +1170,7 @@ title('Fetched using JM waves |FFT|')
 subplot(222)
 imagesc(G.x*1e3,G.z*1e3,real(Reconstruct))
 %ylim([-8 8])
-caxis([-4000 4000])
+%caxis([-4000 4000])
 title('reconstructed AO image')
 xlabel('x(mm)')
 ylabel('z(mm)')
