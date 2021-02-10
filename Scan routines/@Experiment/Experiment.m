@@ -759,7 +759,7 @@ classdef Experiment
              
 ObjectFFT = zeros(Nfft , Nfft);
 I_obj = interp2(Xi,Zi,MyTansmission+10,X,Z,'linear',0);
-figure;imagesc(I_obj)
+
 
 SpectreIN = G.fourier(I_obj);
 Spectre= 0*SpectreIN;
@@ -942,7 +942,7 @@ ylabel(cb,'|FFT| (a.u)')
 
           g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
 
-          g_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
+          %g_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
 
           %e1 = sum((G.dx*G.dz)*abs(g_corr(:)).^2)
           G_corr_fft    = G.fourier( g_corr );
@@ -1024,20 +1024,20 @@ ylabel(cb,'|FFT| (a.u)')
              
             % get input phantom for proper comparison
             MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-             x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
-             z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
+%              x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
+%              z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
             % check if dimension agree (to be properly removed)
               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
                   MyTansmission = MyTansmission';
               end  
  
-              % define FFT structure for iFFT reconstruction
-            [Xi,Zi] = meshgrid(x_phantom,z_phantom);
-            [X,Z] = meshgrid(G.x,G.z);
-         
-                % ObjectFFT = zeros(Nfft , Nfft);
-            MyTansmission = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
-              
+%               % define FFT structure for iFFT reconstruction
+%             [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+%             [X,Z] = meshgrid(G.x,G.z);
+%          
+%                 % ObjectFFT = zeros(Nfft , Nfft);
+%             MyTansmission = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
+%               
 
            % Returns Actual object coefficient in line vector
            
@@ -1095,13 +1095,13 @@ ylabel(cb,'|FFT| (a.u)')
               % define FFT sturcture for iFFT reconstruction
               G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 ); 
 
- 
-  [Xi,Zi] = meshgrid(x_phantom,z_phantom);
-  [X,Z] = meshgrid(G.x,G.z);
-         
-% ObjectFFT = zeros(Nfft , Nfft);
-I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
-
+%  
+%   [Xi,Zi] = meshgrid(x_phantom,z_phantom);
+%   [X,Z] = meshgrid(G.x,G.z);
+%          
+% % ObjectFFT = zeros(Nfft , Nfft);
+% I_obj = interp2(Xi,Zi,MyTansmission,X,Z,'linear',0);
+I_obj = MyTansmission ;
 ObjectFFT   = 0*MyTansmission ;
 
 SpectreIN = G.fourier(I_obj);
@@ -1118,7 +1118,7 @@ Spectre = 0*SpectreIN;
 
 
   %    C_nsan = C_inpout ;
-       C_nsan = M*conj(C_inpout) ;
+       C_nsan = M*C_inpout;
   %    C_nsan = inv(M)*M*(C_inpout) ;
 
    % C_nsan = inv( M )*C_nsan;
@@ -1154,7 +1154,11 @@ Spectre = 0*SpectreIN;
  
 
 I_obj_r = G.ifourier( Spectre );
+
 Reconstruct = G.ifourier( ObjectFFT );
+% reconstruction by projection on simulation grid
+
+
 % % I = ifft2(ifftshift(ObjectFFT));
 % Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
 % % I = ifftshift(I,2);

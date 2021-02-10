@@ -99,24 +99,24 @@ end
   G = TF2D( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
   
    
-  M = CurrentExperiement.GetMmatrix('Real-4phase'); % 'Real' , 'Real-4-phase','Fourier','Fourier-4-phase'
+  M = CurrentExperiement.GetMmatrix('Real-4phase'); % 'Real' , 'Real-4phase','Fourier','Fourier-4phase'
  
-  rank(M)
+ % M = CurrentExperiement.GetMmatrix('Fourier-4phase');
   
-  % algorithme SVD
-  [U,S,V] = svd(M);
-  % invert S
-  Si(abs(S)>0) = S(abs(S)>0).^(-1);
-  %V*Si*U';
-  figure;imagesc( abs( S ) )
-  colorbar
-  %%
+  % view structure as film
+  figure;
+  mm = sum(M,1);
+  ImSt = reshape(mm,[Nz,Nx]); 
+  imagesc(real(ImSt'))
   
-  A = [1,1;1i,-1i]
-  Y = A*[1i;-1i];
-  rank(A)
-  inv(A)*Y
-  
+     
+  for i=1:size(M,1)
+     ImSt = reshape(M(i,:),[Nz,Nx]); 
+     imagesc(real(ImSt'))
+     drawnow
+  end
+
+ 
   %%
   
 %   for i=1:size(M,1)
