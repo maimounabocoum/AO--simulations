@@ -3,6 +3,8 @@ classdef JM
     %   Detailed explanation goes here
     
     properties
+        
+        % Fourier Propertie
         Nx       % number of point for fourier transform
         Nx0
         Nz
@@ -19,6 +21,10 @@ classdef JM
         kz       % frequencz variable in rad
         dz
         dfz
+        
+        % Interpolated object Matrix
+        Y
+        
     end
     
     methods
@@ -42,19 +48,20 @@ classdef JM
             obj.kx = 2*pi*obj.fx;
             obj.kz = 2*pi*obj.fz;
             
+            
         end
         
         function Ekxkz = fourier(obj, Exz)
-            %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Ekxkz=fft2(ifftshift(Exz))*(obj.xRange/obj.Nx)*(obj.zRange/obj.Nz) ;
-            %Ekxkz=fft2(Exz)*(obj.xRange/obj.Nx)*(obj.zRange/obj.Nz) ;
-            Ekxkz=fftshift(Ekxkz);
+%             Ekxkz = fft2(ifftshift(Exz))*(obj.xRange/obj.Nx)*(obj.zRange/obj.Nz) ;
+%             Ekxkz = fftshift(Ekxkz);
+              Ekxkz = fft2(Exz);
+            
         end
         
         function Exz = ifourier(obj, Ekxkz)
-            %fftshift(Et);    %real(F) sera toujours positif pour phi=0
-            Exz=ifft2(ifftshift(Ekxkz))*(obj.Nz/obj.zRange)*(obj.Nx/obj.xRange)  ;
-            Exz=fftshift(Exz);
+%             Exz = ifft2(ifftshift(Ekxkz))*(obj.Nz/obj.zRange)*(obj.Nx/obj.xRange)  ;
+%             Exz = fftshift(Exz);
+              Exz = ifft2(Ekxkz);
         end
     end
 end

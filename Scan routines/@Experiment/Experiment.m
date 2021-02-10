@@ -923,7 +923,7 @@ ylabel(cb,'|FFT| (a.u)')
                   case 'Fourier-4phase'
                       
          [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox(); 
-         G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );
+         G = JM( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );
  
          % interpolation parameters to match dx sampling
          [Xi,Zi] = meshgrid(x_phantom,z_phantom);
@@ -965,7 +965,7 @@ ylabel(cb,'|FFT| (a.u)')
             % each line : g function
             % each colmun : different pixels of camera
        [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
-       G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );     
+       G = JM( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );     
        
        
             switch TypeMatrix
@@ -1085,15 +1085,15 @@ ylabel(cb,'|FFT| (a.u)')
              [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             % get input phantom for proper comparison
             MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
-            x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
-            z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
+%             x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
+%             z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
             % check if dimension agree (to be properly removed)
               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
                   MyTansmission = MyTansmission';
               end  
  
               % define FFT sturcture for iFFT reconstruction
-              G = TF2D( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 ); 
+              G = JM( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 ); 
 
 %  
 %   [Xi,Zi] = meshgrid(x_phantom,z_phantom);
@@ -1108,6 +1108,7 @@ SpectreIN = G.fourier(I_obj);
 Spectre = 0*SpectreIN;
 
 % built acquisition -non-hermitian (minimal) matrix 
+% gets signal using sum of I.G function on simulation grid
 [C_nsan,yNscan,yScanParam] = obj.GetYvector('Real-4phase'); % 'Real','Real-4phase','Fourier','Fourier-4-phase'
 
 % compare to Matric fecth * Inpout image :
@@ -1118,14 +1119,13 @@ Spectre = 0*SpectreIN;
 
 
   %    C_nsan = C_inpout ;
-       C_nsan = M*C_inpout;
+  %     C_nsan = M*C_inpout;
   %    C_nsan = inv(M)*M*(C_inpout) ;
 
-   % C_nsan = inv( M )*C_nsan;
-   % C_nsan = conj(C_nsan) ; 
-% C_nsan : fetched complex Fourier coefficient (imageInpout*Signal)
+    % C_nsan = inv( M )*C_nsan;
+    % C_nsan = conj(C_nsan) ; 
+    % C_nsan : fetched complex Fourier coefficient (imageInpout*Signal)
 
-% 
 % yNscan
 % yScanParam = obj.ScanParam ;
 % yNscan = obj.Nscan ;
@@ -1158,10 +1158,6 @@ I_obj_r = G.ifourier( Spectre );
 Reconstruct = G.ifourier( ObjectFFT );
 % reconstruction by projection on simulation grid
 
-
-% % I = ifft2(ifftshift(ObjectFFT));
-% Reconstruct = Reconstruct - ones(Nfft,1)*Reconstruct(1,:);
-% % I = ifftshift(I,2);
 figure(2);
 subplot(221)
 imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(ObjectFFT))
