@@ -15,7 +15,7 @@ field_init(0);
 clearvars ; 
 IsSaved = 1 ;
 %%%%%%%%%%%% target folder to save simulated data %%%%%%%%%%
-SimuPathFolder = 'D:\Data\simulations';
+SimuPathFolder = 'Q:\Data\simulations';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

@@ -628,7 +628,7 @@ classdef Experiment
             
                 case 'camera'
              
-             myField = obj.GetCameraTagged(obj.param.Trigdelay,obj.param.tau_c,nscan);
+             myField = obj.GetCameraCorrelation(obj.param.Trigdelay,obj.param.tau_c,nscan);
              obj.AOSignal_CCD(:,nscan) = myField(:);
             
                 case 'photodiode'
@@ -739,26 +739,21 @@ classdef Experiment
                        % coordinate of simulation box
              [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             % get input phantom for proper comparison
-            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Nz,Nx,Ny]) );
             x_phantom = obj.MySimulationBox.x - obj.param.center(1) ;
             z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
             % check if dimension agree (to be properly removed)
-              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
-                  MyTansmission = MyTansmission';
-              end  
+%               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+%                   MyTansmission = MyTansmission';
+%               end  
  
               % define FFT sturcture for iFFT reconstruction
- Nfft = 2^10;
- G = TF2D( Nfft , Nfft , (Nfft-1)*obj.param.nuX0 , (Nfft-1)*obj.param.nuZ0 );
 
- [Xi,Zi] = meshgrid(x_phantom,z_phantom);
- [X,Z] = meshgrid(G.x,G.z);
+ G = JM( (2^7) , (2^7) ,  (2^7)*obj.param.nuX0 , (2^7)*obj.param.nuZ0 );
 
- 
-
-             
-ObjectFFT = zeros(Nfft , Nfft);
-I_obj = interp2(Xi,Zi,MyTansmission+10,X,Z,'linear',0);
+         
+ObjectFFT = zeros( G.Nz , G.Nx );
+I_obj = MyTansmission ;
 
 
 SpectreIN = G.fourier(I_obj);
@@ -768,12 +763,11 @@ Spectre= 0*SpectreIN;
  for n_loop = 1:obj.Nscan
   PHASE = obj.ScanParam(n_loop,3);
   s =  exp(2i*pi*(PHASE));
-  g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
-  G_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
-  G_corr_fft = G.fourier(G_corr);
+  g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Nz,Nx,Ny]) ) ;
+  G_corr_fft = G.fourier(g_corr);
   
   subplot(122)
-  imagesc(G_corr);
+  imagesc(g_corr);
   subplot(121)
   imagesc(abs(G_corr_fft));
   imagesc(G.fx/(obj.param.nuX0),G.fz/(obj.param.nuZ0),abs(G_corr_fft))
