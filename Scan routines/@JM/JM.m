@@ -63,6 +63,9 @@ classdef JM
              Exz = fftshift(Exz);
 %              Exz = ifft2(Ekxkz);
         end
+        
+        
+        
     end
 end
 
