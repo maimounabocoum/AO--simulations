@@ -628,7 +628,7 @@ classdef Experiment
             
                 case 'camera'
              
-             myField = obj.GetCameraTagged(obj.param.Trigdelay,obj.param.tau_c,nscan);
+             myField = obj.GetCameraCorrelation(obj.param.Trigdelay,obj.param.tau_c,nscan);
              obj.AOSignal_CCD(:,nscan) = myField(:);
             
                 case 'photodiode'
