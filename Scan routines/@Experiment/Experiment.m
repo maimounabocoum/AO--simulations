@@ -740,8 +740,8 @@ classdef Experiment
              [Nx,Ny,Nz] = obj.MySimulationBox.SizeBox();
             % get input phantom for proper comparison
             MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Nz,Nx,Ny]) );
-            x_phantom = obj.MySimulationBox.x - obj.param.center(1) ;
-            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
+%            x_phantom = obj.MySimulationBox.x - obj.param.center(1) ;
+%            z_phantom = obj.MySimulationBox.z - obj.param.center(3) ; % center at origine
             % check if dimension agree (to be properly removed)
 %               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
 %                   MyTansmission = MyTansmission';
@@ -894,8 +894,8 @@ ylabel(cb,'|FFT| (a.u)')
           I_isophase = find( obj.ScanParam(:,3) == obj.ScanParam(n_loop,3));
           
           g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
-          G_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
-          G_corr_fft = G.fourier(G_corr);
+ %         G_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
+          G_corr_fft = G.fourier(g_corr);
           
 %           [Fx,Fz] = meshgrid( G.fx/(obj.param.nuX0) , G.fz/(obj.param.nuZ0) );
 %           Fx = Fx((Nfft/2+1) + Nbz , (Nfft/2+1) + Nbx );
@@ -920,8 +920,6 @@ ylabel(cb,'|FFT| (a.u)')
          G = JM( Nx , Nz , Nx*obj.param.nuX0 , Nz*obj.param.nuZ0 );
  
          % interpolation parameters to match dx sampling
-         [Xi,Zi] = meshgrid(x_phantom,z_phantom);
-         [X,Z] = meshgrid(G.x,G.z); 
          
         MphaseCompression = zeros(yNscan,obj.Nscan);   
         for loop = 1:yNscan  
@@ -934,7 +932,7 @@ ylabel(cb,'|FFT| (a.u)')
          % evaluation of Fourier Tranform of illumniation pattern g : AOSignal_CCD
          for n_loop = 1:obj.Nscan
 
-          g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Ny,Nx,Nz]) )' ;
+          g_corr = squeeze( reshape(obj.AOSignal_CCD(:,n_loop),[Nz,Nx,Ny]) ) ;
 
           %g_corr = interp2(Xi,Zi,g_corr,X,Z,'linear',0);
 
@@ -1017,13 +1015,13 @@ ylabel(cb,'|FFT| (a.u)')
         
              
             % get input phantom for proper comparison
-            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Ny,Nx,Nz]) );
+            MyTansmission = squeeze( reshape(obj.DiffuseLightTransmission',[Nz,Nx,Ny]) );
 %              x_phantom = obj.MySimulationBox.x - mean(obj.MySimulationBox.x) ;
 %              z_phantom = obj.MySimulationBox.z - mean(obj.MySimulationBox.z) ; % center at origine
             % check if dimension agree (to be properly removed)
-              if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
-                  MyTansmission = MyTansmission';
-              end  
+%               if length(obj.MySimulationBox.x) == size(obj.MySimulationBox.x*1e3,2)
+%                   MyTansmission = MyTansmission';
+%               end  
  
 %               % define FFT structure for iFFT reconstruction
 %             [Xi,Zi] = meshgrid(x_phantom,z_phantom);

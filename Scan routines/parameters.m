@@ -57,7 +57,7 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 
 param.NbZ         = 1:10;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
 param.NbX         = -10:10;                          % 20 Nb de composantes de Fourier en X, 'JM'
-param.phase       = 0;%[0,0.25,0.5,0.75];                          % phases i 2pi unit for 'JM'
+param.phase       = [0,0.25,0.5,0.75];                          % phases i 2pi unit for 'JM'
 param.nuZ0 = 1/( (param.c)*20e-6 );           % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 
 
