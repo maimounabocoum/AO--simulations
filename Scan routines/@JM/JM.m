@@ -52,17 +52,20 @@ classdef JM
         end
         
         function Ekxkz = fourier(obj, Exz)
-%             Ekxkz = fft2(ifftshift(Exz))*(obj.xRange/obj.Nx)*(obj.zRange/obj.Nz) ;
-%             Ekxkz = fftshift(Ekxkz);
-              Ekxkz = fft2(Exz);
+             Ekxkz = fft2(ifftshift(Exz))*(obj.xRange/obj.Nx)*(obj.zRange/obj.Nz) ;
+             Ekxkz = fftshift(Ekxkz);
+%              Ekxkz = fft2(Exz);
             
         end
         
         function Exz = ifourier(obj, Ekxkz)
-%             Exz = ifft2(ifftshift(Ekxkz))*(obj.Nz/obj.zRange)*(obj.Nx/obj.xRange)  ;
-%             Exz = fftshift(Exz);
-              Exz = ifft2(Ekxkz);
+             Exz = ifft2(ifftshift(Ekxkz))*(obj.Nz/obj.zRange)*(obj.Nx/obj.xRange)  ;
+             Exz = fftshift(Exz);
+%              Exz = ifft2(Ekxkz);
         end
+        
+        
+        
     end
 end
 

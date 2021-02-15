@@ -28,7 +28,7 @@ CurrentExperiement = CurrentExperiement.EvalPhantom();
 
 % use param.angles has an input to additionally show Radon transform
 % CurrentExperiement.ShowPhantom(param.angles);
- CurrentExperiement.ShowPhantom();
+ Iphantom = CurrentExperiement.ShowPhantom();
 
 % creating memory to save probe delay law
 if param.Activated_FieldII == 1 
@@ -95,26 +95,26 @@ end
   CurrentExperiement.ShowJMreconstruction_camera();
   
   %% matrix reconstruction
+  % Iphantom = CurrentExperiement.ShowPhantom();
   [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
-  G = TF2D( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
+  G = JM( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
   
-   
-  M = CurrentExperiement.GetMmatrix('Real-4phase'); % 'Real' , 'Real-4phase','Fourier','Fourier-4phase'
- 
- % M = CurrentExperiement.GetMmatrix('Fourier-4phase');
+  [ Y , yNscan , yScanParam ] = CurrentExperiement.GetYvector('Real'); 
+  M = CurrentExperiement.GetMmatrix('Real'); % 'Real' , 'Real-4phase','Fourier','Fourier-4phase'
+
+  [U,S,V] = svd(M);
+
+  Splus = S';
+  Splus(Splus>0.1) = 1./Splus(Splus>0.1);
+  Minv = V*Splus*U';
+
+  Ireconst = Minv*Y ;
   
-  % view structure as film
-  figure;
-  mm = sum(M,1);
-  ImSt = reshape(mm,[Nz,Nx]); 
-  imagesc(real(ImSt'))
-  
-     
-  for i=1:size(M,1)
-     ImSt = reshape(M(i,:),[Nz,Nx]); 
-     imagesc(real(ImSt'))
-     drawnow
-  end
+figure;
+subplot(121)
+imagesc(Iphantom)
+subplot(122)
+imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
 
  
   %%
