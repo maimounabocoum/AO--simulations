@@ -100,14 +100,17 @@ end
   G = JM( Nx , Nz , Nx*param.nuX0 , Nz*param.nuZ0 );
   
   [ Y , yNscan , yScanParam ] = CurrentExperiement.GetYvector('Real'); 
-  M = CurrentExperiement.GetMmatrix('Real'); % 'Real' , 'Real-4phase','Fourier','Fourier-4phase'
-
-  [U,S,V] = svd(M);
-
-  Splus = S';
-  Splus(Splus>0.1) = 1./Splus(Splus>0.1);
-  Minv = V*Splus*U';
-
+  %M = CurrentExperiement.GetMmatrix('Real'); % 'Real' , 'Real-4phase','Fourier','Fourier-4phase'
+  
+  [G,Iout] = G.BuiltRealMatrix( M , CurrentExperiement.ScanParam , -5:5 , 1:10 , [0,0.25,0.5,0.75]);
+  
+Y = Y(Iout);  
+[U,S,V] = svd(G.M);
+ Splus = 0*S;
+ seuil = S(240,240)/4;
+ Splus(S>seuil) = 1./S(S>seuil);
+ Splus = Splus';
+ Minv = V*Splus*U';
   Ireconst = Minv*Y ;
   
 figure;

@@ -23,7 +23,8 @@ classdef JM
         dfz
         
         % Interpolated object Matrix
-        Y
+        ScanParam
+        M
         
     end
     
@@ -62,6 +63,25 @@ classdef JM
              Exz = ifft2(ifftshift(Ekxkz))*(obj.Nz/obj.zRange)*(obj.Nx/obj.xRange)  ;
              Exz = fftshift(Exz);
 %              Exz = ifft2(Ekxkz);
+        end
+        
+        function [obj,Iextract] = BuiltRealMatrix(obj,M,sParam,NBxIN,NbzIN,phase)
+            
+            
+            % build new scanParam
+            [NBZ, PHASE , NBX] = meshgrid( NbzIN , phase ,-NBxIN) ;
+            obj.ScanParam = [NBX(:), NBZ(:), PHASE(:)];
+            obj.M = zeros(length(NBX(:)),size(M,2));
+            Iextract = [];
+            
+            for i=1:length(NBX(:))
+               Ifill = obj.ScanParam(i,:)==sParam;
+               Ifill = find(sum(Ifill,2)==3);
+               Iextract = [Iextract,Ifill];
+               obj.M(i,:) = M(Ifill,:);
+            end
+            
+            
         end
         
         
