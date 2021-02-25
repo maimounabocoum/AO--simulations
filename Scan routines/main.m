@@ -169,7 +169,7 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
     % % option for screening : XY, Xt , XZt , Zt
      %CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
-     CurrentExperiement.MySimulationBox.ShowMaxField('Zt', Hf);  
+    % CurrentExperiement.MySimulationBox.ShowMaxField('Zt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);

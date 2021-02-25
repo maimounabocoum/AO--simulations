@@ -1349,7 +1349,8 @@ title('Ideal Phantom Spectrum |FFT|')
                 
                 t           = obj.MySimulationBox.time(:); % simulation time column vector
                 % box(number of column)
-                E_tagged    = obj.EvalTaggedPhotonsField(); % evaluate field of current simulation n_scan
+                E_tagged    = obj.EvalComplexField(); % evaluate field of current simulation n_scan
+                
                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
                 
                 
