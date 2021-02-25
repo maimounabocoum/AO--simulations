@@ -63,7 +63,7 @@ param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (e
 
 
 
-param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII simulation
+param.Activated_FieldII = 0 ;     % 0 to generate field by yourself - 1 FIELDII simulation
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -71,9 +71,9 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-15 15]; % [-15 15]/1000;     % in m [-15 15]
+    param.Xrange = [-15 15]/1000; % [-15 15]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;            % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [30 40];% [0.5 40]/1000;       % simulation JM : [5 40]/1000;
+    param.Zrange = [30 40]/1000;% [0.5 40]/1000;       % simulation JM : [5 40]/1000;
 
     param.Nx = 100;             % number of interpolating points along Xrange
     param.Ny = 1;               % number of interpolating points along Yrange

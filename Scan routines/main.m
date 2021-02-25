@@ -157,7 +157,9 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
 
   CurrentExperiement.ShowMatrixreconstruction_camera()
 
-  
+ %% run this section for article 
+ 
+ 
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
