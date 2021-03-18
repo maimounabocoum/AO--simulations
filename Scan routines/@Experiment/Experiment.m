@@ -690,7 +690,7 @@ classdef Experiment
                                
                 % Eref       = repmat( exp(-1i*2*pi*obj.param.f0*t(:)), 1 , size( output , 2 )  );                 
                 
-                 Etagged    = hilbert(output) ;             
+                 Etagged    = output ;             
                 %Etagged    = envelope(output,300).*exp( 1i*angle(hilbert(output)) ); 
                 % complexe simulated field over time (each line), for each point of the simulated
                 % box (number of column)   
@@ -1349,8 +1349,8 @@ title('Ideal Phantom Spectrum |FFT|')
                 
                 t           = obj.MySimulationBox.time(:); % simulation time column vector
                 % box(number of column)
-                E_tagged    = obj.EvalComplexField(); % evaluate field of current simulation n_scan
                 
+                E_tagged    = obj.EvalComplexField(); % evaluate field of current simulation n_scan
                 Eref        = repmat( obj.MyAO.Event(:,nscan) , 1 , size( E_tagged , 2 )  );  % reference field 
                 
                 

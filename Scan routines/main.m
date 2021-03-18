@@ -157,7 +157,9 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
 
   CurrentExperiement.ShowMatrixreconstruction_camera()
 
-  
+ %% run this section for article 
+ 
+ 
  %% run this code portion to visualize the field temporal and/or spatial profile
  
  Hf = gcf;      % open a new figure
@@ -167,6 +169,7 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
  CurrentExperiement = CurrentExperiement.EvalPhantom();
  CurrentExperiement = CurrentExperiement.InitializeProbe(n_scan)    ;   % Initializes the Probe
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
+
     % % option for screening : XY, Xt , XZt , Zt
      %CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('Zt', Hf);  
@@ -174,6 +177,7 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
+   %FieldCorr =  CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
       CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
