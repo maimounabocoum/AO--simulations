@@ -1,21 +1,45 @@
 clearvars
-addpath('..\..\..\AO--commons\shared functions folder');
-addpath('..\..\..\AO--commons\common subfunctions');
+addpath('D:\AO--commons\shared functions folder');
+addpath('D:\AO--commons\common subfunctions');
+
+
 %% generate 1D phase profile
 
-Type = 'phasejump'; % 'chirp','periodic'
+Type = 'chirp'; % 'chirp','periodic'
 Parameters;
 
-%             figure(1); 
-%             hold on
-%             plot(F.t/T0, phi )
-%             xlabel('t( \mu s )')
-%             title('\phi(t)')
+figure(1)
+f0 = 1e6 ; % frequency Delta f en Hz
+T_window = 100e-6;
+Delfta_f = 1e6;
+f = f0 + (Delfta_f/T_window)*(F.t);
+E_ref = exp(2*pi*1i*f.*F.t);
+H = ones(1,length(F.t));
+H(abs(F.t) >= T_window/2) = 0 ;
+
+
+figure(1); 
+subplot(121)
+plot(F.t*1e6, unwrap(angle(E_ref.*H.*exp(-1i*2*pi*f0*F.t))) )
+%plot(F.t*1e6, real(E_ref.*H))
+xlim([-70 70])
+xlabel('t( \mu s )')
+title('Mudulation')
+
+subplot(122)
+S = F.fourier(E_ref.*H);
+plot(F.f*1e-6 , abs(S) )
+xlim([0 2.5])
+xlabel('frequency (MHz)')
+title('Mudulation')
+
+DF_eval = (max(f)-min(f))*1e-6
+
 
 %% modulation d'amplitude
 nu0 = 1/T0; % fundamental modulation frequency
-Ar  = 0.5*( 1 + 0*cos( 2*pi*n*nu0*F.t) )  ;
-%Ar  = cos( 0.5*2*pi*n*nu0*F.t)  ;
+%Ar  = 0.5*( 1 + 0*cos( 2*pi*n*nu0*F.t) )  ;
+Ar  = cos( 0.5*2*pi*n*nu0*F.t)  ;
 
 %% command AO
 
@@ -34,10 +58,10 @@ H  = ( F.t > - tau_c/2  & F.t < tau_c/2  ); % integration window
 
 Es =  interp1( F.t , H.*fEr , F.t -delay + z/c ,'linear',0); % tagged photon at position z / delay [s] = z/v_us 
 % 
-figure(100);
-plot(imag(Es)); hold on;
-plot(imag(Er),'r');
-figure(2); hold on ; plot(F.t/T0,real(Er))
+% figure(100);
+% plot(imag(Es)); hold on;
+% plot(imag(Er),'r');
+% figure(2); hold on ; plot(F.t/T0,real(Er))
 
 % figure(2)
 % [h,~,~] = plotyy( F.t/T0 , Ar , F.t/T0 , phi );
