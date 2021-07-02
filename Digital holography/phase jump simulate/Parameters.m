@@ -1,6 +1,6 @@
 %% parameter sheet
 
-Fe = 50e6;          % sampling frequency
+Fe = 40e6;          % sampling frequency
 N = 2^14;
 f0 = 6e6;           % US frequency in Hz
 
@@ -34,16 +34,19 @@ end
 
 
 PHI2 = (0.9e6)/tau_c; % 0.185
-
-% phi = 2*pi*f0*F.t + df*(F.t).^2;
+df = 1e6;
+ phi = 2*pi*f0*F.t + df*(F.t).^2;
  
 % periodic ramp
+
+   case 'periodic_chirp'
 
 % rajout de la porteuse
 % phi = 2*pi*f0*Trep*sawtooth(2*pi*t/Trep) ;
 % phi = 2*pi*f0*Trep*sawtooth(2*pi*t/Trep) + 2*pi*df*(Trep*sawtooth(2*pi*t/Trep)).^2;
 
  phi = 2*pi*PHI2*( T0*( sawtooth(2*pi*F.t/T0) + 1 )/2 ).^2 ;
+ 
     case 'JM'
  
  nu = n/T0; % harmonic frequency

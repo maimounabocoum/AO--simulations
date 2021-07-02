@@ -1,11 +1,16 @@
 %% simulate reconstruction with periodic fringes autocorrelation
 clearvars
-addpath('..\functions');
-addpath('..\');
+ addpath('D:\AO--commons\shared functions folder')
+ addpath('sequences');
+ addpath('subfunctions');
+ addpath('C:\Program Files (x86)\Gage\CompuScope\CompuScope MATLAB SDK\CsMl')
+ addpath('D:\AO--commons\read and write files')
+
+
 
 %% generate 1D phase profile
 N = 2^10;
-S = TF2D(N,10000,10000);
+S = TF2D(N,N,10000,10000);
 
 [X,Y] = meshgrid(S.x,S.y);
 Io = exp(-X.^2/(0.01)^2-Y.^2/(0.01)^2);
