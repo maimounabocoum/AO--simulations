@@ -40,7 +40,7 @@ field_init(0);
      xlabel('x (mm)')
      ylabel('z (mm)')
      ylim([min(CurrentExperiement.MySimulationBox.z*1e3) max(CurrentExperiement.MySimulationBox.z*1e3)])
-     title(['correlation with Reference, \tau_{exp,CCD} = ',num2str(1e6*Exposure),'\mu s']) 
+     title(['correlation with Reference, \tau_{exp,CCD} = ',num2str(20),'\mu s']) 
      cb = colorbar ;
      ylabel(cb,'a.u')
       drawnow

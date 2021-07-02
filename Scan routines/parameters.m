@@ -28,7 +28,7 @@ param.farfield  = param.width^2/(4*param.lambda);
 
 param.detection = {'camera','photodiode'};        % 'photodiode': return flux over time / 'camera': returned fluence over camera integration time
 param.tau_c     = 20e-6;        % camera intergration type for holography detection (advise: leave it at 20us )
-param.Trigdelay = 20e-6;        % accounts for time fo flight delay before camera triggers
+param.Trigdelay = 30e-6;        % accounts for time fo flight delay before camera triggers
 
 % tips: you can evaluate tau_c and Trigdelay using the "visualize the
 % field" bloc adjusting parameters in:
@@ -55,15 +55,15 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 % activeElements are indexed by 
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
-param.NbZ         = 10;                              % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = 0;                          % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbZ         = 8;                          % 8; % Nb de composantes de Fourier en Z, 'JM'
+param.NbX         = 3;                          % 20 Nb de composantes de Fourier en X, 'JM'
 param.phase       = 0;                          % phases i 2pi unit for 'JM'
-param.nuZ0 = 1/( (param.c)*20e-6 );           % Pas fréquence spatiale en Z (en mm-1)
+param.nuZ0 = 1/( (param.c)*20e-6 );             % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 
 
 
 
-param.Activated_FieldII = 0 ;     % 0 to generate field by yourself - 1 FIELDII simulation
+param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII simulation
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Simulation BOX
@@ -71,28 +71,28 @@ param.Activated_FieldII = 0 ;     % 0 to generate field by yourself - 1 FIELDII 
 
 %% Simulation box initialization : 
 
-    param.Xrange = [-15 15]/1000; % [-15 15]/1000;     % in m [-15 15]
+    param.Xrange = [-15 15]/1000;     % [-15 15]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;            % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [30 40]/1000;% [0.5 40]/1000;       % simulation JM : [5 40]/1000;
+    param.Zrange = [20 45]/1000;      % [0.5 40]/1000;       % simulation JM : [5 40]/1000;
 
-    param.Nx = 100;             % number of interpolating points along Xrange
+    param.Nx = 200;             % number of interpolating points along Xrange
     param.Ny = 1;               % number of interpolating points along Yrange
     param.patternRep = 2;       % number of times the 40us main pattern is repeted (minimum = 1) 
     % in order to match fs_aq(Hz) along Zrange , and 
     % unshures Nz >=1
-    param.Nz = 100;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
+    param.Nz = 150;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 %% definition of laser beam
     
 % waist of diffuse IR laser beam
 param.w0 = [10 10]/1000 ;             % specify the center of the gaussian beam.
-param.center = [0 0 10]/1000 ;      % specify the center of the gaussian beam.    
+param.center = [0 0 32.5]/1000 ;      % specify the center of the gaussian beam.    
              
                                     % if this value is commented, 
                                     % the beam is by defaukt center on the
                                     % simulation box
 %% absorbers positions :
     % fringes : modulation of intensity in direction given by Position
-    param.phantom.Positions = [0 0 8 ; 0 0 12]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
+    param.phantom.Positions = [0 0 31.5 ; 0 0 33.5]/1000;  % [x1 y1 z1; x2 y2 z2 ; ....] aborbant position list
     param.phantom.Sizes     = [1 ; 1]/1000;             % dimension in all direction [dim ; dim ; ...]    param.phantom.Types = {'gaussian','gaussian'} ;         % available types exemple : { 'square', 'gaussian', ...}
     param.phantom.Types = {'gaussian','gaussian'};
     

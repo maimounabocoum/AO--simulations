@@ -69,7 +69,7 @@ end
  
  %% show acquisition loop results CCD
  
- n_scan = 3 ; % choose which scan to screen out
+ n_scan = 1 ; % choose which scan to screen out
  [Nx,Ny,Nz] = CurrentExperiement.MySimulationBox.SizeBox();
  MySignal  = CurrentExperiement.AOSignal_CCD(:,n_scan);
  MySignal = reshape(MySignal,[Ny,Nx,Nz]);
@@ -178,7 +178,7 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
     % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
    %FieldCorr =  CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
-      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 20e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 30e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
 % figure;imagesc(CurrentExperiement.MySimulationBox.Field)    
@@ -191,13 +191,13 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
  if (IsSaved == 1)
      
      % saving folder name with todays date
-     SubFolderName = generateSubFolderName(SimuPathFolder) ;
-     FileName   = generateSaveName(SubFolderName ,'name','Simu_longwindows_NbZ=10_NbX=10','type',param.FOC_type);
+     SubFolderName = generateSubFolderName('Q:\Data\simulations') ;
+     FileName   = generateSaveName(SubFolderName ,'name','Profile','type',param.FOC_type,'Nbx',param.NbX,'Nbz',param.NbZ);
      
- x_phantom = CurrentExperiement.MySimulationBox.x ;
- y_phantom = CurrentExperiement.MySimulationBox.y ;
- z_phantom = CurrentExperiement.MySimulationBox.z ;
- [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
+%  x_phantom = CurrentExperiement.MySimulationBox.x ;
+%  y_phantom = CurrentExperiement.MySimulationBox.y ;
+%  z_phantom = CurrentExperiement.MySimulationBox.z ;
+%  [MyTansmission,R,zR] = CurrentExperiement.ShowPhantom(param.angles);
  
 %-- saving parameters same as in experiment---------%
 
@@ -251,8 +251,7 @@ c               = param.c ;
                   'DelayLAWS','ActiveLIST','MyImage','Field_Profile','param','Field')            
          case 'JM'  
 
-    save(FileName,'x_phantom','y_phantom','z_phantom','MyTansmission',...
-                  'param','CurrentExperiement')               
+    save(FileName,'CurrentExperiement')               
      end
      %%%%%%%%%%%%%%%%%%%%
  end
