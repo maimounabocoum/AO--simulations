@@ -73,14 +73,14 @@ param.Activated_FieldII = 1 ;     % 0 to generate field by yourself - 1 FIELDII 
 
     param.Xrange = [-15 15]/1000;     % [-15 15]/1000;     % in m [-15 15]
     param.Yrange = 0/1000;            % [-0.1 0.1]/1000 ; (not implemented yet)
-    param.Zrange = [20 45]/1000;      % [0.5 40]/1000;       % simulation JM : [5 40]/1000;
+    param.Zrange = [20 50]/1000;      % [0.5 40]/1000;       % simulation JM : [5 40]/1000;
 
     param.Nx = 200;             % number of interpolating points along Xrange
     param.Ny = 1;               % number of interpolating points along Yrange
-    param.patternRep = 2;       % number of times the 40us main pattern is repeted (minimum = 1) 
+    param.patternRep = 4;       % number of times the 40us main pattern is repeted (minimum = 1) 
     % in order to match fs_aq(Hz) along Zrange , and 
     % unshures Nz >=1
-    param.Nz = 150;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
+    param.Nz = 160;%max( 1 , ceil ( param.fs_aq * (abs(param.Zrange(2) - param.Zrange(1)))/(param.c) ) ); % do not edit
 %% definition of laser beam
     
 % waist of diffuse IR laser beam

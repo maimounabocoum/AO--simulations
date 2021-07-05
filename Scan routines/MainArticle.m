@@ -27,7 +27,8 @@ field_init(0);
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
    [Nx,Ny,Nz]       = SizeBox(CurrentExperiement.MySimulationBox); 
-   
+   x = CurrentExperiement.MySimulationBox.x ;
+   z = CurrentExperiement.MySimulationBox.z ;
    
    t       = CurrentExperiement.MySimulationBox.time(:); % simulation time column vector
    myField = CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
@@ -36,7 +37,7 @@ field_init(0);
                 
 
               figure
-     imagesc(CurrentExperiement.MySimulationBox.x*1e3,CurrentExperiement.MySimulationBox.z*1e3, myField );
+     imagesc(x*1e3,z*1e3, myField );
      xlabel('x (mm)')
      ylabel('z (mm)')
      ylim([min(CurrentExperiement.MySimulationBox.z*1e3) max(CurrentExperiement.MySimulationBox.z*1e3)])
@@ -44,6 +45,11 @@ field_init(0);
      cb = colorbar ;
      ylabel(cb,'a.u')
       drawnow
+      
+      % save parameters
+     SubFolderName = generateSubFolderName('Q:\Data\simulations') ;
+     FileName   = generateSaveName(SubFolderName ,'name','Profile','type',param.FOC_type,'Nbx',param.NbX,'Nbz',param.NbZ);
+     save(FileName,'myField','x','z')  
              
 %%
 

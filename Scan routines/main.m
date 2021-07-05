@@ -171,21 +171,21 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
  CurrentExperiement = CurrentExperiement.CalculateUSfield(n_scan)   ;   % Calculate the Field Over input BOX
 
     % % option for screening : XY, Xt , XZt , Zt
-     %CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
+    % CurrentExperiement.MySimulationBox.ShowMaxField('Xt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('Zt', Hf);  
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZt',Hf);   
     % CurrentExperiement.MySimulationBox.ShowMaxField('XZ', Hf);
     % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
-   %FieldCorr =  CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
+    % FieldCorr =  CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
       CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 30e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
 % figure;imagesc(CurrentExperiement.MySimulationBox.Field)    
- %% run this code portion to visualize the field autocorrelation with reference beam (holography detection only)
+ % run this code portion to visualize the field autocorrelation with reference beam (holography detection only)
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- %% save data for reconstruction Iradon %% ONLY SAVING OP
+ % save data for reconstruction Iradon %% ONLY SAVING OP
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
  if (IsSaved == 1)
