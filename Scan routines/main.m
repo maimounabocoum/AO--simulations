@@ -178,7 +178,7 @@ imagesc( squeeze(reshape( Ireconst ,[Ny,Nx,Nz]))' )
     % myField = CurrentExperiement.GetCameraTagged(20e-6,20e-6,n_scan);
     % CurrentExperiement.MyAO = CurrentExperiement.MyAO.AOsequenceGenerate(param,CurrentExperiement.ScanParam);
     % FieldCorr =  CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
-      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 30e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
+      CurrentExperiement.ShowFieldCorrelation('XZ', Hf , 70e-6, 20e-6 ,n_scan); % ('XZ',Hf, startExposure, Exposure time,n_scan)
     % CurrentExperiement.MySimulationBox.ShowMaxField('YZ', Hf);
 %  CurrentExperiement.MyProbe.ShowProbe()   
 % figure;imagesc(CurrentExperiement.MySimulationBox.Field)    

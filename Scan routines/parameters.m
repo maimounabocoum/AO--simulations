@@ -28,7 +28,7 @@ param.farfield  = param.width^2/(4*param.lambda);
 
 param.detection = {'camera','photodiode'};        % 'photodiode': return flux over time / 'camera': returned fluence over camera integration time
 param.tau_c     = 20e-6;        % camera intergration type for holography detection (advise: leave it at 20us )
-param.Trigdelay = 30e-6;        % accounts for time fo flight delay before camera triggers
+param.Trigdelay = 70e-6;        % accounts for time fo flight delay before camera triggers
 
 % tips: you can evaluate tau_c and Trigdelay using the "visualize the
 % field" bloc adjusting parameters in:
@@ -56,7 +56,7 @@ param.decimation  = 10;  % decimation list of active actuators   - only active i
 % mod( (1:N_elements) - ElmtBorns(1) , 2*decimation ) ;
 
 param.NbZ         = 8;                          % 8; % Nb de composantes de Fourier en Z, 'JM'
-param.NbX         = 3;                          % 20 Nb de composantes de Fourier en X, 'JM'
+param.NbX         = 13;                          % 20 Nb de composantes de Fourier en X, 'JM'
 param.phase       = 0;                          % phases i 2pi unit for 'JM'
 param.nuZ0 = 1/( (param.c)*20e-6 );             % Pas fréquence spatiale en Z (en mm-1)
 param.nuX0 = 1/(param.N_elements*param.width);  % Pas fréquence spatiale en X (en mm-1) 

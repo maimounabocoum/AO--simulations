@@ -31,7 +31,7 @@ field_init(0);
    z = CurrentExperiement.MySimulationBox.z ;
    
    t       = CurrentExperiement.MySimulationBox.time(:); % simulation time column vector
-   myField = CurrentExperiement.GetCameraCorrelation(20e-6, 20e-6 ,n_scan);
+   myField = CurrentExperiement.GetCameraCorrelation(70e-6, 20e-6 ,n_scan);
    myField = reshape(myField ,[Ny,Nx,Nz]);     % resize the box to current screening
    myField = squeeze( myField(1,:,:) )' ; % remove single direction
                 
