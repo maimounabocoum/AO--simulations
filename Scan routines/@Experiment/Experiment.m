@@ -1397,6 +1397,7 @@ title('Ideal Phantom Spectrum |FFT|')
                             List(index_center_box,2)*1e3,...
                             List(index_center_box,3)*1e3 ) )
                         
+                   
                         xlabel('simulation time (\mu s)')
                         legend('Simu FieldII','Reference','camera integration')        
                 subplot(2,2,2)
