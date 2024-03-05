@@ -334,7 +334,7 @@ classdef Experiment
                     % set the impulse impulse response in FIELD II
                         t_impulseResponse = (0:1/obj.param.fs:2/obj.param.f0);
                         impulse           = sin(2*pi*obj.param.f0*t_impulseResponse);
-                        impulse           = impulse.*hanning(length(impulse))'; 
+                        impulse           = impulse.*hann(length(impulse))'; 
                         xdc_impulse (Probe, impulse);
                         
                     % set excitation in FIELD II:  
