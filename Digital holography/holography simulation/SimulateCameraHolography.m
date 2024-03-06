@@ -8,7 +8,8 @@ clearvars
 isIm   = 1;     % screen out images jtest
 
 % here : param is the Ref intensity W/cm^2
- param = repmat(linspace(1e-6,60e-4,20),20,1) ;
+Nav = 50 ;
+ param = repmat(linspace(1e-6,60e-4,20),Nav,1) ;
  param = param(:);
  
 % 1024px: SIG  9.1778e-09 , NOISE 5.9459e-11  = > S/N : 154.3550
@@ -290,12 +291,15 @@ end
 
  
 for i = 1:20
-   mu(i) = mean( SIG( ((1+20*(i-1)):(20*(i)) ) ) );
-   sigma(i) = std( SIG( ((1+20*(i-1)):(20*(i)) ) ) ,1);
-   Param(i) = mean( param( ((1+20*(i-1)):(20*(i)) ) ) );
+   mu(i) = mean( SIG( ((1+Nav*(i-1)):(Nav*(i)) ) ) );
+   sigma(i) = std( SIG( ((1+Nav*(i-1)):(Nav*(i)) ) ) ,1);
+   Param(i) = mean( param( ((1+Nav*(i-1)):(Nav*(i)) ) ) );
 end
  
 
 figure(3); clf
-plot(SIG./NOISE)
+plot(SIG)
+
+figure(4); clf
+plot(mu,mu./sigma)
 
