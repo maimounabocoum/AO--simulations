@@ -3,22 +3,19 @@ addpath('..\..\..\AO--commons\common subfunctions');
 
 %% addpath
 %Include;
-
+clearvars
 % clearvars  -except SIG
-
-isRef  = 0;     % = 0 : signal , = 1 noise
-isPlot = 0 ;    % = 1 : plot S/N on graph (first run isRef=0 then isRef=1)
-isIm   = 1;     % screen out images 
+isIm   = 1;     % screen out images jtest
 
 % here : param is the Ref intensity W/cm^2
- param = 1e-4;%10e-4*ones(1,10);
-% param = 5e-6;%500e-6;
+ param = repmat(linspace(1e-6,60e-4,20),20,1) ;
+ param = param(:);
  
 % 1024px: SIG  9.1778e-09 , NOISE 5.9459e-11  = > S/N : 154.3550
 % 2048px: SIG 1.4584e-07 , NOISE 9.3700e-10 => S/N : 155.6457
 
 %nameCamera = 'PCO.edge';
-nameCamera = 'PhotonFocus';
+nameCamera = 'Ximea';
 %  nameCamera = 'xiB-64';
 
 
@@ -103,16 +100,17 @@ clearvars N Fmax
 
 %% ========= initial gaussian field in (x,y) plane + plane wave tilted
 
-lambda0     = 780e-9;      % m
+lambda0     = 800e-9;      % m
 c           = 3e8;         % m/s
 nu          = c/lambda0;   % Hz
 h           = 6.626*1e-34; % J.s
 Ephoton     = h*nu ;       % J
-P0          = 200e-9*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 );          % Power of Main pulse in W*(Scam/(1cm^2))
+
+P0          = (2e-4)*param(i_loop)*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 );        % Power of Main pulse in W*(Scam/(1cm^2))
 Pref        = param(i_loop)*( (Nx_cam*Ny_cam*dpixel^2)/ (1e-2)^2 ); % Power of Ref pulse in W*(Scam/(1cm^2))
 Tint        = 100e-6;       % integration time of the camera in s
 ModeWidth   = 0.2e4 ;         % reducing it the will affect final speckle size
-eta         = 0 ;        % tagging efficiency (all photons are tagged when eta = 1)
+eta         = 0.01 ;        % tagging efficiency (all photons are tagged when eta = 1)
 
 % following function returns :
 % E_tag   : field of tagged photon in sqrt(W/m^2)
@@ -124,12 +122,7 @@ eta         = 0 ;        % tagging efficiency (all photons are tagged when eta =
 
 [E0_tag,E0_untag,Eref] = initField(P0,Pref,ModeWidth,eta,F);
 
-if isRef == 1
-E0_tag = 0*E0_tag ;
-end
-
-
-%   figure; imagesc(1e3*F.x,1e3*F.y,abs(E0_tag).^2)
+%   figure; imagesc(1e3*F.x,1e3*F.z,abs(E0_tag).^2)
 %   xlabel('x(mm)')
 %   ylabel('x(mm)')
 %   cb = colorbar
@@ -141,10 +134,8 @@ I1   = Tint.*( abs(E0_untag).^2 + abs(E0_tag + Eref ).^2 ); % in J/m^2
 I_bg =  Tint.*( abs(Eref).^2 ); % in J/m^2
 
 % std = sqrt(var) = sigma
-
 %  I1 = PoissonNoise((F.dx*F.dy)*I/Ephoton); % in photon
 %  I1 = I1*Ephoton/(F.dx*F.dy) ;  % convert back to photon count to J/m^2
-
 %   mean(I1(:))
 %  sqrt(var(I1(:)))
 % so far, I1 is interpolated on F.x , F.y , therefore its size is N^2
@@ -165,10 +156,6 @@ else
  Nphoton        = PoissonNoise( Icam/Ephoton );
  Nphoton_bg     = PoissonNoise( Icam_bg/Ephoton );
 end
-
-
- 
- %Nphoton_bg = PoissonNoise( Icam_bg/Ephoton );
 
 %  mean(Nphoton(:))
 %  sqrt(var(1*Nphoton(:)))
@@ -221,13 +208,10 @@ Ncount_bg = min(Ncount_bg,2^bit);
 Ng = 2^( nextpow2( max(Nx_cam,Ny_cam) ) );
 G = TF2D( Ng , Ng ,1/dpixel,1/dpixel);
 
-% [Xg,Yg] = meshgrid(G.x,G.y);
-
 % usefull if image pixel dimension is not of size 2^n
- Ncount = PadImage(Ncount,G.Nx,G.Nz);
-
-
- Icam_tagged    = PadImage(Icam_tagged,G.Nx,G.Nz);
+%  Ncount = PadImage(Ncount,G.Nx,G.Nz);
+% 
+%  Icam_tagged    = PadImage(Icam_tagged,G.Nx,G.Nz);
  Ntagged        = Icam_tagged/Ephoton;
  
 % sumNcount = trapz(G.x,trapz(G.y,abs(Ncount).^2))
@@ -241,14 +225,17 @@ Ncom_fft_bg     = G.fourier(Ncount_bg);
 
 % mean( abs(Ncom_fft(:)) )
 
-fx_c = 1.5*15920;
-fz_c = 0;
+fx_c0 = 1.5*15920;
+fz_c0 = 0;
+fx_c1 = 1.5*15920;
+fz_c1 = 1.5*15920;
 fr = 4500 ; % 2400
 
 [FX,FZ]     = meshgrid(G.fx,G.fz);
-Filter0     = ((FX-fx_c).^2 + (FZ-fz_c).^2 <= (fr)^2);
 
-%Filter1    = ((FX).^2 + (FY).^2 <= (fr)^2);
+Filter0     = ((FX-fx_c0).^2 + (FZ-fz_c0).^2 <= (fr)^2);
+Filter1     = ((FX-fx_c1).^2 + (FZ-fz_c1).^2 <= (fr)^2);
+
 Ncom        = G.ifourier( Ncom_fft.*Filter0 );
 Ncom_bg     = G.ifourier( Ncom_fft_bg.*Filter0 );
 %Ntagged    = G.ifourier(Ntagged_fft.*Filter1);
@@ -273,11 +260,13 @@ title('FFT Photo-electron')
 axis([-50000 50000 -50000 50000])
 
 theta = 0 : (2 * pi / 10000) : (2 * pi);
-pline_x = fr * cos(theta) + fx_c;
-pline_z = fr * sin(theta) + fz_c;
+pline_x0 = fr * cos(theta) + fx_c0;
+pline_z0 = fr * sin(theta) + fz_c0;
+pline_x1 = fr * cos(theta) + fx_c1;
+pline_z1 = fr * sin(theta) + fz_c1;
 hold on;
-plot(pline_x, pline_z, 'r-', 'LineWidth', 3);
-
+plot(pline_x0, pline_z0, 'r-', 'LineWidth', 3);
+plot(pline_x1, pline_z1, 'r-', 'LineWidth', 3);
 
 figure(1);
 subplot(221) ;imagesc(G.x*1e3,G.z*1e3,abs(Ntagged)) ; colorbar
@@ -292,28 +281,21 @@ title('inverse FFT - Nphoton Tagged')
 
 end
 
-%% reconstruction error
+%% signal and noise
+SIG(i_loop) =  trapz(G.fx,trapz(G.fz,abs(Ncom_fft.*Filter0).^2));
 
-if isRef == 0
-SIG(i_loop) =  trapz(G.fx,trapz(G.fz,abs(Ncom_fft.*Filter0).^2))...
-             - trapz(G.fx,trapz(G.fz,abs(Ncom_fft_bg.*Filter0).^2));
-%SIG(i_loop) = sum( abs( Ncom_fft(:).*Filter0(:) ).^2 )
-else
-NOISE(i_loop) = trapz(G.fx,trapz(G.fy,abs(Ncom_fft.*Filter0).^2))...
-             - trapz(G.fx,trapz(G.fy,abs(Ncom_fft_bg.*Filter0).^2)); 
-%NOISE(i_loop) = sum( abs( Ncom_fft(:).*Filter0(:) ).^2 )
+NOISE(i_loop) = trapz(G.fx,trapz(G.fz,abs(Ncom_fft.*Filter1).^2)); 
+
 end
-
- end
 
  
-if isPlot == 1
-SNR = SIG./NOISE ; 
-figure(2);
-hold on
-SNR(find(isnan(SNR)))= 1e-23;
-semilogx(param,SNR)
-grid on
+for i = 1:20
+   mu(i) = mean( SIG( ((1+20*(i-1)):(20*(i)) ) ) );
+   sigma(i) = std( SIG( ((1+20*(i-1)):(20*(i)) ) ) ,1);
+   Param(i) = mean( param( ((1+20*(i-1)):(20*(i)) ) ) );
 end
+ 
 
+figure(3); clf
+plot(SIG./NOISE)
 
