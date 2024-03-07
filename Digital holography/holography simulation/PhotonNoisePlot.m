@@ -45,7 +45,7 @@ f_psd = F.f( ((F.N)/2+1):end );
 
 subplot(212)
 loglog( f_psd , PowerSpectDens ,'o-') ; hold on
-loglog( f_psd,  mean(PowerSpectDens(2:end)) + 0*f_psd , 'red') ; 
+loglog( f_psd, mean(PowerSpectDens(2:end)) + 0*f_psd , 'red') ; 
 
 
 
