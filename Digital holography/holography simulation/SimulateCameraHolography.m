@@ -15,10 +15,8 @@ Nav = 50 ;
 % 1024px: SIG  9.1778e-09 , NOISE 5.9459e-11  = > S/N : 154.3550
 % 2048px: SIG 1.4584e-07 , NOISE 9.3700e-10 => S/N : 155.6457
 
-%nameCamera = 'PCO.edge';
+% nameCamera = 'PCO.edge';
 nameCamera = 'Ximea';
-%  nameCamera = 'xiB-64';
-
 
 % turn on(=1)/off(=0) noises
 IsPoissonNoise      = 1 ;
@@ -27,13 +25,13 @@ DarkNoise           = 0 ;
 DigitalizedNoise    = 0 ;
 MinusBG             = 1 ; % remove backgroung
 
-for i_loop = 1:length(param)
+for i_loop = 1%:length(param)
 
 
-%%=========================== define camera screen
+%%=========================== define camera screen ==============
  switch nameCamera
      case 'PCO.edge'
-Nx_cam = 512;  % 1024;
+Nx_cam = 512;   % 1024;
 Ny_cam = 512;   %  620;
 dpixel = 5e-6;
 QE =  0.2;
@@ -61,8 +59,6 @@ AD = 48.82 ; % electron/counts
 bit = 12; % 
 Dark = 12500 ; % electron/sec/px PCO
 
-
-
     case 'manual'
 Nx_cam = 2048;  % 1024;
 Ny_cam = 2048;  % 620;
@@ -77,23 +73,22 @@ Dark = 10 ; % electron/sec/px PCO
 
 end
 
-% np = number of points / pixels
-np = 1 ;
-N = 2^(nextpow2( np*max(Nx_cam,Ny_cam) )); % number of point in Fourier
-% frequency = 0 corresponds to point of coordinate N/2+1
 
-F       = TF2D( N ,N, np/(dpixel), np/(dpixel));
-
+np = 1 ;                                            % np = number of points / pixels
+N = 2^(nextpow2( np*max(Nx_cam,Ny_cam) ));          % number of point in Fourier
+F       = TF2D( N ,N, np/(dpixel), np/(dpixel));    % Fourier structure
 
 
 % zero of camera : inf( length(.)/2 + 1 )
 % renetering pixels to zero:
-Nx_center = floor(Nx_cam/2) + 1 ;
-Ny_center = floor(Ny_cam/2) + 1 ;
+% Nx_center = floor(Nx_cam/2) + 1 ;
+% Ny_center = floor(Ny_cam/2) + 1 ;
 
 x_cam =  F.x( ( -(floor(Nx_cam/2)):(floor(Nx_cam/2)-1) )*np + (N/2+1) ) ;
-y_cam =  F.x( ( -(floor(Ny_cam/2)):(floor(Ny_cam/2)-1) )*np + (N/2+1) ) ;
-[Xc,Yc] = meshgrid(x_cam,y_cam);
+y_cam =  F.z( ( -(floor(Ny_cam/2)):(floor(Ny_cam/2)-1) )*np + (N/2+1) ) ;
+% 
+% [Xc,Yc] = meshgrid(x_cam,y_cam);
+
 %% =========================== generate fourier structure
 
 
@@ -130,7 +125,7 @@ eta         = 0.01 ;        % tagging efficiency (all photons are tagged when et
 %   xlabel(cb,'W/m^2')
 %   title(['Tagged light on camera. P_0 = ',num2str(P0*1e9),'nW'])
 
-%% ===== quantum shot noise
+%% ===== intensity on the camera
 I1   = Tint.*( abs(E0_untag).^2 + abs(E0_tag + Eref ).^2 ); % in J/m^2
 I_bg =  Tint.*( abs(Eref).^2 ); % in J/m^2
 
@@ -145,6 +140,7 @@ I_bg =  Tint.*( abs(Eref).^2 ); % in J/m^2
 % Icam : Energy on each pixels in J
 Icam    = SumCamera( x_cam , y_cam  , F.x , F.z , I1 , np ); % in J
 Icam_bg = SumCamera( x_cam , y_cam  , F.x , F.z , I_bg , np ); % in J 
+
 % size of Icam is still Nx_cam * Ny_cam
 Icam_tagged = SumCamera( x_cam , y_cam  , F.x , F.z , Tint*abs(E0_tag).*abs(E0_tag) , np ); % in J
 

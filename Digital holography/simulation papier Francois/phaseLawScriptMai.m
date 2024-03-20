@@ -15,6 +15,7 @@ timeduringpulse = load(filepath, "timeduringpulse");
 timeduringpulse = struct2cell(timeduringpulse);
 timeduringpulse = cell2mat(timeduringpulse);
 
+%% plot slow and fast axis - and respective fit
 wx = load(filepath, "wx");
 wx = struct2cell(wx);
 wx = cell2mat(wx);
@@ -23,7 +24,25 @@ wy = load(filepath, "wy");
 wy = struct2cell(wy);
 wy = cell2mat(wy);
 
+f=polyfit(timeduringpulse,wx,4) ;
+wx_fit = polyval(f,timeduringpulse); 
+g=polyfit(timeduringpulse,wy,12) ;
+wy_fit = polyval(g,timeduringpulse); 
+
+
+figure(1) ; clf ; 
+plot(timeduringpulse,wx,'o','color','red') ; hold on 
+plot(timeduringpulse,wx_fit,'color','red') ; hold on
+plot(timeduringpulse,wy_fit,'color','blue') ; hold on
+plot(timeduringpulse,wy,'o','color','blue') ;
+
+xlabel('time (us)')
+ylabel('waist(mm)')
+grid on
 %% Slow axis y
+
+wx = wx_fit ;
+wy = wy_fit ;
  
 lambda = 828e-9;
 
@@ -70,8 +89,8 @@ plot(w_ref)
 % Définition de la grille spatiale
 Nx = 512; % Nombre de points en x
 Ny = 512; % Nombre de points en y
-Lx = 20e-2; % Taille de la grille en x en m
-Ly = 20e-2; % Taille de la grille en y en m
+Lx = 100e-2; % Taille de la grille en x en m
+Ly = 100e-2; % Taille de la grille en y en m
 dx = Lx / Nx; % Pas d'échantillonnage en x
 dy = Ly / Ny; % Pas d'échantillonnage en y
 x = linspace(-Lx/2, Lx/2, Nx); % Grille spatiale en x
@@ -105,7 +124,7 @@ for i = 1:length(wy)
     Eref = Profile{100}.*phaseLaw{100};
     E  = Profile{i}.*phaseLaw{i} ;
     
-    g1(i) = ( sum( E(:).*conj(E1(:))) )/sqrt((sum( E(:).*conj(E(:))) )*(sum( E1(:).*conj(E1(:))) )) ;
+    g1(i) = ( sum( E(:).*conj(Eref(:))) )/sqrt((sum( E(:).*conj(E(:))) )*(sum( Eref(:).*conj(Eref(:))) )) ;
 
 end
 
