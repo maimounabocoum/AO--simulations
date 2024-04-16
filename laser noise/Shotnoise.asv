@@ -2,12 +2,12 @@ addpath('..\..\..\AO--commons\shared functions folder');
 addpath('..\..\..\AO--commons\common subfunctions');
 
 %%
-clearvars ;
+clearvars :
 % generate poissoninan statistics on laser using "real" parameters:
 
-param = (0.1:0.5:10)*1e-3 ;
+param = (1:0.1:10)*1e-3 ;
 
-for loop = 1:1length(param)
+for loop = 1:length(param)
 
 P           = param(loop) ;       % power in W
 lambda0     = 800e-9;      % m
@@ -27,7 +27,7 @@ T = 1/Fs ; % (condition for Df T = 1)
 % generation of random trace 
 
 % Fourier structure : 
-N = 2^9 ;       % number of point for FFT
+N = 2^11 ;       % number of point for FFT
 F = TF_t(N,Fs) ; % Fourier time structure
 
 
@@ -105,17 +105,16 @@ grid on
 % 
 
 % Integration of the noise : 
-I1 = min(find(f_psd >= 80*1e3)) ;
-I2 = min(find(f_psd >= 200*1e3)) ;
+I1 = min(find(f_psd >= 90*1e3)) ;
+I2 = min(find(f_psd >= 300*1e3)) ;
 
 LowNoise(loop) =  trapz( f_psd((2:I1)) , PowerSpectDens(2:I1) ) ;
 HighNoise(loop) = trapz( f_psd((I2:end)) , PowerSpectDens(I2:end) ) ; 
-AllNoise(loop) = trapz( f_psd((2:end)) , PowerSpectDens(2:end) ) ; 
+AllNoise(loop) = trapz( f_psd((2:end)) , PowerSpectDens(I2:end) ) ; 
 
 end
 
 figure(3); clf ; 
-plot(param*1e3,10*log10(AllNoise)) ; hold on ; 
 plot(param*1e3,10*log10(LowNoise)) ; hold on ; 
 plot(param*1e3,10*log10(HighNoise)) ;
 xlabel('Power(mW)')
